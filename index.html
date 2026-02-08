@@ -3,383 +3,482 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cube Sudoku Pro - V3.1 Retro Look</title>
-    <link rel="icon" type="image/png" href="logo.png">
+    <title>Cube Sudoku Pro - Ultimate Edition</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
     <style>
         :root {
-            /* Light Mode Palette - Based on V2.3.0 look */
-            --bg: #f0f4f8;
+            --bg: #f8fafc;
             --surface: #ffffff;
             --text: #0f172a;
             --primary: #4A90E2;
-            --accent: #8b5cf6;
-            
-            /* Retro Board Colors */
-            --grid-gap-color: #94a3b8; /* The color of thin lines */
-            --grid-bold-color: #1e293b; /* The color of thick lines */
-            --border-thick: 3px solid var(--grid-bold-color);
-            
+            --secondary: #8b5cf6;
+            --grid-line: #cbd5e1;
+            --grid-bold: #1e293b;
             --selected: #dbeafe;
-            --related: #f1f5f9;
             --same-num: #fef08a;
             --error: #ef4444;
-            --fixed: #475569;
-            --note: #64748b;
+            --fixed: #64748b;
+            --note: #94a3b8;
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         [data-theme="dark"] {
             --bg: #0f172a;
             --surface: #1e293b;
             --text: #f8fafc;
-            --grid-gap-color: #334155;
-            --grid-bold-color: #0f172a;
+            --grid-line: #334155;
+            --grid-bold: #f8fafc;
             --selected: #1e40af;
-            --related: #1e293b;
             --same-num: #854d0e;
             --fixed: #94a3b8;
-            --note: #cbd5e1;
         }
 
         body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             margin: 0; background: var(--bg); color: var(--text);
             display: flex; flex-direction: column; align-items: center;
-            height: 100vh; /* overflow: hidden; removed to allow scrolling on small screens if needed */
-            user-select: none;
-            touch-action: manipulation;
+            height: 100vh; overflow: hidden; user-select: none;
         }
 
-        /* New Header Layout */
-        .game-header {
-            width: 95vw; max-width: 450px;
+        /* --- Header & Stats --- */
+        .top-nav {
+            width: 100%; max-width: 450px; padding: 15px;
             display: flex; justify-content: space-between; align-items: center;
-            padding: 10px 0;
+            box-sizing: border-box;
         }
-        .header-left, .header-right { display: flex; gap: 10px; font-size: 1.2rem; cursor: pointer; }
-        
-        /* Timer Centered Above Board */
-        .timer-container {
-            text-align: center;
-            margin-bottom: 5px;
-        }
-        .timer-box {
+        .timer-display {
             font-variant-numeric: tabular-nums;
-            font-weight: bold;
-            font-size: 1.5rem;
-            color: var(--primary);
-            background: var(--surface);
-            padding: 5px 15px;
-            border-radius: 8px;
-            display: inline-block;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            font-size: 1.6rem; font-weight: 800; color: var(--primary);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
-        #difficulty-label { font-size: 0.8rem; color: var(--fixed); margin-top: 2px;}
+        .icon-btn { font-size: 1.4rem; cursor: pointer; padding: 5px; transition: var(--transition); }
+        .icon-btn:hover { transform: scale(1.1); }
 
-        /* The Grid - V2.3.0 Retro Style */
-        #sudoku-grid {
-            display: grid;
-            grid-template-columns: repeat(9, 1fr);
-            width: 95vw; max-width: 450px; aspect-ratio: 1/1;
-            /* Use gap for thin lines */
-            background: var(--grid-gap-color);
-            gap: 1px;
-            /* Thick outer border */
-            border: var(--border-thick);
-            margin: 0 auto 15px auto;
-            border-radius: 4px;
+        /* --- Sudoku Grid --- */
+        .grid-container {
+            position: relative;
+            margin: 10px 0;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
         }
-
+        #grid {
+            display: grid; grid-template-columns: repeat(9, 1fr);
+            width: 92vw; max-width: 420px; aspect-ratio: 1/1;
+            background: var(--grid-line); border: 3px solid var(--grid-bold);
+            gap: 1px; border-radius: 8px; overflow: hidden;
+        }
         .cell {
-            background: var(--surface); display: flex; align-items: center;
-            justify-content: center; position: relative; cursor: pointer;
-            font-size: 1.5rem; font-weight: bold; transition: background 0.1s;
+            background: var(--surface); display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; font-weight: 700; cursor: pointer; position: relative;
+            transition: background var(--transition);
         }
-
-        /* 3x3 Block Borders - Retro Style */
-        .cell:nth-child(3n) { border-right: 2px solid var(--grid-bold-color); }
-        .cell:nth-child(9n) { border-right: none; } /* Fix right edge */
-        .cell:nth-child(n+19):nth-child(-n+27), 
-        .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 2px solid var(--grid-bold-color); }
-
+        /* Block Borders */
+        .cell:nth-child(3n):not(:nth-child(9n)) { border-left: 2px solid var(--grid-bold); }
+        .cell:nth-child(n+19):nth-child(-n+27), .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 2px solid var(--grid-bold); }
+        
         /* Cell States */
         .cell.selected { background: var(--selected) !important; }
-        .cell.related { background: var(--related); }
         .cell.same-val { background: var(--same-num); }
-        .cell.err { color: var(--error) !important; background: #fee2e2 !important; }
-        [data-theme="dark"] .cell.err { background: #7f1d1d !important; }
-        .cell.is-fixed { color: var(--fixed); }
-
-        /* Notes Grid */
-        .notes-grid {
-            display: grid; grid-template-columns: repeat(3, 1fr);
-            width: 100%; height: 100%; pointer-events: none;
-        }
-        .note-digit {
-            font-size: 0.6rem; color: var(--note); font-weight: normal;
-            display: flex; align-items: center; justify-content: center;
+        .cell.fixed { color: var(--fixed); background: rgba(0,0,0,0.02); }
+        .cell.err { color: var(--error); animation: shake 0.3s; }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-2px); }
+            75% { transform: translateX(2px); }
         }
 
-        /* Numpad - Moved below board */
+        /* Notes Display */
+        .notes-grid { display: grid; grid-template-columns: repeat(3, 1fr); width: 100%; height: 100%; pointer-events: none; padding: 2px; box-sizing: border-box; }
+        .note { font-size: 0.6rem; color: var(--note); display: flex; align-items: center; justify-content: center; font-weight: 400; }
+
+        /* --- Controls --- */
         .numpad {
             display: grid; grid-template-columns: repeat(5, 1fr);
-            gap: 8px; width: 95vw; max-width: 450px;
-            margin-bottom: 15px;
+            gap: 10px; width: 92vw; max-width: 420px; margin: 15px 0;
         }
         .num-btn {
-            background: var(--surface); border: none; border-radius: 8px;
-            height: 50px; font-size: 1.4rem; font-weight: bold;
-            color: var(--text); box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border: 1px solid var(--grid-gap-color);
+            background: var(--surface); border: 1px solid var(--grid-line);
+            height: 55px; border-radius: 12px; font-size: 1.5rem; font-weight: 800;
+            color: var(--text); cursor: pointer; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            transition: all 0.1s;
         }
-        .num-btn:active { transform: scale(0.95); background: var(--primary); color: white; }
+        .num-btn:active { transform: translateY(2px); box-shadow: none; background: var(--primary); color: white; }
 
-        /* Toolbar - Moved below Numpad */
         .toolbar {
-            display: flex; gap: 10px; width: 95vw; max-width: 450px;
-            justify-content: space-between; margin-bottom: 20px;
+            display: flex; gap: 8px; width: 92vw; max-width: 420px;
         }
-        .tool-btn { 
-            background: var(--surface); border: 1px solid var(--grid-gap-color);
-            padding: 10px 5px; border-radius: 8px; cursor: pointer; color: var(--text);
-            display: flex; flex-direction: column; align-items: center; font-size: 0.75rem;
-            flex: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        .tool-btn {
+            flex: 1; padding: 10px 5px; border-radius: 12px; border: 1px solid var(--grid-line);
+            background: var(--surface); color: var(--text); font-size: 0.75rem; font-weight: 600;
+            display: flex; flex-direction: column; align-items: center; cursor: pointer;
+            transition: var(--transition);
         }
-        .tool-btn span { font-size: 1.2rem; margin-bottom: 4px; }
+        .tool-btn span { font-size: 1.3rem; margin-bottom: 4px; }
         .tool-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* Modals */
+        /* --- Modals --- */
         .modal {
             position: fixed; inset: 0; background: rgba(0,0,0,0.8);
             display: none; align-items: center; justify-content: center; z-index: 1000;
+            backdrop-filter: blur(4px);
         }
         .modal-content {
-            background: var(--surface); padding: 30px; border-radius: 20px;
-            width: 80%; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            background: var(--surface); padding: 30px; border-radius: 24px;
+            width: 85%; max-width: 380px; text-align: center;
         }
-        .modal-btn-group { display: grid; gap: 10px; margin-top: 20px; }
-        .modal-btn { padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; background: var(--primary); color: white; }
-        .modal-btn.secondary { background: var(--grid-gap-color); color: var(--text); }
+        .modal-btn {
+            width: 100%; padding: 15px; margin: 8px 0; border: none; border-radius: 12px;
+            font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: 0.2s;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-secondary { background: var(--secondary); color: white; }
 
-        @media (max-height: 700px) {
-             /* Adjustments for smaller screens */
-            #sudoku-grid { height: auto; aspect-ratio: auto; }
-            .cell { height: 40px; font-size: 1.3rem; }
-            .num-btn { height: 45px; }
-        }
+        /* Stats & Achievements */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+        .stat-card { background: var(--bg); padding: 15px; border-radius: 12px; }
+        .stat-val { display: block; font-size: 1.2rem; font-weight: 800; color: var(--primary); }
     </style>
 </head>
 <body data-theme="light">
 
-<div class="game-header">
-    <div class="header-left">
-        <span onclick="toggleSettings()">⚙️</span>
+    <div class="top-nav">
+        <div class="icon-btn" onclick="openModal('settings-modal')">⚙️</div>
+        <div class="timer-display" id="timer">00:00</div>
+        <div class="icon-btn" onclick="openModal('stats-modal')">🏆</div>
     </div>
-    <div class="header-right">
-        <span onclick="toggleStats()">📊</span>
+
+    <div class="grid-container">
+        <div id="grid"></div>
     </div>
-</div>
 
-<div class="timer-container">
-    <div class="timer-box" id="timer">00:00</div>
-    <div id="difficulty-label">MEDIUM</div>
-</div>
+    <div class="numpad" id="numpad">
+        <button class="num-btn" onclick="handleInput(1)">1</button>
+        <button class="num-btn" onclick="handleInput(2)">2</button>
+        <button class="num-btn" onclick="handleInput(3)">3</button>
+        <button class="num-btn" onclick="handleInput(4)">4</button>
+        <button class="num-btn" onclick="handleInput(5)">5</button>
+        <button class="num-btn" onclick="handleInput(6)">6</button>
+        <button class="num-btn" onclick="handleInput(7)">7</button>
+        <button class="num-btn" onclick="handleInput(8)">8</button>
+        <button class="num-btn" onclick="handleInput(9)">9</button>
+        <button class="num-btn" onclick="handleInput(0)" style="color:var(--error)">✖️</button>
+    </div>
 
-<div id="sudoku-grid"></div>
+    <div class="toolbar">
+        <button class="tool-btn" onclick="game.undo()"><span>↩️</span>Undo</button>
+        <button class="tool-btn" onclick="game.redo()"><span>↪️</span>Redo</button>
+        <button class="tool-btn" id="note-toggle" onclick="game.toggleNoteMode()"><span>✏️</span>Notes</button>
+        <button class="tool-btn" onclick="game.advancedHint()"><span>💡</span>Hint</button>
+    </div>
 
-<div class="numpad">
-    <button class="num-btn" onclick="handleInput(1)">1</button>
-    <button class="num-btn" onclick="handleInput(2)">2</button>
-    <button class="num-btn" onclick="handleInput(3)">3</button>
-    <button class="num-btn" onclick="handleInput(4)">4</button>
-    <button class="num-btn" onclick="handleInput(5)">5</button>
-    <button class="num-btn" onclick="handleInput(6)">6</button>
-    <button class="num-btn" onclick="handleInput(7)">7</button>
-    <button class="num-btn" onclick="handleInput(8)">8</button>
-    <button class="num-btn" onclick="handleInput(9)">9</button>
-    <button class="num-btn" onclick="handleInput(0)" style="color: var(--error);">✖️</button>
-</div>
-
-<div class="toolbar">
-    <button class="tool-btn" onclick="undo()"><span>↩️</span>Undo</button>
-    <button class="tool-btn" id="note-toggle" onclick="toggleNoteMode()"><span>✏️</span>Notes</button>
-    <button class="tool-btn" onclick="getHint()"><span>💡</span>Hint</button>
-    <button class="tool-btn" onclick="eraseCell()"><span>🧹</span>Erase</button>
-</div>
-
-<div id="start-modal" class="modal" style="display: flex;">
-    <div class="modal-content">
-        <img src="logo.png" style="width:80px; margin-bottom:15px;" alt="Logo">
-        <h2>Cube Sudoku Pro</h2>
-        <div id="resume-box" style="display:none; margin-bottom: 15px;">
-            <button class="modal-btn" style="background: var(--accent); width: 100%;" onclick="resumeGame()">המשך משחק אחרון</button>
-        </div>
-        <p>משחק חדש:</p>
-        <div class="modal-btn-group">
-            <button class="modal-btn" onclick="startNewGame('easy')">קל</button>
-            <button class="modal-btn" onclick="startNewGame('medium')">בינוני</button>
-            <button class="modal-btn" onclick="startNewGame('hard')">קשה</button>
+    <div id="start-modal" class="modal" style="display: flex;">
+        <div class="modal-content">
+            <img src="logo.jpg" style="width:100px; border-radius: 20px; margin-bottom:15px;" alt="Logo">
+            <h2>Cube Sudoku Pro</h2>
+            <div id="resume-container" style="display:none">
+                <button class="modal-btn btn-secondary" onclick="game.resume()">המשך משחק</button>
+                <hr style="opacity:0.2; margin: 15px 0;">
+            </div>
+            <p>בחר רמת קושי למשחק חדש:</p>
+            <button class="modal-btn btn-primary" onclick="game.start('easy')">קל</button>
+            <button class="modal-btn btn-primary" onclick="game.start('medium')">בינוני</button>
+            <button class="modal-btn btn-primary" onclick="game.start('hard')">קשה</button>
         </div>
     </div>
-</div>
 
-<script>
-    // --- לוגיקת המשחק (ללא שינוי מגרסה V3.0) ---
-    let state = {
-        board: Array(81).fill(0), initial: Array(81).fill(0), notes: Array.from({length: 81}, () => []),
-        solution: [], history: [], selected: null, noteMode: false, time: 0, level: 'medium',
-        settings: { vibration: true, theme: 'light', showErrors: true }
-    };
-    let timerInterval;
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <h3>הגדרות</h3>
+            <div style="text-align:right">
+                <label><input type="checkbox" id="set-sound" checked onchange="game.updateSettings()"> צלילים</label><br><br>
+                <label><input type="checkbox" id="set-vibrate" checked onchange="game.updateSettings()"> רטט</label><br><br>
+                <label><input type="checkbox" id="set-dark" onchange="game.updateSettings()"> מצב לילה</label>
+            </div>
+            <button class="modal-btn btn-primary" onclick="closeModal('settings-modal')">סגור</button>
+        </div>
+    </div>
 
-    const Solver = {
-        isValid(board, idx, num) {
-            const r = Math.floor(idx / 9), c = idx % 9;
-            const bR = Math.floor(r / 3) * 3, bC = Math.floor(c / 3) * 3;
-            for (let i = 0; i < 9; i++) {
-                if (board[r * 9 + i] === num || board[i * 9 + c] === num) return false;
-                let bIdx = (bR + Math.floor(i / 3)) * 9 + (bC + i % 3);
-                if (board[bIdx] === num) return false;
+    <div id="stats-modal" class="modal">
+        <div class="modal-content">
+            <h3>הישגים וסטטיסטיקה</h3>
+            <div class="stats-grid">
+                <div class="stat-card"><span class="stat-val" id="stat-wins">0</span>ניצחונות</div>
+                <div class="stat-card"><span class="stat-val" id="stat-best">--:--</span>זמן שיא</div>
+            </div>
+            <div id="achievements" style="font-size:0.9rem; text-align:right;"></div>
+            <button class="modal-btn btn-primary" onclick="closeModal('stats-modal')">סגור</button>
+        </div>
+    </div>
+
+    <script>
+        /** * Cube Sudoku Engine v4.0
+         * Includes Unique Solver, Audio, History, and State persistence.
+         */
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        const Solver = {
+            isValid(b, i, n) {
+                const r = Math.floor(i/9), c = i%9, br = Math.floor(r/3)*3, bc = Math.floor(c/3)*3;
+                for(let k=0; k<9; k++) {
+                    if(b[r*9+k] === n || b[k*9+c] === n) return false;
+                    const bi = (br + Math.floor(k/3))*9 + (bc + k%3);
+                    if(b[bi] === n) return false;
+                }
+                return true;
+            },
+            solve(board, findMultiple = false) {
+                let count = 0;
+                let result = null;
+                const solveInternal = (b) => {
+                    const idx = b.indexOf(0);
+                    if(idx === -1) { count++; result = [...b]; return true; }
+                    for(let n=1; n<=9; n++) {
+                        if(this.isValid(b, idx, n)) {
+                            b[idx] = n;
+                            if(solveInternal(b) && !findMultiple) return true;
+                            b[idx] = 0;
+                            if(count > 1 && findMultiple) return true;
+                        }
+                    }
+                    return false;
+                };
+                solveInternal([...board]);
+                return findMultiple ? count : result;
             }
-            return true;
-        },
-        solve(board) {
-            let empty = board.indexOf(0);
-            if (empty === -1) return true;
-            let nums = [1,2,3,4,5,6,7,8,9].sort(() => Math.random() - 0.5);
-            for (let n of nums) {
-                if (this.isValid(board, empty, n)) {
-                    board[empty] = n;
-                    if (this.solve(board)) return true;
-                    board[empty] = 0;
+        };
+
+        class SudokuGame {
+            constructor() {
+                this.state = {
+                    board: [], initial: [], solution: [], notes: Array(81).fill().map(()=>[]),
+                    history: [], redoStack: [], selected: null, noteMode: false,
+                    time: 0, level: 'medium', settings: { sound: true, vibrate: true, dark: false },
+                    stats: JSON.parse(localStorage.getItem('cube_stats') || '{"wins":0, "best":9999, "streak":0}')
+                };
+                this.timer = null;
+                this.init();
+            }
+
+            init() {
+                const grid = document.getElementById('grid');
+                for(let i=0; i<81; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.onclick = () => this.select(i);
+                    grid.appendChild(cell);
+                }
+                if(localStorage.getItem('cube_save')) document.getElementById('resume-container').style.display='block';
+            }
+
+            start(level) {
+                this.state.level = level;
+                closeModal('start-modal');
+                
+                // 1. Generate full board
+                let full = Array(81).fill(0);
+                // Randomize first row to ensure different puzzles
+                let nums = [1,2,3,4,5,6,7,8,9].sort(()=>Math.random()-0.5);
+                for(let i=0; i<9; i++) full[i] = nums[i];
+                this.state.solution = Solver.solve(full);
+
+                // 2. Dig holes while maintaining uniqueness
+                let board = [...this.state.solution];
+                let indices = Array.from({length:81}, (_,i)=>i).sort(()=>Math.random()-0.5);
+                let holes = {easy: 35, medium: 45, hard: 55}[level];
+                
+                for(let idx of indices) {
+                    if(holes <= 0) break;
+                    let temp = board[idx];
+                    board[idx] = 0;
+                    if(Solver.solve(board, true) === 1) holes--;
+                    else board[idx] = temp;
+                }
+
+                this.state.board = [...board];
+                this.state.initial = [...board];
+                this.state.notes = Array.from({length: 81}, () => []);
+                this.state.time = 0;
+                this.state.history = [];
+                this.render();
+                this.startTimer();
+            }
+
+            select(i) {
+                this.state.selected = i;
+                this.playSound(440, 0.05);
+                this.render();
+            }
+
+            handleInput(n) {
+                if(this.state.selected === null || this.state.initial[this.state.selected] !== 0) return;
+                
+                this.pushHistory();
+
+                if(this.state.noteMode && n !== 0) {
+                    let cellNotes = this.state.notes[this.state.selected];
+                    this.state.notes[this.state.selected] = cellNotes.includes(n) ? cellNotes.filter(x=>x!==n) : [...cellNotes, n].sort();
+                } else {
+                    this.state.board[this.state.selected] = n;
+                    if(n !== 0) {
+                        if(n !== this.state.solution[this.state.selected]) {
+                            this.playSound(150, 0.2, 'square');
+                            if(this.state.settings.vibrate) navigator.vibrate?.(100);
+                        } else {
+                            this.playSound(660, 0.1);
+                        }
+                    }
+                }
+                this.render();
+                this.save();
+                this.checkWin();
+            }
+
+            pushHistory() {
+                this.state.history.push(JSON.stringify({b: this.state.board, n: this.state.notes}));
+                this.state.redoStack = [];
+            }
+
+            undo() {
+                if(!this.state.history.length) return;
+                this.state.redoStack.push(JSON.stringify({b: this.state.board, n: this.state.notes}));
+                const prev = JSON.parse(this.state.history.pop());
+                this.state.board = prev.b; this.state.notes = prev.n;
+                this.render();
+            }
+
+            redo() {
+                if(!this.state.redoStack.length) return;
+                this.state.history.push(JSON.stringify({b: this.state.board, n: this.state.notes}));
+                const next = JSON.parse(this.state.redoStack.pop());
+                this.state.board = next.b; this.state.notes = next.n;
+                this.render();
+            }
+
+            toggleNoteMode() {
+                this.state.noteMode = !this.state.noteMode;
+                document.getElementById('note-toggle').classList.toggle('active', this.state.noteMode);
+            }
+
+            advancedHint() {
+                if(this.state.selected === null) return;
+                this.pushHistory();
+                this.state.board[this.state.selected] = this.state.solution[this.state.selected];
+                this.state.notes[this.state.selected] = [];
+                this.render();
+            }
+
+            render() {
+                const cells = document.querySelectorAll('.cell');
+                cells.forEach((cell, i) => {
+                    cell.className = 'cell';
+                    if(this.state.initial[i] !== 0) cell.classList.add('fixed');
+                    if(this.state.selected === i) cell.classList.add('selected');
+                    
+                    const val = this.state.board[i];
+                    const selectedVal = this.state.board[this.state.selected];
+                    if(selectedVal !== 0 && val === selectedVal) cell.classList.add('same-val');
+
+                    if(val !== 0) {
+                        cell.innerText = val;
+                        if(this.state.initial[i] === 0 && val !== this.state.solution[i]) cell.classList.add('err');
+                    } else {
+                        cell.innerHTML = this.renderNotes(this.state.notes[i]);
+                    }
+                });
+            }
+
+            renderNotes(notes) {
+                if(!notes.length) return '';
+                let html = '<div class="notes-grid">';
+                for(let i=1; i<=9; i++) html += `<div class="note">${notes.includes(i) ? i : ''}</div>`;
+                return html + '</div>';
+            }
+
+            playSound(freq, duration, type='sine') {
+                if(!this.state.settings.sound) return;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type; osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(); osc.stop(audioCtx.currentTime + duration);
+            }
+
+            startTimer() {
+                if(this.timer) clearInterval(this.timer);
+                this.timer = setInterval(() => {
+                    this.state.time++;
+                    const m = Math.floor(this.state.time/60).toString().padStart(2,'0');
+                    const s = (this.state.time%60).toString().padStart(2,'0');
+                    document.getElementById('timer').innerText = `${m}:${s}`;
+                }, 1000);
+            }
+
+            updateSettings() {
+                this.state.settings.sound = document.getElementById('set-sound').checked;
+                this.state.settings.vibrate = document.getElementById('set-vibrate').checked;
+                this.state.settings.dark = document.getElementById('set-dark').checked;
+                document.body.setAttribute('data-theme', this.state.settings.dark ? 'dark' : 'light');
+                this.save();
+            }
+
+            save() {
+                localStorage.setItem('cube_save', JSON.stringify(this.state));
+            }
+
+            resume() {
+                const saved = JSON.parse(localStorage.getItem('cube_save'));
+                if(saved) {
+                    this.state = saved;
+                    document.body.setAttribute('data-theme', this.state.settings.dark ? 'dark' : 'light');
+                    document.getElementById('set-dark').checked = this.state.settings.dark;
+                    closeModal('start-modal');
+                    this.render();
+                    this.startTimer();
                 }
             }
-            return false;
-        }
-    };
 
-    function initGrid() {
-        const grid = document.getElementById('sudoku-grid');
-        grid.innerHTML = '';
-        for (let i = 0; i < 81; i++) {
-            const cell = document.createElement('div');
-            cell.className = 'cell';
-            cell.onclick = () => selectCell(i);
-            grid.appendChild(cell);
-        }
-    }
-
-    function render() {
-        const cells = document.querySelectorAll('.cell');
-        cells.forEach((cell, i) => {
-            cell.className = 'cell';
-            if (state.initial[i] !== 0) cell.classList.add('is-fixed');
-            if (state.selected === i) cell.classList.add('selected');
-            
-            if (state.selected !== null) {
-                let r = Math.floor(i/9), c = i%9, sr = Math.floor(state.selected/9), sc = state.selected%9;
-                if (r === sr || c === sc) cell.classList.add('related');
-                if (state.board[i] !== 0 && state.board[i] === state.board[state.selected]) cell.classList.add('same-val');
-            }
-
-            if (state.board[i] !== 0) {
-                cell.innerText = state.board[i];
-                if (state.settings.showErrors && state.board[i] !== state.solution[i]) cell.classList.add('err');
-            } else {
-                cell.innerHTML = renderNotes(state.notes[i]);
-            }
-        });
-        document.getElementById('difficulty-label').innerText = state.level.toUpperCase();
-    }
-
-    function renderNotes(notes) {
-        if (!notes.length) return '';
-        let html = '<div class="notes-grid">';
-        for (let i = 1; i <= 9; i++) {
-            html += `<div class="note-digit">${notes.includes(i) ? i : ''}</div>`;
-        }
-        return html + '</div>';
-    }
-
-    function handleInput(num) {
-        if (state.selected === null || state.initial[state.selected] !== 0) return;
-        saveHistory();
-        if (state.noteMode && num !== 0) {
-            let n = state.notes[state.selected];
-            state.notes[state.selected] = n.includes(num) ? n.filter(x => x !== num) : [...n, num].sort();
-        } else {
-            state.board[state.selected] = num;
-            if (num !== 0) {
-                clearAutoNotes(state.selected, num);
-                if (state.settings.vibration) navigator.vibrate?.(20);
+            checkWin() {
+                if(this.state.board.every((v,i) => v === this.state.solution[i])) {
+                    clearInterval(this.timer);
+                    this.state.stats.wins++;
+                    if(this.state.time < this.state.stats.best) this.state.stats.best = this.state.time;
+                    localStorage.setItem('cube_stats', JSON.stringify(this.state.stats));
+                    localStorage.removeItem('cube_save');
+                    this.playSound(880, 0.5);
+                    setTimeout(() => alert("כל הכבוד! ניצחת!"), 500);
+                }
             }
         }
-        render(); saveToLocal(); checkWin();
-    }
 
-    function clearAutoNotes(idx, num) {
-        const r = Math.floor(idx/9), c = idx%9;
-        const bR = Math.floor(r/3)*3, bC = Math.floor(c/3)*3;
-        for(let i=0; i<9; i++) {
-            state.notes[r*9+i] = state.notes[r*9+i].filter(x => x !== num);
-            state.notes[i*9+c] = state.notes[i*9+c].filter(x => x !== num);
-            let bIdx = (bR + Math.floor(i/3))*9 + (bC + i%3);
-            state.notes[bIdx] = state.notes[bIdx].filter(x => x !== num);
+        const game = new SudokuGame();
+
+        function openModal(id) {
+            document.getElementById(id).style.display = 'flex';
+            if(id === 'stats-modal') {
+                document.getElementById('stat-wins').innerText = game.state.stats.wins;
+                const b = game.state.stats.best;
+                document.getElementById('stat-best').innerText = b === 9999 ? '--:--' : `${Math.floor(b/60)}:${(b%60).toString().padStart(2,'0')}`;
+            }
         }
-    }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-    function saveToLocal() { localStorage.setItem('sudoku_pro_v3_state', JSON.stringify(state)); }
-
-    function startNewGame(lvl) {
-        state.level = lvl;
-        document.getElementById('start-modal').style.display = 'none';
-        let b = Array(81).fill(0); Solver.solve(b); state.solution = [...b];
-        let removed = lvl === 'easy' ? 30 : lvl === 'medium' ? 45 : 55;
-        while(removed > 0) { let i = Math.floor(Math.random()*81); if(b[i] !== 0) { b[i] = 0; removed--; }}
-        state.board = [...b]; state.initial = [...b]; state.notes = Array.from({length: 81}, () => []);
-        state.time = 0; state.history = [];
-        initGrid(); render(); startTimer();
-    }
-
-    function startTimer() {
-        clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-            state.time++;
-            let m = Math.floor(state.time/60).toString().padStart(2,'0');
-            let s = (state.time%60).toString().padStart(2,'0');
-            document.getElementById('timer').innerText = `${m}:${s}`;
-        }, 1000);
-    }
-
-    function selectCell(i) { state.selected = i; render(); }
-    function toggleNoteMode() { state.noteMode = !state.noteMode; document.getElementById('note-toggle').classList.toggle('active', state.noteMode); }
-    function undo() { if (state.history.length > 0) { let prev = JSON.parse(state.history.pop()); state.board = prev.board; state.notes = prev.notes; render(); saveToLocal();}}
-    function saveHistory() { state.history.push(JSON.stringify({board: [...state.board], notes: JSON.parse(JSON.stringify(state.notes))})); if(state.history.length > 50) state.history.shift(); }
-    function getHint() { if(state.selected === null || state.initial[state.selected] !== 0) return; saveHistory(); state.board[state.selected] = state.solution[state.selected]; state.notes[state.selected] = []; render(); saveToLocal(); checkWin(); }
-    function eraseCell() { handleInput(0); }
-
-    function resumeGame() {
-        const saved = localStorage.getItem('sudoku_pro_v3_state');
-        if(saved) { state = JSON.parse(saved); document.getElementById('start-modal').style.display = 'none'; initGrid(); render(); startTimer(); }
-    }
-
-    function toggleSettings() {
-        state.settings.theme = state.settings.theme === 'light' ? 'dark' : 'light';
-        document.body.setAttribute('data-theme', state.settings.theme);
-        saveToLocal();
-    }
-    function toggleStats() { alert("סטטיסטיקות יתווספו בעדכון הבא!"); }
-
-    window.onload = () => {
-        if(localStorage.getItem('sudoku_pro_v3_state')) { document.getElementById('resume-box').style.display = 'block'; }
-        document.body.setAttribute('data-theme', state.settings.theme);
-    };
-
-    function checkWin() {
-        if(state.board.every((v, i) => v === state.solution[i])) {
-            clearInterval(timerInterval); setTimeout(() => alert(`כל הכבוד! סיימת ב-${document.getElementById('timer').innerText}`), 100);
-            localStorage.removeItem('sudoku_pro_v3_state');
+        // --- Service Worker Logic for Offline ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const swCode = `
+                    const CACHE = 'cube-v4';
+                    self.addEventListener('install', e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./', './index.html', './logo.jpg']))));
+                    self.addEventListener('fetch', e => e.respondWith(caches.match(e.request).then(r => r || fetch(e.request))));
+                `;
+                const blob = new Blob([swCode], {type: 'application/javascript'});
+                navigator.serviceWorker.register(URL.createObjectURL(blob));
+            });
         }
-    }
-</script>
+    </script>
 </body>
 </html>
