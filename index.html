@@ -1422,6 +1422,7 @@
         }
 
         // ============= INITIALIZE APP =============
+        const APP_VERSION = '7.0';
         let gameState, uiController;
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -1437,10 +1438,36 @@
             uiController.showDifficultyModal();
         });
 
-        // Service Worker Registration
+        // Service Worker Registration with version control
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-                .catch(err => console.log('SW registration failed:', err));
+            window.addEventListener('load', async () => {
+                try {
+                    // Check for existing service worker
+                    const registration = await navigator.serviceWorker.getRegistration();
+                    
+                    if (registration) {
+                        // Force update if new version
+                        const currentVersion = localStorage.getItem('app_version');
+                        if (currentVersion !== APP_VERSION) {
+                            console.log('New version detected, updating...');
+                            await registration.unregister();
+                            const cacheNames = await caches.keys();
+                            for (let cacheName of cacheNames) {
+                                await caches.delete(cacheName);
+                            }
+                            localStorage.setItem('app_version', APP_VERSION);
+                        }
+                    } else {
+                        localStorage.setItem('app_version', APP_VERSION);
+                    }
+                    
+                    // Register service worker
+                    await navigator.serviceWorker.register('sw.js');
+                    console.log('Service Worker registered successfully');
+                } catch (err) {
+                    console.log('SW registration failed:', err);
+                }
+            });
         }
     </script>
 </body>
