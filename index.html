@@ -75,6 +75,31 @@
             flex-direction: column;
         }
 
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .app-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--btn-primary);
+            margin-bottom: 2px;
+        }
+
+        .version {
+            font-size: 11px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            user-select: none;
+            transition: color 0.2s;
+        }
+
+        .version:hover {
+            color: var(--btn-primary);
+        }
+
         /* Top Bar */
         .top-bar {
             display: flex;
@@ -154,18 +179,20 @@
             justify-content: center;
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
-            font-size: clamp(16px, 4vw, 24px);
-            font-weight: 600;
+            font-size: clamp(20px, 5vw, 32px);
+            font-weight: 700;
             cursor: pointer;
             transition: background-color 0.15s;
             position: relative;
             user-select: none;
         }
 
+        /* 3x3 block division - after every 3rd column (but not 9th) */
         .cell:nth-child(3n):not(:nth-child(9n)) {
             border-right: 3px solid var(--border-heavy);
         }
 
+        /* 3x3 block division - after rows 3 and 6 (cells 19-27 and 46-54) */
         .cell:nth-child(n+19):nth-child(-n+27),
         .cell:nth-child(n+46):nth-child(-n+54) {
             border-bottom: 3px solid var(--border-heavy);
@@ -250,7 +277,7 @@
             border-radius: 8px;
             background: var(--bg-secondary);
             color: var(--text-primary);
-            font-size: 18px;
+            font-size: 24px;
             font-weight: 700;
             cursor: pointer;
             box-shadow: 0 2px 4px var(--shadow);
@@ -266,11 +293,12 @@
         .num-btn.delete {
             background: var(--btn-danger);
             color: white;
-            font-size: 20px;
+            font-size: 22px;
         }
 
         .num-btn.notes {
             background: var(--bg-tertiary);
+            font-size: 22px;
         }
 
         .num-btn.notes.active {
@@ -493,6 +521,12 @@
 </head>
 <body data-theme="light">
     <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="app-title">Sudoku Master Ultimate</div>
+            <div class="version" id="versionBtn">גרסה 7.0</div>
+        </div>
+
         <!-- Top Bar -->
         <div class="top-bar">
             <div class="timer" id="timer">00:00</div>
@@ -608,6 +642,25 @@
             <div class="modal-buttons">
                 <button class="modal-btn danger" id="resetStats">איפוס סטטיסטיקה</button>
                 <button class="modal-btn secondary" id="closeStats">סגור</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reinstall Modal -->
+    <div class="modal" id="reinstallModal">
+        <div class="modal-content">
+            <h2>⚠️ התקנה מחדש</h2>
+            <p style="text-align: center; margin: 16px 0; line-height: 1.6;">
+                פעולה זו תמחק את כל הנתונים:<br>
+                • משחק שמור<br>
+                • סטטיסטיקות<br>
+                • הגדרות<br>
+                <br>
+                <strong>האם להמשיך?</strong>
+            </p>
+            <div class="modal-buttons">
+                <button class="modal-btn danger" id="confirmReinstall">כן, מחק הכל והתקן מחדש</button>
+                <button class="modal-btn secondary" id="cancelReinstall">ביטול</button>
             </div>
         </div>
     </div>
@@ -1037,6 +1090,19 @@
 
                 this.menuOverlay.addEventListener('click', () => this.toggleMenu());
 
+                // Version click - forced reinstall
+                document.getElementById('versionBtn').addEventListener('click', () => {
+                    this.showReinstallModal();
+                });
+
+                document.getElementById('confirmReinstall').addEventListener('click', async () => {
+                    await this.performReinstall();
+                });
+
+                document.getElementById('cancelReinstall').addEventListener('click', () => {
+                    document.getElementById('reinstallModal').classList.remove('active');
+                });
+
                 document.getElementById('newGameMenu').addEventListener('click', () => {
                     this.toggleMenu();
                     this.showDifficultyModal();
@@ -1311,6 +1377,47 @@
                 document.getElementById('victoryTime').textContent = 
                     `זמן: ${this.game.formatTime(this.game.timer)} | רמזים: ${usedHints}`;
                 this.victoryModal.classList.add('active');
+            }
+
+            showReinstallModal() {
+                // Check if online
+                if (!navigator.onLine) {
+                    alert('התקנה מחדש דורשת חיבור לאינטרנט');
+                    return;
+                }
+                document.getElementById('reinstallModal').classList.add('active');
+            }
+
+            async performReinstall() {
+                document.getElementById('reinstallModal').classList.remove('active');
+                
+                try {
+                    // Clear all localStorage
+                    localStorage.clear();
+                    
+                    // Unregister all service workers
+                    if ('serviceWorker' in navigator) {
+                        const registrations = await navigator.serviceWorker.getRegistrations();
+                        for (let registration of registrations) {
+                            await registration.unregister();
+                        }
+                    }
+                    
+                    // Clear all caches
+                    if ('caches' in window) {
+                        const cacheNames = await caches.keys();
+                        for (let cacheName of cacheNames) {
+                            await caches.delete(cacheName);
+                        }
+                    }
+                    
+                    // Reload the page
+                    alert('כל הנתונים נמחקו. העמוד ייטען מחדש.');
+                    window.location.reload(true);
+                } catch (error) {
+                    console.error('Reinstall error:', error);
+                    alert('שגיאה בתהליך ההתקנה מחדש: ' + error.message);
+                }
             }
         }
 
