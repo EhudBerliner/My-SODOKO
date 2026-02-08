@@ -10,7 +10,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="description" content="משחק סודוקו מתקדם עם רמות קושי, רמזים, הערות ועוד">
     
-    <title>Sudoku Master Ultimate - V7.0</title>
+    <title>Sudoku Master Ultimate - V7.1</title>
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="./manifest.json">
@@ -286,6 +286,14 @@
         .cell.wrong {
             color: var(--cell-error) !important;
             background: var(--cell-conflict);
+            font-weight: 900 !important;
+            animation: wrongShake 0.3s ease-in-out;
+        }
+
+        @keyframes wrongShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-3px); }
+            75% { transform: translateX(3px); }
         }
 
         .cell.victory-pulse {
@@ -573,7 +581,7 @@
     <div class="container">
         <header>
             <h1>🎯 Sudoku Master Ultimate</h1>
-            <div class="version">גרסה 7.0 - PWA Edition</div>
+            <div class="version">גרסה 7.1 - PWA Edition</div>
         </header>
 
         <div class="controls">
@@ -673,12 +681,22 @@
                 <div class="victory-icon">🏆</div>
                 <div class="victory-message">כל הכבוד! ניצחת!</div>
                 <div class="victory-stats">
-                    <p id="victoryTime">זמן: 00:00</p>
-                    <p id="victoryHints">רמזים: 0</p>
+                    <h3 style="text-align: center; margin-bottom: 15px; color: #4A90E2;">📊 סיכום המשחק</h3>
+                    <div style="display: grid; gap: 10px;">
+                        <p><strong>⏱️ זמן משחק:</strong> <span id="victoryTime">00:00</span></p>
+                        <p><strong>💡 רמזים שנוצלו:</strong> <span id="victoryHints">0</span> מתוך 3</p>
+                        <p><strong>🎯 דרגת קושי:</strong> <span id="victoryDifficulty">בינוני</span></p>
+                        <p><strong>📈 דירוג:</strong> <span id="victoryRating">⭐⭐⭐</span></p>
+                    </div>
                 </div>
-                <button class="difficulty-btn btn-primary" onclick="uiController.showDifficultyModal(); document.getElementById('victoryModal').classList.remove('active')">
-                    🎮 משחק חדש
-                </button>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="difficulty-btn btn-primary" style="flex: 1;" onclick="uiController.showDifficultyModal(); document.getElementById('victoryModal').classList.remove('active')">
+                        🎮 משחק חדש
+                    </button>
+                    <button class="difficulty-btn btn-secondary" style="flex: 1;" onclick="uiController.showStats(); document.getElementById('victoryModal').classList.remove('active')">
+                        📊 סטטיסטיקה
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -882,6 +900,10 @@
             }
 
             newGame(difficulty = 'medium') {
+                console.log(`[Debug] ═══════════════════════════════════`);
+                console.log(`[Debug] Starting new game - Difficulty: ${difficulty.toUpperCase()}`);
+                console.log(`[Debug] ═══════════════════════════════════`);
+                
                 this.difficulty = difficulty;
                 this.timer = 0;
                 this.hints = 3;
@@ -891,6 +913,9 @@
                 this.historyIndex = -1;
 
                 this.engine.generate(difficulty);
+                console.log('[Debug] Puzzle generated successfully');
+                console.log('[Debug] Solution:', this.engine.solution);
+                
                 this.saveState();
                 this.startTimer();
             }
@@ -915,19 +940,33 @@
             }
 
             inputNumber(number) {
-                if (this.selectedCell === null || this.engine.fixed[this.selectedCell]) return;
+                if (this.selectedCell === null || this.engine.fixed[this.selectedCell]) {
+                    console.log('[Debug] Cannot input: Cell is null or fixed');
+                    return;
+                }
 
                 this.saveState();
 
                 if (this.noteMode) {
                     this.engine.toggleNote(this.selectedCell, number);
+                    console.log(`[Debug] Toggled note ${number} at cell ${this.selectedCell}`);
                 } else {
+                    const oldValue = this.engine.board[this.selectedCell];
                     this.engine.setCell(this.selectedCell, number);
+                    const correctValue = this.engine.solution[this.selectedCell];
+                    
+                    console.log(`[Debug] Input ${number} at cell ${this.selectedCell} (row: ${Math.floor(this.selectedCell/9)}, col: ${this.selectedCell%9})`);
+                    console.log(`[Debug] Correct value: ${correctValue}, Input: ${number}, Status: ${number === correctValue ? '✓ CORRECT' : '✗ WRONG'}`);
+                    
+                    if (oldValue !== number) {
+                        console.log(`[Debug] Changed from ${oldValue} to ${number}`);
+                    }
                 }
 
                 this.saveGame();
 
                 if (this.engine.isSolved()) {
+                    console.log('[Debug] ★★★ PUZZLE SOLVED! ★★★');
                     this.onWin();
                 }
             }
@@ -942,15 +981,24 @@
             }
 
             useHint() {
-                if (this.hints <= 0 || this.selectedCell === null || this.engine.fixed[this.selectedCell]) return;
+                if (this.hints <= 0 || this.selectedCell === null || this.engine.fixed[this.selectedCell]) {
+                    console.log('[Debug] Cannot use hint - hints:', this.hints, 'selected:', this.selectedCell);
+                    return;
+                }
 
                 this.saveState();
                 this.hints--;
-                this.engine.setCell(this.selectedCell, this.engine.solution[this.selectedCell]);
+                const correctValue = this.engine.solution[this.selectedCell];
+                this.engine.setCell(this.selectedCell, correctValue);
                 this.engine.notes[this.selectedCell].clear();
+                
+                console.log(`[Debug] 💡 Hint used! Cell ${this.selectedCell} set to ${correctValue}`);
+                console.log(`[Debug] Hints remaining: ${this.hints}`);
+                
                 this.saveGame();
 
                 if (this.engine.isSolved()) {
+                    console.log('[Debug] Puzzle solved after hint!');
                     this.onWin();
                 }
             }
@@ -984,8 +1032,10 @@
                     this.engine.notes = state.notes.map(set => new Set(set));
                     this.hints = state.hints;
                     this.saveGame();
+                    console.log(`[Debug] Undo performed - History index: ${this.historyIndex}`);
                     return true;
                 }
+                console.log('[Debug] Cannot undo - at beginning of history');
                 return false;
             }
 
@@ -997,8 +1047,10 @@
                     this.engine.notes = state.notes.map(set => new Set(set));
                     this.hints = state.hints;
                     this.saveGame();
+                    console.log(`[Debug] Redo performed - History index: ${this.historyIndex}`);
                     return true;
                 }
+                console.log('[Debug] Cannot redo - at end of history');
                 return false;
             }
 
@@ -1020,6 +1072,7 @@
                 };
                 
                 localStorage.setItem('sudoku_save', JSON.stringify(gameData));
+                console.log('[Debug] Game saved to localStorage');
             }
 
             loadGame() {
@@ -1041,11 +1094,18 @@
                         }));
                         this.historyIndex = data.historyIndex;
                         this.startTimer();
+                        console.log('[Debug] ═══════════════════════════════════');
+                        console.log('[Debug] Game loaded from localStorage');
+                        console.log('[Debug] Difficulty:', this.difficulty);
+                        console.log('[Debug] Timer:', this.formatTime(this.timer));
+                        console.log('[Debug] Hints:', this.hints);
+                        console.log('[Debug] ═══════════════════════════════════');
                         return true;
                     } catch (e) {
-                        console.error('Failed to load game', e);
+                        console.error('[Debug] Failed to load game:', e);
                     }
                 }
+                console.log('[Debug] No saved game found');
                 return false;
             }
 
@@ -1286,6 +1346,12 @@
                         cell.classList.add('fixed');
                     } else {
                         cell.classList.add('user');
+                        
+                        // Mark wrong answers (user input that doesn't match solution)
+                        if (this.game.engine.board[index] !== 0 && 
+                            this.game.engine.board[index] !== this.game.engine.solution[index]) {
+                            cell.classList.add('wrong');
+                        }
                     }
               
                     if (index === this.game.selectedCell) {
@@ -1373,10 +1439,13 @@
                         const remaining = 9 - counts[i];
                         countSpan.textContent = remaining;
                         
+                        // Disable button when all 9 placements are used
                         if (remaining === 0) {
                             countSpan.parentElement.disabled = true;
+                            countSpan.parentElement.style.opacity = '0.3';
                         } else {
                             countSpan.parentElement.disabled = false;
+                            countSpan.parentElement.style.opacity = '1';
                         }
                     }
                 }
@@ -1412,10 +1481,35 @@
 
             showVictory() {
                 const usedHints = 3 - this.game.hints;
-                document.getElementById('victoryTime').textContent = 
-                    `זמן: ${this.game.formatTime(this.game.timer)}`;
-                document.getElementById('victoryHints').textContent = 
-                    `רמזים: ${usedHints}`;
+                const timeInSeconds = this.game.timer;
+                
+                // Calculate rating (1-5 stars)
+                let rating = 5;
+                if (usedHints > 0) rating -= usedHints;
+                if (timeInSeconds > 600) rating -= 1; // More than 10 minutes
+                if (timeInSeconds > 1200) rating -= 1; // More than 20 minutes
+                rating = Math.max(1, Math.min(5, rating));
+                
+                const stars = '⭐'.repeat(rating) + '☆'.repeat(5 - rating);
+                
+                const difficultyNames = {
+                    easy: 'קל 😊',
+                    medium: 'בינוני 🎯',
+                    hard: 'קשה 🔥'
+                };
+                
+                document.getElementById('victoryTime').textContent = this.game.formatTime(timeInSeconds);
+                document.getElementById('victoryHints').textContent = usedHints;
+                document.getElementById('victoryDifficulty').textContent = difficultyNames[this.game.difficulty] || 'בינוני';
+                document.getElementById('victoryRating').textContent = stars;
+                
+                console.log('[Debug] ═══════════════════════════════════');
+                console.log('[Debug] 🎉 VICTORY! Game completed successfully!');
+                console.log('[Debug] Time:', this.game.formatTime(timeInSeconds));
+                console.log('[Debug] Hints used:', usedHints);
+                console.log('[Debug] Difficulty:', this.game.difficulty);
+                console.log('[Debug] Rating:', rating, 'stars');
+                console.log('[Debug] ═══════════════════════════════════');
                 
                 this.victoryModal.classList.add('active');
                 this.gameBoard.classList.add('victory-animation');
@@ -1488,7 +1582,13 @@
         // ============= INITIALIZE APP =============
         let gameState, uiController;
 
+        console.log('═══════════════════════════════════════════');
+        console.log('🎮 Sudoku Master Ultimate v7.1');
+        console.log('═══════════════════════════════════════════');
+
         window.addEventListener('DOMContentLoaded', () => {
+            console.log('[Debug] DOM loaded, initializing game...');
+            
             gameState = new GameState();
             uiController = new UIController(gameState);
 
@@ -1499,10 +1599,13 @@
             };
 
             if (gameState.hasSavedGame()) {
-                // Resume game automatically
+                console.log('[Debug] Found saved game, resuming...');
             } else {
+                console.log('[Debug] No saved game, showing difficulty modal...');
                 uiController.showDifficultyModal();
             }
+            
+            console.log('[Debug] Game initialized successfully');
         });
 
         // Prevent accidental page close
