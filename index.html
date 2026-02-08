@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#4A90E2">
-    <title>Sudoku Master Ultimate - V6.1</title>
+    <title>Sudoku Master Ultimate - V6.2</title>
     <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiU3Vkb2t1IE1hc3RlciBVbHRpbWF0ZSIsInNob3J0X25hbWUiOiJTdWRva3UiLCJzdGFydF91cmwiOiIuLyIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmZmZmZmYiLCJ0aGVtZV9jb2xvciI6IiM0QTkwRTIifQ==">
     <style>
         :root {
@@ -224,13 +224,20 @@
             user-select: none;
         }
 
+        /* קו אנכי עבה אחרי כל 3 עמודות */
         .cell:nth-child(3n):not(:nth-child(9n)) {
-            border-right: 3px solid var(--border-heavy);
+            border-right: 3px solid var(--border-heavy) !important;
         }
-
+        
+        /* קו אופקי עבה אחרי כל 3 שורות */
         .cell:nth-child(n+19):nth-child(-n+27),
         .cell:nth-child(n+46):nth-child(-n+54) {
-            border-bottom: 3px solid var(--border-heavy);
+            border-bottom: 3px solid var(--border-heavy) !important;
+        }
+        
+        /* תיקון צבע הגבול הכללי כדי שלא יבלע את הקווים העבים */
+        .cell {
+            border: 0.5px solid var(--border-light);
         }
 
         .cell.fixed {
@@ -515,7 +522,7 @@
     <div class="container">
         <header>
             <h1>Sudoku Master Ultimate</h1>
-            <div class="version">Engine V6.1</div>
+            <div class="version">Engine V6.2</div>
         </header>
 
         <div class="info-bar">
