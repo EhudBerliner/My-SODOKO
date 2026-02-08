@@ -1,11 +1,16 @@
 {
-  "name": "Cube App Project",
-  "short_name": "CubeApp",
-  "description": "אפליקציה עם ניהול גרסאות ולוגו קוביות",
+  "name": "Sudoku Master Ultimate",
+  "short_name": "Sudoku",
+  "description": "משחק סודוקו מתקדם עם רמות קושי, רמזים, הערות ועוד - גרסה 7.0",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#4A90E2",
+  "categories": ["games", "entertainment", "education"],
+  "lang": "he",
+  "dir": "rtl",
   "icons": [
     {
       "src": "logo.png",
@@ -13,5 +18,73 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "screenshots": [
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "משחק חדש - קל",
+      "short_name": "קל",
+      "description": "התחל משחק חדש ברמת קושי קלה",
+      "url": "./index.html?difficulty=easy",
+      "icons": [
+        {
+          "src": "logo.png",
+          "sizes": "512x512"
+        }
+      ]
+    },
+    {
+      "name": "משחק חדש - בינוני",
+      "short_name": "בינוני",
+      "description": "התחל משחק חדש ברמת קושי בינונית",
+      "url": "./index.html?difficulty=medium",
+      "icons": [
+        {
+          "src": "logo.png",
+          "sizes": "512x512"
+        }
+      ]
+    },
+    {
+      "name": "משחק חדש - קשה",
+      "short_name": "קשה",
+      "description": "התחל משחק חדש ברמת קושי גבוהה",
+      "url": "./index.html?difficulty=hard",
+      "icons": [
+        {
+          "src": "logo.png",
+          "sizes": "512x512"
+        }
+      ]
+    },
+    {
+      "name": "סטטיסטיקה",
+      "short_name": "סטטיסטיקה",
+      "description": "צפה בסטטיסטיקות המשחק שלך",
+      "url": "./index.html?view=stats",
+      "icons": [
+        {
+          "src": "logo.png",
+          "sizes": "512x512"
+        }
+      ]
+    }
+  ],
+  "share_target": {
+    "action": "./index.html",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text"
+    }
+  },
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7"
 }
