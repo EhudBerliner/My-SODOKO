@@ -3,138 +3,268 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#4A90E2">
-    <title>Cube Game - גרסה 1.0.1</title>
-
+    <title>Cube Puzzle - גרסה 2.1.0</title>
     <link rel="icon" type="image/png" href="logo.png">
-    <link rel="apple-touch-icon" href="logo.png">
-    <link rel="manifest" href="manifest.json">
-
     <style>
         :root {
-            --primary-color: #4A90E2;
-            --header-bg: #1a2a3a;
+            --primary-gradient: linear-gradient(135deg, #4A90E2, #6366f1);
+            --bg: #f8fafc;
+            --cube-purple: #8b5cf6;
+            --cube-teal: #2dd4bf;
+            --highlight: #fef08a;
+            --dark: #0f172a;
         }
 
         body {
-            font-family: system-ui, sans-serif;
-            margin: 0;
-            overflow: hidden; /* מונע גלילה במשחק */
-            background-color: #000;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            margin: 0; background: var(--bg); color: var(--dark);
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
         }
 
-        /* שורת גרסה */
         .version-bar {
-            background-color: var(--header-bg);
-            color: #ffffff;
-            text-align: center;
-            padding: 5px 0;
-            font-size: 0.75rem;
-            z-index: 1000;
+            width: 100%; background: var(--dark); color: white;
+            padding: 5px 20px; font-size: 0.8rem; display: flex;
+            justify-content: space-between; box-sizing: border-box;
         }
 
-        /* אזור המשחק */
-        #game-container {
-            flex: 1;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        .game-container { padding: 20px; text-align: center; max-width: 500px; }
+
+        /* לוח המשחק */
+        #board {
+            display: grid; grid-template-columns: repeat(9, 1fr);
+            gap: 2px; background: #cbd5e1; padding: 4px;
+            border: 3px solid var(--dark); border-radius: 8px; margin: 20px 0;
         }
 
-        canvas {
-            display: block;
-            max-width: 100%;
-            max-height: 100%;
-            box-shadow: 0 0 20px rgba(74, 144, 226, 0.3);
+        .cell {
+            width: 40px; height: 40px; background: white;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; cursor: pointer; font-size: 1.2rem;
+            transition: 0.2s; border-radius: 2px;
         }
 
-        #ui-overlay {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            color: white;
-            pointer-events: none;
+        .cell.fixed { background: #e2e8f0; color: #475569; cursor: default; }
+        .cell.selected { background: var(--cube-purple) !important; color: white; }
+        .cell.highlight-same { background: var(--highlight); }
+        .cell:hover:not(.fixed) { background: #f1f5f9; }
+
+        /* כפתורים */
+        .controls, .levels { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; }
+        button {
+            padding: 10px 15px; border: none; border-radius: 6px;
+            background: var(--primary-gradient); color: white;
+            cursor: pointer; font-weight: bold; transition: 0.3s;
         }
+        button:hover { opacity: 0.8; transform: translateY(-1px); }
+        button:disabled { background: #94a3b8; cursor: not-allowed; }
+
+        /* טבלאות ומודאלים */
+        #overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); display: none; justify-content: center;
+            align-items: center; z-index: 1000;
+        }
+        .modal { background: white; padding: 25px; border-radius: 12px; max-width: 90%; text-align: center; }
+        
+        .leaderboard { width: 100%; margin-top: 20px; border-collapse: collapse; }
+        .leaderboard th, .leaderboard td { padding: 8px; border-bottom: 1px solid #ddd; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
-    <div class="version-bar">
-        גרסה אחרונה: 1.0.1 | סטטוס: מנוע משחק נטען
+<div class="version-bar">
+    <span>גרסה 2.1.0</span>
+    <span id="timer">זמן: 00:00</span>
+</div>
+
+<div class="game-container">
+    <img src="logo.png" alt="Logo" style="width: 80px; margin-top: 10px;">
+    
+    <div class="levels">
+        <button onclick="newGame('easy')">קל</button>
+        <button onclick="newGame('medium')">בינוני</button>
+        <button onclick="newGame('hard')">קשה</button>
     </div>
 
-    <div id="game-container">
-        <div id="ui-overlay">
-            <div id="score">ניקוד: 0</div>
+    <div id="board"></div>
+
+    <div class="controls">
+        <button id="undo" onclick="undo()">⬅️ אחורה</button>
+        <button id="redo" onclick="redo()">קדימה ➡️</button>
+    </div>
+
+    <div id="score-table-area">
+        <h3>🏆 שיאים - רמה <span id="lvl-name">קל</span></h3>
+        <table class="leaderboard" id="leaderboard">
+            <thead><tr><th>מקום</th><th>זמן</th><th>תאריך</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<div id="overlay">
+    <div class="modal" id="modal-content">
+        <h3 id="modal-title">נמצא משחק שמור!</h3>
+        <p id="modal-desc">האם להמשיך מהמקום שעצרת?</p>
+        <div id="modal-btns">
+            <button onclick="resumeGame()">המשך משחק</button>
+            <button style="background:#ef4444" onclick="closeOverlay()">לוח חדש</button>
         </div>
-        <canvas id="gameCanvas"></canvas>
     </div>
+</div>
 
-    <script>
-        // --- לוגיקת המשחק ---
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        let score = 0;
+<script>
+    let currentBoard = [];
+    let initialBoard = [];
+    let history = [];
+    let historyIndex = -1;
+    let selectedIndex = null;
+    let timer = 0;
+    let timerInt;
+    let currentLvl = 'easy';
 
-        // התאמת גודל הקנבס
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight - 30; // מוריד את גובה שורת הגרסה
+    // יצירת הלוח
+    function initBoard() {
+        const boardEl = document.getElementById('board');
+        boardEl.innerHTML = '';
+        for (let i = 0; i < 81; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.onclick = () => selectCell(i);
+            boardEl.appendChild(cell);
         }
-        window.addEventListener('resize', resize);
-        resize();
+    }
 
-        // אובייקט השחקן (בהשראת הלוגו - קובייה)
-        const player = {
-            x: canvas.width / 2,
-            y: canvas.height / 2,
-            size: 50,
-            color: '#4A90E2',
-            dx: 5,
-            dy: 5
-        };
+    function selectCell(idx) {
+        selectedIndex = idx;
+        const val = currentBoard[idx];
+        document.querySelectorAll('.cell').forEach((c, i) => {
+            c.classList.remove('selected', 'highlight-same');
+            if (i === idx) c.classList.add('selected');
+            if (val !== 0 && currentBoard[i] === val) c.classList.add('highlight-same');
+        });
+    }
 
-        function drawPlayer() {
-            ctx.fillStyle = player.color;
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = player.color;
-            ctx.fillRect(player.x, player.y, player.size, player.size);
-            ctx.shadowBlur = 0;
-            
-            // הוספת ספרה כמו בלוגו
-            ctx.fillStyle = "white";
-            ctx.font = "bold 20px Arial";
-            ctx.fillText("7", player.x + 18, player.y + 32);
+    // הזנת מספרים
+    window.addEventListener('keydown', (e) => {
+        if (selectedIndex === null || initialBoard[selectedIndex] !== 0) return;
+        if (e.key >= 1 && e.key <= 9) {
+            saveState();
+            currentBoard[selectedIndex] = parseInt(e.key);
+            render();
+            checkWin();
         }
+    });
 
-        function update() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            drawPlayer();
+    function saveState() {
+        history = history.slice(0, historyIndex + 1);
+        history.push(JSON.stringify(currentBoard));
+        historyIndex++;
+        localStorage.setItem('cube_save', JSON.stringify({
+            currentBoard, initialBoard, timer, currentLvl, history, historyIndex
+        }));
+    }
 
-            // לוגיקת תנועה בסיסית (בדיקה שהמשחק חי)
-            player.x += player.dx;
-            player.y += player.dy;
-
-            if (player.x + player.size > canvas.width || player.x < 0) player.dx *= -1;
-            if (player.y + player.size > canvas.height || player.y < 0) player.dy *= -1;
-
-            requestAnimationFrame(update);
+    function undo() {
+        if (historyIndex >= 0) {
+            currentBoard = JSON.parse(history[historyIndex]);
+            historyIndex--;
+            render();
         }
+    }
 
-        // הפעלת המשחק
-        update();
+    function redo() {
+        // לוגיקת רדו פשוטה למימוש
+    }
 
-        // --- רישום PWA ---
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(console.error);
-            });
+    function newGame(lvl) {
+        currentLvl = lvl;
+        document.getElementById('lvl-name').innerText = lvl;
+        timer = 0;
+        clearInterval(timerInt);
+        startTimer();
+        
+        // יצירת לוח דמי (בפרויקט מלא כאן נכנס אלגוריתם סודוקו)
+        initialBoard = Array(81).fill(0);
+        let seeds = [1,2,3,4,5,6,7,8,9];
+        for(let i=0; i<15; i++) {
+            let pos = Math.floor(Math.random()*81);
+            initialBoard[pos] = seeds[Math.floor(Math.random()*9)];
         }
-    </script>
+        currentBoard = [...initialBoard];
+        history = []; historyIndex = -1;
+        render();
+        updateLeaderboard();
+    }
+
+    function render() {
+        const cells = document.querySelectorAll('.cell');
+        currentBoard.forEach((v, i) => {
+            cells[i].innerText = v || '';
+            cells[i].className = 'cell' + (initialBoard[i] !== 0 ? ' fixed' : '');
+            if(i === selectedIndex) cells[i].classList.add('selected');
+        });
+    }
+
+    function startTimer() {
+        timerInt = setInterval(() => {
+            timer++;
+            let m = Math.floor(timer/60).toString().padStart(2,'0');
+            let s = (timer%60).toString().padStart(2,'0');
+            document.getElementById('timer').innerText = `זמן: ${m}:${s}`;
+        }, 1000);
+    }
+
+    function updateLeaderboard() {
+        const scores = JSON.parse(localStorage.getItem('scores_'+currentLvl) || '[]');
+        const html = scores.slice(0,10).map((s, i) => 
+            `<tr><td>${i+1}</td><td>${s.time}</td><td>${s.date}</td></tr>`
+        ).join('');
+        document.querySelector('#leaderboard tbody').innerHTML = html;
+    }
+
+    function checkWin() {
+        if (!currentBoard.includes(0)) {
+            clearInterval(timerInt);
+            alert("כל הכבוד! פתרת את הלוח!");
+            saveScore();
+        }
+    }
+
+    function saveScore() {
+        let scores = JSON.parse(localStorage.getItem('scores_'+currentLvl) || '[]');
+        scores.push({time: document.getElementById('timer').innerText, date: new Date().toLocaleDateString()});
+        scores.sort((a,b) => a.timer - b.timer);
+        localStorage.setItem('scores_'+currentLvl, JSON.stringify(scores));
+        updateLeaderboard();
+    }
+
+    // טעינה
+    window.onload = () => {
+        initBoard();
+        if (localStorage.getItem('cube_save')) {
+            document.getElementById('overlay').style.display = 'flex';
+        } else {
+            newGame('easy');
+        }
+    };
+
+    function resumeGame() {
+        const s = JSON.parse(localStorage.getItem('cube_save'));
+        currentBoard = s.currentBoard;
+        initialBoard = s.initialBoard;
+        timer = s.timer;
+        currentLvl = s.currentLvl;
+        history = s.history;
+        historyIndex = s.historyIndex;
+        document.getElementById('overlay').style.display = 'none';
+        render(); startTimer(); updateLeaderboard();
+    }
+
+    function closeOverlay() {
+        document.getElementById('overlay').style.display = 'none';
+        newGame('easy');
+    }
+</script>
 </body>
 </html>
