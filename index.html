@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#4A90E2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Sudoku Master Ultimate - V7.2</title>
+    <title>Sudoku Master Ultimate - V7.3</title>
     <link rel="manifest" href="manifest.json">
     <style>
         :root {
@@ -161,9 +161,8 @@
         .game-board {
             display: grid;
             grid-template-columns: repeat(9, 1fr);
-            gap: 1px;
-            background: var(--border-light);
-            padding: 3px;
+            gap: 0;
+            background: var(--bg-primary);
             border: 3px solid var(--border-heavy);
             border-radius: 8px;
             overflow: hidden;
@@ -171,34 +170,6 @@
             aspect-ratio: 1;
             width: 100%;
             max-width: 500px;
-            position: relative;
-        }
-
-        /* Create 3x3 block divisions with pseudo-elements */
-        .game-board::before,
-        .game-board::after {
-            content: '';
-            position: absolute;
-            background: var(--border-heavy);
-            z-index: 1;
-        }
-
-        /* Vertical lines */
-        .game-board::before {
-            width: 3px;
-            height: 100%;
-            top: 0;
-            left: calc(33.333% - 1.5px);
-            box-shadow: calc(33.333% + 1.5px) 0 0 0 var(--border-heavy);
-        }
-
-        /* Horizontal lines */
-        .game-board::after {
-            height: 3px;
-            width: 100%;
-            left: 0;
-            top: calc(33.333% - 1.5px);
-            box-shadow: 0 calc(33.333% + 1.5px) 0 0 var(--border-heavy);
         }
 
         .cell {
@@ -207,13 +178,35 @@
             align-items: center;
             justify-content: center;
             background: var(--bg-primary);
+            border: 0.5px solid var(--border-light);
             font-size: clamp(20px, 5vw, 32px);
             font-weight: 700;
             cursor: pointer;
             transition: background-color 0.15s;
             position: relative;
             user-select: none;
-            z-index: 2;
+        }
+
+        /* Vertical division - after columns 3 and 6 (cells 3,6,12,15,21,24,30,33,39,42,48,51,57,60,66,69,75,78) */
+        .cell:nth-child(3), .cell:nth-child(12), .cell:nth-child(21), 
+        .cell:nth-child(30), .cell:nth-child(39), .cell:nth-child(48),
+        .cell:nth-child(57), .cell:nth-child(66), .cell:nth-child(75) {
+            border-right: 3px solid var(--border-heavy);
+        }
+
+        .cell:nth-child(6), .cell:nth-child(15), .cell:nth-child(24),
+        .cell:nth-child(33), .cell:nth-child(42), .cell:nth-child(51),
+        .cell:nth-child(60), .cell:nth-child(69), .cell:nth-child(78) {
+            border-right: 3px solid var(--border-heavy);
+        }
+
+        /* Horizontal division - after rows 3 and 6 (cells 19-27 and 46-54) */
+        .cell:nth-child(n+19):nth-child(-n+27) {
+            border-bottom: 3px solid var(--border-heavy);
+        }
+
+        .cell:nth-child(n+46):nth-child(-n+54) {
+            border-bottom: 3px solid var(--border-heavy);
         }
 
         .cell.fixed {
@@ -238,9 +231,10 @@
 
         .cell.conflict {
             background: var(--cell-conflict) !important;
-            color: var(--cell-error);
+            color: var(--cell-error) !important;
             animation: shake 0.3s;
-            box-shadow: inset 0 0 0 2px var(--cell-error);
+            box-shadow: inset 0 0 0 3px var(--cell-error) !important;
+            z-index: 100;
         }
 
         .cell .notes {
@@ -542,7 +536,7 @@
         <!-- Header -->
         <div class="header">
             <div class="app-title">Sudoku Master Ultimate</div>
-            <div class="version" id="versionBtn">גרסה 7.2</div>
+            <div class="version" id="versionBtn">גרסה 7.3</div>
         </div>
 
         <!-- Top Bar -->
@@ -1322,25 +1316,31 @@
 
                 const result = this.game.placeNumber(this.game.selectedCell, num);
 
+                // Update UI first
+                this.updateUI();
+                
+                // Then show conflicts after updateUI completes
                 if (!result.success && result.conflicts) {
                     this.showConflicts(result.conflicts);
                 }
-
-                this.updateUI();
             }
 
             showConflicts(conflicts) {
+                console.log('showConflicts called with:', conflicts);
                 const cells = this.gameBoard.querySelectorAll('.cell');
                 
                 if (this.game.selectedCell !== null) {
+                    console.log('Adding conflict to selected cell:', this.game.selectedCell);
                     cells[this.game.selectedCell].classList.add('conflict');
                 }
                 
                 conflicts.forEach(pos => {
+                    console.log('Adding conflict to cell:', pos);
                     cells[pos].classList.add('conflict');
                 });
 
                 setTimeout(() => {
+                    console.log('Removing conflict classes');
                     if (this.game.selectedCell !== null) {
                         cells[this.game.selectedCell].classList.remove('conflict');
                     }
@@ -1511,7 +1511,7 @@
         }
 
         // ============= INITIALIZE APP =============
-        const APP_VERSION = '7.2';
+        const APP_VERSION = '7.3';
         let gameState, uiController;
 
         window.addEventListener('DOMContentLoaded', () => {
