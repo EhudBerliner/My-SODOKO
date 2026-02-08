@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#4A90E2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Sudoku  - V7.4</title>
+    <title>Sudoku - V7.5</title>
     <link rel="manifest" href="manifest.json">
     <style>
         :root {
@@ -19,6 +19,7 @@
             --border-medium: #495057;
             --border-heavy: #212529;
             --cell-fixed: #4A90E2;
+            --cell-fixed-bg: #e3f2fd;
             --cell-user: #2d3748;
             --cell-selected: #bfdbfe;
             --cell-highlighted: #dbeafe;
@@ -40,6 +41,7 @@
             --border-medium: #606060;
             --border-heavy: #808080;
             --cell-fixed: #60a5fa;
+            --cell-fixed-bg: #1e3a5f;
             --cell-user: #e5e5e5;
             --cell-selected: #1e3a5f;
             --cell-highlighted: #2d4a6f;
@@ -187,32 +189,18 @@
             user-select: none;
         }
 
-        /* Vertical division - after columns 3 and 6 (cells 3,6,12,15,21,24,30,33,39,42,48,51,57,60,66,69,75,78) */
-        /* קווי הפרדה אנכיים - גבול עבה בין הבלוקים (אחרי עמודה 3 ו-6) */
-        /* בגלל dir="rtl", הגבול השמאלי של התאים בעמודות האלו יוצר את ההפרדה */
         .cell:nth-child(9n+3), 
         .cell:nth-child(9n+6) {
             border-left: 3px solid var(--border-heavy) !important;
         }
         
-        /* קווי הפרדה אופקיים - גבול עבה בין הבלוקים (אחרי שורה 3 ו-6) */
         .cell:nth-child(n+19):nth-child(-n+27),
         .cell:nth-child(n+46):nth-child(-n+54) {
             border-bottom: 3px solid var(--border-heavy) !important;
         }
         
-        /* תיקון קטן למניעת קפיצות של התאים בגלל עובי הגבול */
         .cell {
             box-sizing: border-box;
-        }
-
-        /* Horizontal division - after rows 3 and 6 (cells 19-27 and 46-54) */
-        .cell:nth-child(n+19):nth-child(-n+27) {
-            border-bottom: 3px solid var(--border-heavy);
-        }
-
-        .cell:nth-child(n+46):nth-child(-n+54) {
-            border-bottom: 3px solid var(--border-heavy);
         }
 
         .cell.fixed {
@@ -233,7 +221,8 @@
         }
 
         .cell.highlighted {
-            background: var(--cell-highlighted);
+            background: var(--cell-highlighted) !important;
+            box-shadow: inset 0 0 0 2px var(--btn-primary);
         }
 
         .cell.conflict {
@@ -269,7 +258,7 @@
             75% { transform: translateX(4px); }
         }
 
-        /* Number Pad - New Layout */
+        /* Number Pad */
         .number-pad {
             display: flex;
             flex-direction: column;
@@ -287,7 +276,7 @@
         }
 
         .number-row.second {
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(6, 1fr);
         }
 
         .num-btn {
@@ -301,18 +290,23 @@
             cursor: pointer;
             box-shadow: 0 2px 4px var(--shadow);
             transition: all 0.2s;
+            position: relative;
         }
 
-        .num-btn:active {
+        .num-btn:active:not(:disabled) {
             transform: scale(0.95);
             background: var(--btn-primary);
             color: white;
         }
 
+        .num-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
         .num-btn.delete {
-           /* background: var(--btn-danger); */
             background: var(--bg-tertiary);
-            color: white;
+            color: var(--text-primary);
             font-size: 22px;
         }
 
@@ -324,6 +318,11 @@
         .num-btn.notes.active {
             background: var(--btn-success);
             color: white;
+        }
+
+        .num-btn.placeholder {
+            opacity: 0;
+            pointer-events: none;
         }
 
         /* Hamburger Menu */
@@ -543,8 +542,8 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <div class="app-title">Sudoku </div>
-            <div class="version" id="versionBtn">גרסה 7.4</div>
+            <div class="app-title">Sudoku</div>
+            <div class="version" id="versionBtn">גרסה 7.5</div>
         </div>
 
         <!-- Top Bar -->
@@ -577,6 +576,7 @@
                 <button class="num-btn" data-num="9">9</button>
                 <button class="num-btn delete" data-num="0">🗑️</button>
                 <button class="num-btn notes" id="noteBtn">✏️</button>
+                <button class="num-btn placeholder"></button>
             </div>
         </div>
     </div>
@@ -697,19 +697,12 @@
 
             generateComplete() {
                 this.board = Array(81).fill(0);
-                
-                // Optimization: Pre-fill the three diagonal 3x3 blocks
-                // These blocks don't interfere with each other, so we can fill them independently
                 this.fillDiagonalBlocks();
-                
-                // Now fill the rest of the board
                 this.fillRemaining(0);
-                
                 return [...this.board];
             }
 
             fillDiagonalBlocks() {
-                // Fill blocks at positions (0,0), (3,3), (6,6)
                 for (let block = 0; block < 3; block++) {
                     const startRow = block * 3;
                     const startCol = block * 3;
@@ -726,7 +719,6 @@
             }
 
             fillRemaining(pos) {
-                // Skip already filled cells (diagonal blocks)
                 while (pos < 81 && this.board[pos] !== 0) {
                     pos++;
                 }
@@ -779,25 +771,21 @@
             generatePuzzle(difficulty = 'medium') {
                 const cellsToRemove = { easy: 35, medium: 45, hard: 55 };
                 
-                // Generate complete solution
                 const complete = this.generateComplete();
                 this.solution = [...complete];
                 this.board = [...complete];
                 this.fixed = Array(81).fill(true);
 
                 const target = cellsToRemove[difficulty] || 45;
-                
-                // Optimized removal strategy - remove cells symmetrically for better puzzle aesthetics
                 const positions = [];
                 for (let i = 0; i < 81; i++) {
                     positions.push(i);
                 }
                 
-                // Shuffle positions
                 this.shuffleArray(positions);
                 
                 let removed = 0;
-                const maxAttempts = 100; // Prevent infinite loops
+                const maxAttempts = 100;
                 let attempts = 0;
 
                 for (let pos of positions) {
@@ -807,11 +795,10 @@
                     const backup = this.board[pos];
                     this.board[pos] = 0;
                     
-                    // Quick check: ensure puzzle still solvable with unique solution
                     if (this.hasUniqueSolution()) {
                         this.fixed[pos] = false;
                         removed++;
-                        attempts = 0; // Reset attempts on success
+                        attempts = 0;
                     } else {
                         this.board[pos] = backup;
                     }
@@ -819,7 +806,7 @@
 
                 this.notes = Array(81).fill(null).map(() => new Set());
                 
-                console.log(`Generated ${difficulty} puzzle: ${removed} cells removed out of ${target} target`);
+                console.log(`Generated ${difficulty} puzzle: ${removed} cells removed`);
                 
                 return {
                     board: [...this.board],
@@ -891,6 +878,14 @@
                 }
 
                 return conflicts;
+            }
+
+            countNumber(num) {
+                let count = 0;
+                for (let i = 0; i < 81; i++) {
+                    if (this.board[i] === num) count++;
+                }
+                return count;
             }
         }
 
@@ -985,6 +980,11 @@
 
             placeNumber(pos, num) {
                 if (this.engine.fixed[pos]) return { success: false };
+
+                // Check if number is already at max count (9)
+                if (num !== 0 && this.engine.countNumber(num) >= 9) {
+                    return { success: false, maxed: true };
+                }
 
                 if (num === 0) {
                     this.engine.board[pos] = 0;
@@ -1158,7 +1158,6 @@
                     cell.className = 'cell';
                     cell.dataset.index = i;
                     
-                    // Add data attributes for easier styling and debugging
                     const row = Math.floor(i / 9);
                     const col = i % 9;
                     const blockRow = Math.floor(row / 3);
@@ -1178,10 +1177,8 @@
                 this.undoBtn.addEventListener('click', () => this.undo());
                 this.menuBtn.addEventListener('click', () => this.toggleMenu());
                 this.noteBtn.addEventListener('click', () => this.toggleNoteMode());
-
                 this.menuOverlay.addEventListener('click', () => this.toggleMenu());
 
-                // Version click - forced reinstall
                 document.getElementById('versionBtn').addEventListener('click', () => {
                     this.showReinstallModal();
                 });
@@ -1324,31 +1321,25 @@
 
                 const result = this.game.placeNumber(this.game.selectedCell, num);
 
-                // Update UI first
                 this.updateUI();
                 
-                // Then show conflicts after updateUI completes
                 if (!result.success && result.conflicts) {
                     this.showConflicts(result.conflicts);
                 }
             }
 
             showConflicts(conflicts) {
-                console.log('showConflicts called with:', conflicts);
                 const cells = this.gameBoard.querySelectorAll('.cell');
                 
                 if (this.game.selectedCell !== null) {
-                    console.log('Adding conflict to selected cell:', this.game.selectedCell);
                     cells[this.game.selectedCell].classList.add('conflict');
                 }
                 
                 conflicts.forEach(pos => {
-                    console.log('Adding conflict to cell:', pos);
                     cells[pos].classList.add('conflict');
                 });
 
                 setTimeout(() => {
-                    console.log('Removing conflict classes');
                     if (this.game.selectedCell !== null) {
                         cells[this.game.selectedCell].classList.remove('conflict');
                     }
@@ -1414,10 +1405,17 @@
             updateUI() {
                 this.updateBoard();
                 this.updateControls();
+                this.updateNumberPad();
             }
 
             updateBoard() {
                 const cells = this.gameBoard.querySelectorAll('.cell');
+                
+                // Get selected number ONLY if a cell is selected that has a number
+                const selectedNum = (this.game.selectedCell !== null && 
+                                    this.game.engine.board[this.game.selectedCell] !== 0)
+                    ? this.game.engine.board[this.game.selectedCell] 
+                    : 0;
                 
                 cells.forEach((cell, index) => {
                     cell.className = 'cell';
@@ -1431,17 +1429,11 @@
 
                     if (index === this.game.selectedCell) {
                         cell.classList.add('selected');
-                        
-                        // Highlight same numbers only when cell is selected
-                        const selectedNum = this.game.engine.board[this.game.selectedCell];
-                        if (selectedNum !== 0) {
-                            cells.forEach((otherCell, otherIndex) => {
-                                if (otherIndex !== this.game.selectedCell && 
-                                    this.game.engine.board[otherIndex] === selectedNum) {
-                                    otherCell.classList.add('highlighted');
-                                }
-                            });
-                        }
+                    }
+
+                    // Highlight same numbers ONLY when selectedNum is not 0
+                    if (selectedNum !== 0 && this.game.engine.board[index] === selectedNum) {
+                        cell.classList.add('highlighted');
                     }
 
                     if (this.game.engine.board[index] !== 0) {
@@ -1457,6 +1449,21 @@
                         cell.appendChild(notesDiv);
                     }
                 });
+            }
+
+            updateNumberPad() {
+                // Disable buttons when number count reaches 9
+                for (let num = 1; num <= 9; num++) {
+                    const count = this.game.engine.countNumber(num);
+                    const btn = document.querySelector(`.num-btn[data-num="${num}"]`);
+                    if (btn) {
+                        if (count >= 9) {
+                            btn.disabled = true;
+                        } else {
+                            btn.disabled = false;
+                        }
+                    }
+                }
             }
 
             updateControls() {
@@ -1477,7 +1484,6 @@
             }
 
             showReinstallModal() {
-                // Check if online
                 if (!navigator.onLine) {
                     alert('התקנה מחדש דורשת חיבור לאינטרנט');
                     return;
@@ -1489,10 +1495,8 @@
                 document.getElementById('reinstallModal').classList.remove('active');
                 
                 try {
-                    // Clear all localStorage
                     localStorage.clear();
                     
-                    // Unregister all service workers
                     if ('serviceWorker' in navigator) {
                         const registrations = await navigator.serviceWorker.getRegistrations();
                         for (let registration of registrations) {
@@ -1500,7 +1504,6 @@
                         }
                     }
                     
-                    // Clear all caches
                     if ('caches' in window) {
                         const cacheNames = await caches.keys();
                         for (let cacheName of cacheNames) {
@@ -1508,7 +1511,6 @@
                         }
                     }
                     
-                    // Reload the page
                     alert('כל הנתונים נמחקו. העמוד ייטען מחדש.');
                     window.location.reload(true);
                 } catch (error) {
@@ -1519,7 +1521,7 @@
         }
 
         // ============= INITIALIZE APP =============
-        const APP_VERSION = '7.4';
+        const APP_VERSION = '7.5';
         let gameState, uiController;
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -1535,15 +1537,13 @@
             uiController.showDifficultyModal();
         });
 
-        // Service Worker Registration with version control
+        // Service Worker Registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', async () => {
                 try {
-                    // Check for existing service worker
                     const registration = await navigator.serviceWorker.getRegistration();
                     
                     if (registration) {
-                        // Force update if new version
                         const currentVersion = localStorage.getItem('app_version');
                         if (currentVersion !== APP_VERSION) {
                             console.log('New version detected, updating...');
@@ -1558,7 +1558,6 @@
                         localStorage.setItem('app_version', APP_VERSION);
                     }
                     
-                    // Register service worker
                     await navigator.serviceWorker.register('sw.js');
                     console.log('Service Worker registered successfully');
                 } catch (err) {
