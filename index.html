@@ -3,79 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cube Sudoku Pro - V3.0</title>
+    <title>Cube Sudoku Pro - V3.1 Retro Look</title>
     <link rel="icon" type="image/png" href="logo.png">
     <style>
         :root {
-            /* Light Mode */
-            --bg: #f8fafc;
+            /* Light Mode Palette - Based on V2.3.0 look */
+            --bg: #f0f4f8;
             --surface: #ffffff;
             --text: #0f172a;
             --primary: #4A90E2;
             --accent: #8b5cf6;
-            --grid-line: #cbd5e1;
-            --grid-bold: #1e293b;
+            
+            /* Retro Board Colors */
+            --grid-gap-color: #94a3b8; /* The color of thin lines */
+            --grid-bold-color: #1e293b; /* The color of thick lines */
+            --border-thick: 3px solid var(--grid-bold-color);
+            
             --selected: #dbeafe;
             --related: #f1f5f9;
             --same-num: #fef08a;
             --error: #ef4444;
-            --fixed: #64748b;
-            --note: #94a3b8;
+            --fixed: #475569;
+            --note: #64748b;
         }
 
         [data-theme="dark"] {
             --bg: #0f172a;
             --surface: #1e293b;
             --text: #f8fafc;
-            --grid-line: #334155;
-            --grid-bold: #f8fafc;
+            --grid-gap-color: #334155;
+            --grid-bold-color: #0f172a;
             --selected: #1e40af;
             --related: #1e293b;
             --same-num: #854d0e;
+            --fixed: #94a3b8;
+            --note: #cbd5e1;
         }
 
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
             margin: 0; background: var(--bg); color: var(--text);
             display: flex; flex-direction: column; align-items: center;
-            height: 100vh; overflow: hidden; user-select: none;
+            height: 100vh; /* overflow: hidden; removed to allow scrolling on small screens if needed */
+            user-select: none;
+            touch-action: manipulation;
         }
 
-        /* Header & Stats */
-        .top-bar {
-            width: 100%; padding: 10px 20px; box-sizing: border-box;
+        /* New Header Layout */
+        .game-header {
+            width: 95vw; max-width: 450px;
             display: flex; justify-content: space-between; align-items: center;
-            background: var(--surface); box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 10px 0;
         }
+        .header-left, .header-right { display: flex; gap: 10px; font-size: 1.2rem; cursor: pointer; }
+        
+        /* Timer Centered Above Board */
+        .timer-container {
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        .timer-box {
+            font-variant-numeric: tabular-nums;
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: var(--primary);
+            background: var(--surface);
+            padding: 5px 15px;
+            border-radius: 8px;
+            display: inline-block;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        #difficulty-label { font-size: 0.8rem; color: var(--fixed); margin-top: 2px;}
 
-        .timer-box { font-variant-numeric: tabular-nums; font-weight: bold; font-size: 1.1rem; }
-
-        /* The Grid */
+        /* The Grid - V2.3.0 Retro Style */
         #sudoku-grid {
-            display: grid; grid-template-columns: repeat(9, 1fr);
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
             width: 95vw; max-width: 450px; aspect-ratio: 1/1;
-            background: var(--grid-line); border: 2px solid var(--grid-bold);
-            margin: 10px 0;
+            /* Use gap for thin lines */
+            background: var(--grid-gap-color);
+            gap: 1px;
+            /* Thick outer border */
+            border: var(--border-thick);
+            margin: 0 auto 15px auto;
+            border-radius: 4px;
         }
 
         .cell {
             background: var(--surface); display: flex; align-items: center;
             justify-content: center; position: relative; cursor: pointer;
-            font-size: 1.5rem; font-weight: 500; transition: background 0.1s;
+            font-size: 1.5rem; font-weight: bold; transition: background 0.1s;
         }
 
-        /* 3x3 Block Borders */
-        .cell:nth-child(3n) { border-left: 2px solid var(--grid-bold); }
-        .cell:nth-child(9n) { border-left: none; }
+        /* 3x3 Block Borders - Retro Style */
+        .cell:nth-child(3n) { border-right: 2px solid var(--grid-bold-color); }
+        .cell:nth-child(9n) { border-right: none; } /* Fix right edge */
         .cell:nth-child(n+19):nth-child(-n+27), 
-        .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 2px solid var(--grid-bold); }
+        .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 2px solid var(--grid-bold-color); }
 
         /* Cell States */
         .cell.selected { background: var(--selected) !important; }
         .cell.related { background: var(--related); }
         .cell.same-val { background: var(--same-num); }
-        .cell.err { color: var(--error); }
-        .cell.is-fixed { color: var(--fixed); font-weight: 800; }
+        .cell.err { color: var(--error) !important; background: #fee2e2 !important; }
+        [data-theme="dark"] .cell.err { background: #7f1d1d !important; }
+        .cell.is-fixed { color: var(--fixed); }
 
         /* Notes Grid */
         .notes-grid {
@@ -83,29 +115,37 @@
             width: 100%; height: 100%; pointer-events: none;
         }
         .note-digit {
-            font-size: 0.6rem; color: var(--note);
+            font-size: 0.6rem; color: var(--note); font-weight: normal;
             display: flex; align-items: center; justify-content: center;
         }
 
-        /* Toolbar & Numpad */
-        .toolbar { display: flex; gap: 15px; margin: 5px 0; }
-        .tool-btn { 
-            background: var(--surface); border: 1px solid var(--grid-line);
-            padding: 8px; border-radius: 8px; cursor: pointer; color: var(--text);
-            display: flex; flex-direction: column; align-items: center; font-size: 0.7rem;
-        }
-        .tool-btn.active { background: var(--primary); color: white; }
-
+        /* Numpad - Moved below board */
         .numpad {
             display: grid; grid-template-columns: repeat(5, 1fr);
-            gap: 8px; width: 95vw; max-width: 450px; padding: 10px;
+            gap: 8px; width: 95vw; max-width: 450px;
+            margin-bottom: 15px;
         }
         .num-btn {
-            background: var(--surface); border: none; border-radius: 12px;
+            background: var(--surface); border: none; border-radius: 8px;
             height: 50px; font-size: 1.4rem; font-weight: bold;
             color: var(--text); box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid var(--grid-gap-color);
         }
         .num-btn:active { transform: scale(0.95); background: var(--primary); color: white; }
+
+        /* Toolbar - Moved below Numpad */
+        .toolbar {
+            display: flex; gap: 10px; width: 95vw; max-width: 450px;
+            justify-content: space-between; margin-bottom: 20px;
+        }
+        .tool-btn { 
+            background: var(--surface); border: 1px solid var(--grid-gap-color);
+            padding: 10px 5px; border-radius: 8px; cursor: pointer; color: var(--text);
+            display: flex; flex-direction: column; align-items: center; font-size: 0.75rem;
+            flex: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .tool-btn span { font-size: 1.2rem; margin-bottom: 4px; }
+        .tool-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
         /* Modals */
         .modal {
@@ -114,32 +154,37 @@
         }
         .modal-content {
             background: var(--surface); padding: 30px; border-radius: 20px;
-            width: 80%; max-width: 400px; text-align: center;
+            width: 80%; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
+        .modal-btn-group { display: grid; gap: 10px; margin-top: 20px; }
+        .modal-btn { padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; background: var(--primary); color: white; }
+        .modal-btn.secondary { background: var(--grid-gap-color); color: var(--text); }
 
-        @media (orientation: landscape) {
-            body { flex-direction: row; justify-content: space-around; }
-            #sudoku-grid { height: 80vh; width: auto; }
+        @media (max-height: 700px) {
+             /* Adjustments for smaller screens */
+            #sudoku-grid { height: auto; aspect-ratio: auto; }
+            .cell { height: 40px; font-size: 1.3rem; }
+            .num-btn { height: 45px; }
         }
     </style>
 </head>
 <body data-theme="light">
 
-<div class="top-bar">
-    <div onclick="toggleSettings()">⚙️</div>
+<div class="game-header">
+    <div class="header-left">
+        <span onclick="toggleSettings()">⚙️</span>
+    </div>
+    <div class="header-right">
+        <span onclick="toggleStats()">📊</span>
+    </div>
+</div>
+
+<div class="timer-container">
     <div class="timer-box" id="timer">00:00</div>
     <div id="difficulty-label">MEDIUM</div>
-    <div onclick="toggleStats()">📊</div>
 </div>
 
 <div id="sudoku-grid"></div>
-
-<div class="toolbar">
-    <button class="tool-btn" onclick="undo()"><span>↩️</span>Undo</button>
-    <button class="tool-btn" id="note-toggle" onclick="toggleNoteMode()"><span>✏️</span>Notes</button>
-    <button class="tool-btn" onclick="getHint()"><span>💡</span>Hint</button>
-    <button class="tool-btn" onclick="eraseCell()"><span>🧹</span>Erase</button>
-</div>
 
 <div class="numpad">
     <button class="num-btn" onclick="handleInput(1)">1</button>
@@ -151,44 +196,41 @@
     <button class="num-btn" onclick="handleInput(7)">7</button>
     <button class="num-btn" onclick="handleInput(8)">8</button>
     <button class="num-btn" onclick="handleInput(9)">9</button>
-    <button class="num-btn" onclick="handleInput(0)" style="font-size:1rem">מחק</button>
+    <button class="num-btn" onclick="handleInput(0)" style="color: var(--error);">✖️</button>
+</div>
+
+<div class="toolbar">
+    <button class="tool-btn" onclick="undo()"><span>↩️</span>Undo</button>
+    <button class="tool-btn" id="note-toggle" onclick="toggleNoteMode()"><span>✏️</span>Notes</button>
+    <button class="tool-btn" onclick="getHint()"><span>💡</span>Hint</button>
+    <button class="tool-btn" onclick="eraseCell()"><span>🧹</span>Erase</button>
 </div>
 
 <div id="start-modal" class="modal" style="display: flex;">
     <div class="modal-content">
-        <img src="logo.png" style="width:80px; margin-bottom:15px;">
+        <img src="logo.png" style="width:80px; margin-bottom:15px;" alt="Logo">
         <h2>Cube Sudoku Pro</h2>
-        <div id="resume-box" style="display:none">
-            <button onclick="resumeGame()" style="width:100%; margin-bottom:10px; background:var(--accent); color:white; padding:15px; border-radius:10px; border:none;">המשך משחק אחרון</button>
+        <div id="resume-box" style="display:none; margin-bottom: 15px;">
+            <button class="modal-btn" style="background: var(--accent); width: 100%;" onclick="resumeGame()">המשך משחק אחרון</button>
         </div>
-        <p>בחר רמת קושי:</p>
-        <div style="display:grid; gap:10px;">
-            <button onclick="startNewGame('easy')">קל</button>
-            <button onclick="startNewGame('medium')">בינוני</button>
-            <button onclick="startNewGame('hard')">קשה</button>
+        <p>משחק חדש:</p>
+        <div class="modal-btn-group">
+            <button class="modal-btn" onclick="startNewGame('easy')">קל</button>
+            <button class="modal-btn" onclick="startNewGame('medium')">בינוני</button>
+            <button class="modal-btn" onclick="startNewGame('hard')">קשה</button>
         </div>
     </div>
 </div>
 
 <script>
-    // --- State Management ---
+    // --- לוגיקת המשחק (ללא שינוי מגרסה V3.0) ---
     let state = {
-        board: Array(81).fill(0),
-        initial: Array(81).fill(0),
-        notes: Array.from({length: 81}, () => []),
-        solution: [],
-        history: [],
-        selected: null,
-        noteMode: false,
-        time: 0,
-        level: 'medium',
-        errors: 0,
-        settings: { sound: true, vibration: true, theme: 'light', showErrors: true }
+        board: Array(81).fill(0), initial: Array(81).fill(0), notes: Array.from({length: 81}, () => []),
+        solution: [], history: [], selected: null, noteMode: false, time: 0, level: 'medium',
+        settings: { vibration: true, theme: 'light', showErrors: true }
     };
-
     let timerInterval;
 
-    // --- Core Logic: Solver & Generator ---
     const Solver = {
         isValid(board, idx, num) {
             const r = Math.floor(idx / 9), c = idx % 9;
@@ -215,7 +257,6 @@
         }
     };
 
-    // --- UI Rendering ---
     function initGrid() {
         const grid = document.getElementById('sudoku-grid');
         grid.innerHTML = '';
@@ -234,7 +275,6 @@
             if (state.initial[i] !== 0) cell.classList.add('is-fixed');
             if (state.selected === i) cell.classList.add('selected');
             
-            // Related Highlighting
             if (state.selected !== null) {
                 let r = Math.floor(i/9), c = i%9, sr = Math.floor(state.selected/9), sc = state.selected%9;
                 if (r === sr || c === sc) cell.classList.add('related');
@@ -248,6 +288,7 @@
                 cell.innerHTML = renderNotes(state.notes[i]);
             }
         });
+        document.getElementById('difficulty-label').innerText = state.level.toUpperCase();
     }
 
     function renderNotes(notes) {
@@ -259,12 +300,9 @@
         return html + '</div>';
     }
 
-    // --- Input Handlers ---
     function handleInput(num) {
         if (state.selected === null || state.initial[state.selected] !== 0) return;
-        
         saveHistory();
-
         if (state.noteMode && num !== 0) {
             let n = state.notes[state.selected];
             state.notes[state.selected] = n.includes(num) ? n.filter(x => x !== num) : [...n, num].sort();
@@ -275,14 +313,10 @@
                 if (state.settings.vibration) navigator.vibrate?.(20);
             }
         }
-        
-        render();
-        saveToLocal();
-        checkWin();
+        render(); saveToLocal(); checkWin();
     }
 
     function clearAutoNotes(idx, num) {
-        // רכיב מהדרישות: ניקוי הערות אוטומטי בשורה/עמודה/בלוק
         const r = Math.floor(idx/9), c = idx%9;
         const bR = Math.floor(r/3)*3, bC = Math.floor(c/3)*3;
         for(let i=0; i<9; i++) {
@@ -293,34 +327,17 @@
         }
     }
 
-    // --- Persistence ---
-    function saveToLocal() {
-        localStorage.setItem('sudoku_pro_state', JSON.stringify(state));
-    }
+    function saveToLocal() { localStorage.setItem('sudoku_pro_v3_state', JSON.stringify(state)); }
 
     function startNewGame(lvl) {
         state.level = lvl;
         document.getElementById('start-modal').style.display = 'none';
-        
-        let b = Array(81).fill(0);
-        Solver.solve(b);
-        state.solution = [...b];
-        
+        let b = Array(81).fill(0); Solver.solve(b); state.solution = [...b];
         let removed = lvl === 'easy' ? 30 : lvl === 'medium' ? 45 : 55;
-        while(removed > 0) {
-            let i = Math.floor(Math.random()*81);
-            if(b[i] !== 0) { b[i] = 0; removed--; }
-        }
-        
-        state.board = [...b];
-        state.initial = [...b];
-        state.notes = Array.from({length: 81}, () => []);
-        state.time = 0;
-        state.history = [];
-        
-        initGrid();
-        render();
-        startTimer();
+        while(removed > 0) { let i = Math.floor(Math.random()*81); if(b[i] !== 0) { b[i] = 0; removed--; }}
+        state.board = [...b]; state.initial = [...b]; state.notes = Array.from({length: 81}, () => []);
+        state.time = 0; state.history = [];
+        initGrid(); render(); startTimer();
     }
 
     function startTimer() {
@@ -333,69 +350,34 @@
         }, 1000);
     }
 
-    function selectCell(i) {
-        state.selected = i;
-        render();
-    }
-
-    function toggleNoteMode() {
-        state.noteMode = !state.noteMode;
-        document.getElementById('note-toggle').classList.toggle('active', state.noteMode);
-    }
-
-    function undo() {
-        if (state.history.length > 0) {
-            let prev = JSON.parse(state.history.pop());
-            state.board = prev.board;
-            state.notes = prev.notes;
-            render();
-        }
-    }
-
-    function saveHistory() {
-        state.history.push(JSON.stringify({board: [...state.board], notes: JSON.parse(JSON.stringify(state.notes))}));
-        if(state.history.length > 50) state.history.shift();
-    }
-
-    function getHint() {
-        if(state.selected === null) return;
-        saveHistory();
-        state.board[state.selected] = state.solution[state.selected];
-        state.notes[state.selected] = [];
-        render();
-    }
-
-    function eraseCell() {
-        if(state.selected !== null && state.initial[state.selected] === 0) {
-            saveHistory();
-            state.board[state.selected] = 0;
-            state.notes[state.selected] = [];
-            render();
-        }
-    }
+    function selectCell(i) { state.selected = i; render(); }
+    function toggleNoteMode() { state.noteMode = !state.noteMode; document.getElementById('note-toggle').classList.toggle('active', state.noteMode); }
+    function undo() { if (state.history.length > 0) { let prev = JSON.parse(state.history.pop()); state.board = prev.board; state.notes = prev.notes; render(); saveToLocal();}}
+    function saveHistory() { state.history.push(JSON.stringify({board: [...state.board], notes: JSON.parse(JSON.stringify(state.notes))})); if(state.history.length > 50) state.history.shift(); }
+    function getHint() { if(state.selected === null || state.initial[state.selected] !== 0) return; saveHistory(); state.board[state.selected] = state.solution[state.selected]; state.notes[state.selected] = []; render(); saveToLocal(); checkWin(); }
+    function eraseCell() { handleInput(0); }
 
     function resumeGame() {
-        const saved = localStorage.getItem('sudoku_pro_state');
-        if(saved) {
-            state = JSON.parse(saved);
-            document.getElementById('start-modal').style.display = 'none';
-            initGrid();
-            render();
-            startTimer();
-        }
+        const saved = localStorage.getItem('sudoku_pro_v3_state');
+        if(saved) { state = JSON.parse(saved); document.getElementById('start-modal').style.display = 'none'; initGrid(); render(); startTimer(); }
     }
 
+    function toggleSettings() {
+        state.settings.theme = state.settings.theme === 'light' ? 'dark' : 'light';
+        document.body.setAttribute('data-theme', state.settings.theme);
+        saveToLocal();
+    }
+    function toggleStats() { alert("סטטיסטיקות יתווספו בעדכון הבא!"); }
+
     window.onload = () => {
-        if(localStorage.getItem('sudoku_pro_state')) {
-            document.getElementById('resume-box').style.display = 'block';
-        }
+        if(localStorage.getItem('sudoku_pro_v3_state')) { document.getElementById('resume-box').style.display = 'block'; }
+        document.body.setAttribute('data-theme', state.settings.theme);
     };
 
     function checkWin() {
         if(state.board.every((v, i) => v === state.solution[i])) {
-            clearInterval(timerInterval);
-            alert("כל הכבוד! ניצחת!");
-            // עדכון סטטיסטיקות כאן
+            clearInterval(timerInterval); setTimeout(() => alert(`כל הכבוד! סיימת ב-${document.getElementById('timer').innerText}`), 100);
+            localStorage.removeItem('sudoku_pro_v3_state');
         }
     }
 </script>
