@@ -56,8 +56,8 @@
             --cell-user: #e5e5e5;
             --cell-selected: #1e3a5f;
             --cell-highlighted: #2d4a6f;
-            --cell-conflict: #4a1a1a;
-            --cell-error: #dc2626;
+            --cell-conflict: #5a1a1a;
+            --cell-error: #ef4444;
             --accent: #a78bfa;
             --shadow: rgba(0, 0, 0, 0.3);
         }
@@ -269,10 +269,18 @@
 
         .cell.highlighted {
             background: var(--cell-highlighted);
+            box-shadow: inset 0 0 0 2px var(--btn-primary);
         }
 
         .cell.conflict {
             background: var(--cell-conflict);
+            box-shadow: inset 0 0 0 3px var(--cell-error);
+            animation: conflictPulse 0.5s ease-in-out;
+        }
+
+        @keyframes conflictPulse {
+            0%, 100% { box-shadow: inset 0 0 0 3px var(--cell-error); }
+            50% { box-shadow: inset 0 0 0 4px var(--cell-error); }
         }
 
         .cell.wrong {
@@ -1260,6 +1268,16 @@
             updateBoard() {
                 const cells = this.gameBoard.querySelectorAll('.cell');
                 
+                // Get conflicts for selected cell
+                const conflicts = this.game.selectedCell !== null && this.game.engine.board[this.game.selectedCell] !== 0
+                    ? this.getConflicts(this.game.selectedCell)
+                    : [];
+                
+                // Get all cells with same number as selected cell
+                const selectedNumber = this.game.selectedCell !== null 
+                    ? this.game.engine.board[this.game.selectedCell]
+                    : 0;
+                
                 cells.forEach((cell, index) => {
                     cell.className = 'cell';
                     cell.innerHTML = '';
@@ -1272,6 +1290,16 @@
               
                     if (index === this.game.selectedCell) {
                         cell.classList.add('selected');
+                    }
+
+                    // Highlight conflicts (cells that conflict with selected cell)
+                    if (conflicts.includes(index)) {
+                        cell.classList.add('conflict');
+                    }
+
+                    // Highlight cells with same number as selected cell
+                    if (selectedNumber !== 0 && this.game.engine.board[index] === selectedNumber) {
+                        cell.classList.add('highlighted');
                     }
 
                     if (this.game.engine.board[index] !== 0) {
@@ -1289,6 +1317,48 @@
                         cell.appendChild(notesDiv);
                     }
                 });
+            }
+
+            getConflicts(index) {
+                const conflicts = [];
+                const value = this.game.engine.board[index];
+                
+                if (value === 0) return conflicts;
+                
+                const row = Math.floor(index / 9);
+                const col = index % 9;
+                
+                // Check row conflicts
+                for (let i = 0; i < 9; i++) {
+                    const cellIndex = row * 9 + i;
+                    if (cellIndex !== index && this.game.engine.board[cellIndex] === value) {
+                        conflicts.push(cellIndex);
+                    }
+                }
+                
+                // Check column conflicts
+                for (let i = 0; i < 9; i++) {
+                    const cellIndex = i * 9 + col;
+                    if (cellIndex !== index && this.game.engine.board[cellIndex] === value) {
+                        conflicts.push(cellIndex);
+                    }
+                }
+                
+                // Check 3x3 box conflicts
+                const boxRow = Math.floor(row / 3) * 3;
+                const boxCol = Math.floor(col / 3) * 3;
+                for (let i = 0; i < 3; i++) {
+                    for (let j = 0; j < 3; j++) {
+                        const cellIndex = (boxRow + i) * 9 + (boxCol + j);
+                        if (cellIndex !== index && this.game.engine.board[cellIndex] === value) {
+                            if (!conflicts.includes(cellIndex)) {
+                                conflicts.push(cellIndex);
+                            }
+                        }
+                    }
+                }
+                
+                return conflicts;
             }
 
             updateNumberPad() {

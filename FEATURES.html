@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>תכונות חדשות - Sudoku v7.0</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #4A90E2;
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .version {
+            text-align: center;
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 40px;
+        }
+        
+        .feature {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-right: 5px solid #4A90E2;
+        }
+        
+        .feature h2 {
+            color: #333;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .icon {
+            font-size: 1.8em;
+        }
+        
+        .feature p {
+            color: #555;
+            line-height: 1.8;
+            font-size: 1.1em;
+        }
+        
+        .example {
+            background: white;
+            border: 2px dashed #4A90E2;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: monospace;
+        }
+        
+        .conflict-demo {
+            border: 3px solid #ef4444;
+            background: #fee2e2;
+            animation: pulse 1s infinite;
+        }
+        
+        .highlight-demo {
+            border: 2px solid #4A90E2;
+            background: #dbeafe;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            gap: 5px;
+            margin: 15px auto;
+            justify-content: center;
+        }
+        
+        .demo-cell {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .steps {
+            background: #e3f2fd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .steps h3 {
+            color: #1976d2;
+            margin-bottom: 15px;
+        }
+        
+        .steps ol {
+            margin-right: 20px;
+        }
+        
+        .steps li {
+            margin-bottom: 10px;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: #4A90E2;
+            color: white;
+            text-align: center;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 30px;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background: #3b7bc4;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Sudoku Master Ultimate</h1>
+        <div class="version">גרסה 7.0 - PWA Edition</div>
+        
+        <div class="feature">
+            <h2><span class="icon">🔴</span>הדגשת קונפליקטים</h2>
+            <p>
+                כאשר אתה מזין מספר שכבר קיים באותה שורה, עמודה או מרבע 3×3,
+                <strong>המספרים המתנגשים</strong> (לא המספר שהזנת!) יודגשו במסגרת אדומה מהבהבת.
+            </p>
+            
+            <div class="example conflict-demo">
+                <strong>דוגמה:</strong> אם אתה מזין 5 בשורה שכבר יש בה 5, ה-5 הקיימת תודגש באדום
+            </div>
+            
+            <div class="demo-grid">
+                <div class="demo-cell">3</div>
+                <div class="demo-cell conflict-demo">5</div>
+                <div class="demo-cell">7</div>
+                <div class="demo-cell">2</div>
+                <div class="demo-cell" style="background: #bfdbfe; border: 2px solid #4A90E2;">5</div>
+                <div class="demo-cell">1</div>
+                <div class="demo-cell">8</div>
+                <div class="demo-cell">9</div>
+                <div class="demo-cell">4</div>
+            </div>
+            
+            <p style="text-align: center; color: #666; font-size: 0.9em; margin-top: 10px;">
+                ↑ התא הכחול הוא המספר שהזנת, התא האדום הוא הקונפליקט
+            </p>
+        </div>
+        
+        <div class="feature">
+            <h2><span class="icon">🔵</span>הדגשת מספרים זהים</h2>
+            <p>
+                כאשר אתה בוחר תא עם מספר (למשל 7), <strong>כל המספרים 7</strong> בלוח
+                יודגשו במסגרת כחולה. ההדגשה נשארת עד שתבחר תא אחר.
+            </p>
+            
+            <div class="example highlight-demo">
+                <strong>דוגמה:</strong> לחיצה על תא עם 7 → כל ה-7 בלוח מודגשים בכחול
+            </div>
+            
+            <div class="demo-grid">
+                <div class="demo-cell">3</div>
+                <div class="demo-cell highlight-demo">7</div>
+                <div class="demo-cell">2</div>
+                <div class="demo-cell highlight-demo">7</div>
+                <div class="demo-cell" style="background: #bfdbfe; border: 2px solid #4A90E2;">7</div>
+                <div class="demo-cell">1</div>
+                <div class="demo-cell">8</div>
+                <div class="demo-cell highlight-demo">7</div>
+                <div class="demo-cell">4</div>
+            </div>
+            
+            <p style="text-align: center; color: #666; font-size: 0.9em; margin-top: 10px;">
+                ↑ התא הכחול הכהה הוא התא שבחרת, התאים הכחולים הבהירים הם המספרים הזהים
+            </p>
+        </div>
+        
+        <div class="steps">
+            <h3>📝 איך להשתמש בתכונות החדשות:</h3>
+            <ol>
+                <li><strong>זיהוי טעויות:</strong> אם הזנת מספר והתאים האדומים הופיעו - יש קונפליקט! בדוק את המספרים המודגשים.</li>
+                <li><strong>ראיית התמונה הכללית:</strong> לחץ על מספר כלשהו בלוח כדי לראות איפה הוא כבר מופיע.</li>
+                <li><strong>תכנון מהלכים:</strong> השתמש בהדגשה כדי להבין אילו מספרים חסרים באיזורים שונים.</li>
+                <li><strong>למידה:</strong> התכונות עוזרות למתחילים להבין את כללי המשחק טוב יותר.</li>
+            </ol>
+        </div>
+        
+        <a href="index.html" class="btn">🎮 התחל לשחק עכשיו!</a>
+    </div>
+</body>
+</html>
