@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#4A90E2">
-    <title>Sudoku Master Ultimate - V5.9</title>
+    <title>Sudoku Master Ultimate - V6.0</title>
     <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiU3Vkb2t1IE1hc3RlciBVbHRpbWF0ZSIsInNob3J0X25hbWUiOiJTdWRva3UiLCJzdGFydF91cmwiOiIuLyIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmZmZmZmYiLCJ0aGVtZV9jb2xvciI6IiM0QTkwRTIifQ==">
     <style>
         :root {
@@ -515,7 +515,7 @@
     <div class="container">
         <header>
             <h1>Sudoku Master Ultimate</h1>
-            <div class="version">Engine V5.9</div>
+            <div class="version">Engine V6.0</div>
         </header>
 
         <div class="info-bar">
@@ -786,7 +786,7 @@
                 const row = Math.floor(pos / 9);
                 const col = pos % 9;
 
-                // Check row
+                // Check row - only for duplicate numbers, NOT correctness
                 for (let c = 0; c < 9; c++) {
                     const checkPos = row * 9 + c;
                     if (checkPos !== pos && this.board[checkPos] === num) {
@@ -794,7 +794,7 @@
                     }
                 }
 
-                // Check column
+                // Check column - only for duplicate numbers, NOT correctness
                 for (let r = 0; r < 9; r++) {
                     const checkPos = r * 9 + col;
                     if (checkPos !== pos && this.board[checkPos] === num) {
@@ -802,7 +802,7 @@
                     }
                 }
 
-                // Check 3x3 block
+                // Check 3x3 block - only for duplicate numbers, NOT correctness
                 const blockRow = Math.floor(row / 3) * 3;
                 const blockCol = Math.floor(col / 3) * 3;
                 for (let r = blockRow; r < blockRow + 3; r++) {
@@ -951,18 +951,22 @@
                     // This allows users to enter wrong numbers as long as they don't conflict
                     const conflicts = this.engine.getConflicts(pos, num);
                     
+                    console.log(`Attempting to place ${num} at position ${pos}`);
+                    console.log(`Conflicts found:`, conflicts.size > 0 ? Array.from(conflicts) : 'None');
+                    console.log(`Correct answer: ${this.engine.solution[pos]}`);
+                    console.log(`Will allow: ${conflicts.size === 0 ? 'YES' : 'NO'}`);
+                    
                     if (conflicts.size > 0) {
                         // Conflict found - do NOT allow placement
-                        this.audio.playError();
+                        console.log('BLOCKED: Conflict with existing numbers');
                         return { success: false, conflicts: Array.from(conflicts) };
                     }
 
                     // No conflict - allow placement (even if wrong answer)
-                    // Wrong answers will be shown in orange color
+                    console.log('ALLOWED: No conflicts, placing number');
                     this.engine.board[pos] = num;
                     this.engine.notes[pos].clear();
                     this.saveSnapshot();
-                    this.audio.playInput();
                     this.saveGame();
 
                     // Check for win (all cells correct)
