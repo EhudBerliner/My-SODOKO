@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cube Sudoku Pro V4.7 - Full Engine</title>
+    <title>Cube Sudoku Pro V4.8</title>
     
     <style>
         :root {
             --bg: #f0f4f8; --surface: #ffffff; --text: #0f172a;
             --primary: #4A90E2; --accent: #8b5cf6;
-            --grid-gap: #94a3b8; --grid-bold: #1e293b;
+            --grid-gap: #94a3b8; --grid-bold: #000000; /* שחור מודגש למטריצה */
             --selected: #dbeafe; --error: #ef4444;
             --conflict: #fecaca; --fixed: #475569; --note: #64748b;
         }
         [data-theme="dark"] {
             --bg: #0f172a; --surface: #1e293b; --text: #f8fafc;
-            --grid-gap: #334155; --grid-bold: #f8fafc;
+            --grid-gap: #334155; --grid-bold: #ffffff;
             --selected: #1e40af; --conflict: #7f1d1d; --fixed: #94a3b8;
         }
 
@@ -26,26 +26,34 @@
             height: 100vh; overflow: hidden; user-select: none;
         }
 
-        .top-bar { width: 95vw; max-width: 450px; display: flex; justify-content: space-between; padding: 10px 0; }
+        .header-title { font-weight: 900; font-size: 1.2rem; color: var(--primary); margin: 5px 0; }
+
+        .top-bar { width: 95vw; max-width: 450px; display: flex; justify-content: space-between; align-items: center; padding: 5px 0; }
         .icon-btn { font-size: 1.4rem; cursor: pointer; padding: 5px; }
 
-        .timer-box { font-variant-numeric: tabular-nums; font-weight: 800; font-size: 1.6rem; color: var(--primary); background: var(--surface); padding: 4px 16px; border-radius: 12px; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .timer-box { font-variant-numeric: tabular-nums; font-weight: 800; font-size: 1.6rem; color: var(--primary); background: var(--surface); padding: 4px 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 
+        /* --- Grid Structure V4.8 --- */
         #grid {
             display: grid; grid-template-columns: repeat(9, 1fr);
-            width: 94vw; max-width: 440px; aspect-ratio: 1/1;
-            background: var(--grid-gap); gap: 1px;
-            border: 3px solid var(--grid-bold); border-radius: 4px; outline: none;
+            width: 92vw; max-width: 440px; aspect-ratio: 1/1;
+            background: var(--grid-gap); 
+            border: 3px solid var(--grid-bold);
+            outline: none;
         }
         .cell {
             background: var(--surface); display: flex; align-items: center; justify-content: center;
-            font-size: 1.5rem; font-weight: bold; position: relative; transition: background 0.1s;
+            font-size: 1.5rem; font-weight: bold; position: relative;
+            border: 0.1px solid rgba(0,0,0,0.05); /* קו דק פנימי */
         }
-        /* Thick borders for 3x3 */
-        .cell:nth-child(3n):not(:nth-child(9n)) { border-right: 2px solid var(--grid-bold); }
-        .cell:nth-child(n+19):nth-child(-n+27), .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 2px solid var(--grid-bold); }
 
-        .cell.selected { background: var(--selected) !important; }
+        /* עיצוב גבולות עבים למטריצת 3x3 */
+        .cell:nth-child(3n) { border-right: 2px solid var(--grid-bold); }
+        .cell:nth-child(9n) { border-right: none; }
+        .cell:nth-child(n+19):nth-child(-n+27),
+        .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 2px solid var(--grid-bold); }
+
+        .cell.selected { background: var(--selected) !important; box-shadow: inset 0 0 0 2px var(--primary); }
         .cell.conflict-blink { background: var(--conflict) !important; color: var(--error); animation: pulse 0.4s 2; }
         .cell.fixed { color: var(--fixed); background: rgba(0,0,0,0.02); }
         .cell.err { color: var(--error); }
@@ -53,22 +61,25 @@
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
 
         .notes-grid { display: grid; grid-template-columns: repeat(3, 1fr); width: 100%; height: 100%; padding: 2px; box-sizing: border-box; }
-        .note { font-size: 0.6rem; color: var(--note); display: flex; align-items: center; justify-content: center; }
+        .note { font-size: 0.55rem; color: var(--note); display: flex; align-items: center; justify-content: center; line-height: 1; }
 
-        .numpad { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; width: 94vw; max-width: 440px; margin: 15px 0; }
-        .num-btn { background: var(--surface); border: 1px solid var(--grid-gap); height: 52px; border-radius: 10px; font-size: 1.4rem; font-weight: bold; color: var(--text); cursor: pointer; }
+        .numpad { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; width: 92vw; max-width: 440px; margin: 12px 0; }
+        .num-btn { background: var(--surface); border: 1px solid var(--grid-gap); height: 50px; border-radius: 8px; font-size: 1.3rem; font-weight: bold; color: var(--text); cursor: pointer; }
         .num-btn:active { background: var(--primary); color: white; }
 
-        .toolbar { display: flex; gap: 8px; width: 94vw; max-width: 440px; justify-content: space-between; }
-        .tool-btn { flex: 1; padding: 8px 0; border-radius: 10px; border: 1px solid var(--grid-gap); background: var(--surface); color: var(--text); font-size: 0.7rem; font-weight: 600; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
-        .tool-btn.active { background: var(--primary); color: white; }
+        .toolbar { display: flex; gap: 6px; width: 92vw; max-width: 440px; justify-content: space-between; }
+        .tool-btn { flex: 1; padding: 8px 0; border-radius: 8px; border: 1px solid var(--grid-gap); background: var(--surface); color: var(--text); font-size: 0.7rem; font-weight: 600; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .tool-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(5px); }
-        .modal-content { background: var(--surface); padding: 30px; border-radius: 20px; width: 80%; max-width: 380px; text-align: center; }
+        /* Modals */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); }
+        .modal-content { background: var(--surface); padding: 25px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
         .m-btn { width: 100%; padding: 14px; margin: 8px 0; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: bold; cursor: pointer; background: var(--primary); color: white; }
     </style>
 </head>
 <body data-theme="light">
+
+    <div class="header-title">Cube Sudoku Pro V4.8</div>
 
     <div class="top-bar">
         <span class="icon-btn" onclick="openModal('settings-modal')">⚙️</span>
@@ -80,33 +91,26 @@
 
     <div class="numpad">
         <script>for(let i=1; i<=9; i++) document.write(`<button class="num-btn" onclick="game.handleInput(${i})">${i}</button>`);</script>
-        <button class="num-btn" onclick="game.handleInput(0)" style="color:var(--error)">✖️</button>
+        <button class="num-btn" onclick="game.handleInput(0)" style="color:var(--error)">✖</button>
     </div>
 
     <div class="toolbar">
-        <button class="tool-btn" onclick="game.undo()"><span>↩️</span>Undo</button>
-        <button class="tool-btn" onclick="game.redo()"><span>↪️</span>Redo</button>
-        <button class="tool-btn" id="note-toggle" onclick="game.toggleNotes()"><span>✏️</span>Notes</button>
-        <button class="tool-btn" id="hi-toggle" onclick="game.toggleHighlight()"><span>🔦</span>סימון</button>
+        <button class="tool-btn" onclick="game.undo()"><span>↩</span>Undo</button>
+        <button class="tool-btn" onclick="game.redo()"><span>↪</span>Redo</button>
+        <button class="tool-btn" id="note-toggle" onclick="game.toggleNotes()"><span>✏</span>Notes</button>
+        <button class="tool-btn" id="hi-toggle" onclick="game.toggleHighlight()"><span>🔦</span>Highlight</button>
         <button class="tool-btn" onclick="game.getHint()"><span>💡</span>Hint</button>
     </div>
 
     <div id="start-modal" class="modal" style="display: flex;">
         <div class="modal-content">
-            <img src="logo.jpg" style="width:70px; border-radius:15px; margin-bottom:15px;">
-            <h2>Cube Sudoku Pro V4.7</h2>
+            <img src="logo.jpg" style="width:60px; border-radius:12px; margin-bottom:10px;">
+            <h2 style="margin:10px 0;">סודוקו פרו V4.8</h2>
             <div id="resume-box" style="display:none"><button class="m-btn" style="background:var(--accent)" onclick="game.resume()">המשך משחק</button><hr style="opacity:0.2"></div>
+            <p>רמת קושי:</p>
             <button class="m-btn" onclick="game.newGame('easy')">קל</button>
             <button class="m-btn" onclick="game.newGame('medium')">בינוני</button>
             <button class="m-btn" onclick="game.newGame('hard')">קשה</button>
-        </div>
-    </div>
-
-    <div id="stats-modal" class="modal">
-        <div class="modal-content">
-            <h3>סטטיסטיקה</h3>
-            <div id="stats-view" style="text-align:right; margin:20px 0; line-height:2;"></div>
-            <button class="m-btn" onclick="closeModal('stats-modal')">סגור</button>
         </div>
     </div>
 
@@ -121,20 +125,26 @@
         </div>
     </div>
 
+    <div id="stats-modal" class="modal">
+        <div class="modal-content">
+            <h3>סטטיסטיקה</h3>
+            <div id="stats-view" style="text-align:right; margin:15px 0;"></div>
+            <button class="m-btn" onclick="closeModal('stats-modal')">סגור</button>
+        </div>
+    </div>
+
     <script>
-        // --- Sound Engine ---
         const AudioEngine = {
             ctx: new (window.AudioContext || window.webkitAudioContext)(),
-            play(freq, type="sine", dur=0.15) {
+            play(freq, type="sine", dur=0.12) {
                 if(!game.state.settings.sound) return;
                 const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-                o.type = type; o.frequency.value = freq; g.gain.setValueAtTime(0.1, this.ctx.currentTime);
+                o.type = type; o.frequency.value = freq; g.gain.setValueAtTime(0.05, this.ctx.currentTime);
                 g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + dur);
                 o.connect(g); g.connect(this.ctx.destination); o.start(); o.stop(this.ctx.currentTime + dur);
             }
         };
 
-        // --- Solver Engine (Backtracking) ---
         const Solver = {
             isValid(b, idx, n) {
                 let r = Math.floor(idx/9), c = idx%9, br = Math.floor(r/3)*3, bc = Math.floor(c/3)*3;
@@ -145,33 +155,32 @@
                 }
                 return true;
             },
-            solve(board, countLimit = 1) {
-                let count = 0, found = null;
+            solve(board, limit = 1) {
+                let count = 0, solution = null;
                 const solveInner = (b) => {
                     let idx = b.indexOf(0);
-                    if(idx === -1) { count++; found = [...b]; return true; }
+                    if(idx === -1) { count++; solution = [...b]; return true; }
                     for(let n=1; n<=9; n++) {
                         if(this.isValid(b, idx, n)) {
                             b[idx] = n;
-                            if(solveInner(b) && count >= countLimit) return true;
+                            if(solveInner(b) && count >= limit) return true;
                             b[idx] = 0;
                         }
                     }
                     return false;
                 };
                 solveInner([...board]);
-                return countLimit === 1 ? found : count;
+                return limit === 1 ? solution : count;
             }
         };
 
-        // --- Game Class ---
         class SudokuPro {
             constructor() {
                 this.state = {
                     board: [], initial: [], solution: [], notes: Array(81).fill().map(()=>[]),
                     history: [], redo: [], selected: 0, noteMode: false, highlight: true,
                     conflicts: [], time: 0, settings: { sound: true, dark: false },
-                    stats: JSON.parse(localStorage.getItem('cube_stats_v47') || '{"wins":0, "best":9999}')
+                    stats: JSON.parse(localStorage.getItem('cube_stats_v48') || '{"wins":0, "best":9999}')
                 };
                 this.timerInterval = null;
                 this.initUI();
@@ -180,12 +189,12 @@
 
             initUI() {
                 const grid = document.getElementById('grid');
+                grid.innerHTML = '';
                 for(let i=0; i<81; i++) {
                     const c = document.createElement('div'); c.className = 'cell';
                     c.onclick = () => this.select(i); grid.appendChild(c);
                 }
-                document.getElementById('hi-toggle').classList.add('active');
-                if(localStorage.getItem('cube_save_v47')) document.getElementById('resume-box').style.display='block';
+                if(localStorage.getItem('cube_save_v48')) document.getElementById('resume-box').style.display='block';
             }
 
             initKeyboard() {
@@ -211,24 +220,21 @@
                     let bi = (br + Math.floor(i/3))*9 + (bc + i%3);
                     if(this.state.board[bi] === n) conflicts.push(bi);
                 }
-                return [...new Set(conflicts)].filter(i => i !== idx);
+                return [...new Set(conflicts)].filter(x => x !== idx);
             }
 
             newGame(lvl) {
                 closeModal('start-modal');
                 let b = Array(81).fill(0), seeds = [1,2,3,4,5,6,7,8,9].sort(()=>Math.random()-0.5);
-                for(let i=0; i<9; i++) b[i] = seeds[i];
+                for(let i=0; i<9; i++) b[0*9+i] = seeds[i];
                 this.state.solution = Solver.solve(b);
-                
                 let gameBoard = [...this.state.solution], indices = Array.from({length:81}, (_,i)=>i).sort(()=>Math.random()-0.5);
-                let holes = {easy: 30, medium: 45, hard: 55}[lvl];
-                
+                let holes = {easy: 32, medium: 46, hard: 54}[lvl];
                 for(let i of indices) {
                     if(holes <= 0) break;
                     let temp = gameBoard[i]; gameBoard[i] = 0;
                     if(Solver.solve(gameBoard, 2) === 1) holes--; else gameBoard[i] = temp;
                 }
-                
                 this.state.board = [...gameBoard]; this.state.initial = [...gameBoard];
                 this.state.notes = Array(81).fill().map(()=>[]);
                 this.state.time = 0; this.state.history = []; this.render(); this.startTimer();
@@ -238,31 +244,24 @@
 
             handleInput(n) {
                 const idx = this.state.selected;
-                if(idx === null || this.state.initial[idx] !== 0) return;
-
+                if(this.state.initial[idx] !== 0) return;
                 if(n !== 0 && !this.state.noteMode) {
                     const conflicts = this.getConflicts(idx, n);
                     if(conflicts.length > 0) {
                         this.state.conflicts = conflicts; this.render();
-                        AudioEngine.play(100, "sawtooth", 0.4);
-                        setTimeout(() => { this.state.conflicts = []; this.render(); }, 800);
-                        return; // חסימת הזנה מתנגשת
+                        AudioEngine.play(120, "sawtooth", 0.4);
+                        setTimeout(() => { this.state.conflicts = []; this.render(); }, 700);
+                        return;
                     }
                 }
-
-                // Push to History
                 this.state.history.push(JSON.stringify({b: this.state.board, n: this.state.notes}));
                 this.state.redo = [];
-
                 if(this.state.noteMode && n !== 0) {
                     let cn = this.state.notes[idx];
                     this.state.notes[idx] = cn.includes(n) ? cn.filter(x=>x!==n) : [...cn, n].sort();
                 } else {
                     this.state.board[idx] = n;
-                    if(n !== 0) {
-                        if(n !== this.state.solution[idx]) AudioEngine.play(150, "square", 0.2);
-                        else AudioEngine.play(660, "sine", 0.1);
-                    }
+                    if(n !== 0) AudioEngine.play(n === this.state.solution[idx] ? 600 : 200);
                 }
                 this.render(); this.save(); this.checkWin();
             }
@@ -270,7 +269,10 @@
             render() {
                 const cells = document.querySelectorAll('.cell');
                 cells.forEach((c, i) => {
-                    c.className = 'cell' + (this.state.initial[i]!==0?' fixed':'') + (this.state.highlight && this.state.selected===i?' selected':'') + (this.state.conflicts.includes(i)?' conflict-blink':'');
+                    c.className = 'cell';
+                    if(this.state.initial[i]!==0) c.classList.add('fixed');
+                    if(this.state.highlight && this.state.selected===i) c.classList.add('selected');
+                    if(this.state.conflicts.includes(i)) c.classList.add('conflict-blink');
                     let val = this.state.board[i];
                     if(val !== 0) {
                         c.innerText = val;
@@ -283,35 +285,16 @@
                 });
             }
 
-            undo() { if(!this.state.history.length) return; this.state.redo.push(JSON.stringify({b: this.state.board, n: this.state.notes})); let prev = JSON.parse(this.state.history.pop()); this.state.board = prev.b; this.state.notes = prev.n; this.render(); }
-            redo() { if(!this.state.redo.length) return; this.state.history.push(JSON.stringify({b: this.state.board, n: this.state.notes})); let next = JSON.parse(this.state.redo.pop()); this.state.board = next.b; this.state.notes = next.n; this.render(); }
+            undo() { if(!this.state.history.length) return; this.state.redo.push(JSON.stringify({b: this.state.board, n: this.state.notes})); let p = JSON.parse(this.state.history.pop()); this.state.board = p.b; this.state.notes = p.n; this.render(); }
+            redo() { if(!this.state.redo.length) return; this.state.history.push(JSON.stringify({b: this.state.board, n: this.state.notes})); let n = JSON.parse(this.state.redo.pop()); this.state.board = n.b; this.state.notes = n.n; this.render(); }
             toggleNotes() { this.state.noteMode = !this.state.noteMode; document.getElementById('note-toggle').classList.toggle('active', this.state.noteMode); }
             toggleHighlight() { this.state.highlight = !this.state.highlight; document.getElementById('hi-toggle').classList.toggle('active', this.state.highlight); this.render(); }
-            getHint() { if(this.state.selected !== null) { this.state.board[this.state.selected] = this.state.solution[this.state.selected]; this.render(); } }
-            
-            startTimer() {
-                if(this.timerInterval) clearInterval(this.timerInterval);
-                this.timerInterval = setInterval(() => {
-                    this.state.time++;
-                    let m = Math.floor(this.state.time/60).toString().padStart(2,'0'), s = (this.state.time%60).toString().padStart(2,'0');
-                    document.getElementById('timer').innerText = `${m}:${s}`;
-                }, 1000);
-            }
-
-            save() { localStorage.setItem('cube_save_v47', JSON.stringify(this.state)); }
-            resume() { let s = JSON.parse(localStorage.getItem('cube_save_v47')); if(s) { this.state = s; closeModal('start-modal'); this.updateSettings(); this.render(); this.startTimer(); } }
+            getHint() { this.state.board[this.state.selected] = this.state.solution[this.state.selected]; this.render(); }
+            startTimer() { if(this.timerInterval) clearInterval(this.timerInterval); this.timerInterval = setInterval(() => { this.state.time++; let m = Math.floor(this.state.time/60).toString().padStart(2,'0'), s = (this.state.time%60).toString().padStart(2,'0'); document.getElementById('timer').innerText = `${m}:${s}`; }, 1000); }
+            save() { localStorage.setItem('cube_save_v48', JSON.stringify(this.state)); }
+            resume() { let s = JSON.parse(localStorage.getItem('cube_save_v48')); if(s) { this.state = s; closeModal('start-modal'); this.updateSettings(); this.render(); this.startTimer(); } }
             updateSettings() { this.state.settings.dark = document.getElementById('set-dark').checked; this.state.settings.sound = document.getElementById('set-sound').checked; document.body.setAttribute('data-theme', this.state.settings.dark ? 'dark' : 'light'); }
-
-            checkWin() {
-                if(this.state.board.every((v,i)=>v === this.state.solution[i] && v !== 0)) {
-                    clearInterval(this.timerInterval);
-                    this.state.stats.wins++;
-                    if(this.state.time < this.state.stats.best) this.state.stats.best = this.state.time;
-                    localStorage.setItem('cube_stats_v47', JSON.stringify(this.state.stats));
-                    localStorage.removeItem('cube_save_v47');
-                    alert("ניצחת!");
-                }
-            }
+            checkWin() { if(this.state.board.every((v,i)=>v === this.state.solution[i] && v !== 0)) { clearInterval(this.timerInterval); alert("ניצחת!"); } }
         }
 
         const game = new SudokuPro();
@@ -324,9 +307,8 @@
         }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-        // --- Service Worker (Offline) ---
         if ('serviceWorker' in navigator) {
-            const sw = `const C='v47';self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(['./','index.html','logo.jpg']))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
+            const sw = `const C='v48';self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(['./','index.html','logo.jpg']))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
             navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'text/javascript'})));
         }
     </script>
