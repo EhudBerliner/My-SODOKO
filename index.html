@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cube Sudoku Pro - Ultimate Edition</title>
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Cube Sudoku Pro - Clean Edition</title>
     
     <style>
         :root {
@@ -17,11 +15,10 @@
             --grid-line: #cbd5e1;
             --grid-bold: #1e293b;
             --selected: #dbeafe;
-            --same-num: #fef08a;
             --error: #ef4444;
             --fixed: #64748b;
             --note: #94a3b8;
-            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition: 0.15s ease;
         }
 
         [data-theme="dark"] {
@@ -31,8 +28,6 @@
             --grid-line: #334155;
             --grid-bold: #f8fafc;
             --selected: #1e40af;
-            --same-num: #854d0e;
-            --fixed: #94a3b8;
         }
 
         body {
@@ -42,7 +37,7 @@
             height: 100vh; overflow: hidden; user-select: none;
         }
 
-        /* --- Header & Stats --- */
+        /* --- Header --- */
         .top-nav {
             width: 100%; max-width: 450px; padding: 15px;
             display: flex; justify-content: space-between; align-items: center;
@@ -51,17 +46,11 @@
         .timer-display {
             font-variant-numeric: tabular-nums;
             font-size: 1.6rem; font-weight: 800; color: var(--primary);
-            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
-        .icon-btn { font-size: 1.4rem; cursor: pointer; padding: 5px; transition: var(--transition); }
-        .icon-btn:hover { transform: scale(1.1); }
+        .icon-btn { font-size: 1.4rem; cursor: pointer; padding: 5px; }
 
         /* --- Sudoku Grid --- */
-        .grid-container {
-            position: relative;
-            margin: 10px 0;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-        }
+        .grid-container { position: relative; margin: 10px 0; }
         #grid {
             display: grid; grid-template-columns: repeat(9, 1fr);
             width: 92vw; max-width: 420px; aspect-ratio: 1/1;
@@ -71,23 +60,16 @@
         .cell {
             background: var(--surface); display: flex; align-items: center; justify-content: center;
             font-size: 1.5rem; font-weight: 700; cursor: pointer; position: relative;
-            transition: background var(--transition);
         }
+        
         /* Block Borders */
         .cell:nth-child(3n):not(:nth-child(9n)) { border-left: 2px solid var(--grid-bold); }
         .cell:nth-child(n+19):nth-child(-n+27), .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 2px solid var(--grid-bold); }
         
         /* Cell States */
         .cell.selected { background: var(--selected) !important; }
-        .cell.same-val { background: var(--same-num); }
         .cell.fixed { color: var(--fixed); background: rgba(0,0,0,0.02); }
-        .cell.err { color: var(--error); animation: shake 0.3s; }
-        
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-2px); }
-            75% { transform: translateX(2px); }
-        }
+        .cell.err { color: var(--error); }
 
         /* Notes Display */
         .notes-grid { display: grid; grid-template-columns: repeat(3, 1fr); width: 100%; height: 100%; pointer-events: none; padding: 2px; box-sizing: border-box; }
@@ -102,20 +84,18 @@
             background: var(--surface); border: 1px solid var(--grid-line);
             height: 55px; border-radius: 12px; font-size: 1.5rem; font-weight: 800;
             color: var(--text); cursor: pointer; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            transition: all 0.1s;
         }
-        .num-btn:active { transform: translateY(2px); box-shadow: none; background: var(--primary); color: white; }
+        .num-btn:active { background: var(--primary); color: white; transform: translateY(2px); }
 
         .toolbar {
-            display: flex; gap: 8px; width: 92vw; max-width: 420px;
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; width: 92vw; max-width: 420px;
         }
         .tool-btn {
-            flex: 1; padding: 10px 5px; border-radius: 12px; border: 1px solid var(--grid-line);
-            background: var(--surface); color: var(--text); font-size: 0.75rem; font-weight: 600;
+            padding: 10px 2px; border-radius: 10px; border: 1px solid var(--grid-line);
+            background: var(--surface); color: var(--text); font-size: 0.65rem; font-weight: 600;
             display: flex; flex-direction: column; align-items: center; cursor: pointer;
-            transition: var(--transition);
         }
-        .tool-btn span { font-size: 1.3rem; margin-bottom: 4px; }
+        .tool-btn span { font-size: 1.2rem; margin-bottom: 2px; }
         .tool-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
         /* --- Modals --- */
@@ -130,15 +110,9 @@
         }
         .modal-btn {
             width: 100%; padding: 15px; margin: 8px 0; border: none; border-radius: 12px;
-            font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: 0.2s;
+            font-size: 1.1rem; font-weight: 700; cursor: pointer;
         }
         .btn-primary { background: var(--primary); color: white; }
-        .btn-secondary { background: var(--secondary); color: white; }
-
-        /* Stats & Achievements */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
-        .stat-card { background: var(--bg); padding: 15px; border-radius: 12px; }
-        .stat-val { display: block; font-size: 1.2rem; font-weight: 800; color: var(--primary); }
     </style>
 </head>
 <body data-theme="light">
@@ -154,34 +128,31 @@
     </div>
 
     <div class="numpad" id="numpad">
-        <button class="num-btn" onclick="handleInput(1)">1</button>
-        <button class="num-btn" onclick="handleInput(2)">2</button>
-        <button class="num-btn" onclick="handleInput(3)">3</button>
-        <button class="num-btn" onclick="handleInput(4)">4</button>
-        <button class="num-btn" onclick="handleInput(5)">5</button>
-        <button class="num-btn" onclick="handleInput(6)">6</button>
-        <button class="num-btn" onclick="handleInput(7)">7</button>
-        <button class="num-btn" onclick="handleInput(8)">8</button>
-        <button class="num-btn" onclick="handleInput(9)">9</button>
-        <button class="num-btn" onclick="handleInput(0)" style="color:var(--error)">✖️</button>
+        <button class="num-btn" onclick="game.handleInput(1)">1</button>
+        <button class="num-btn" onclick="game.handleInput(2)">2</button>
+        <button class="num-btn" onclick="game.handleInput(3)">3</button>
+        <button class="num-btn" onclick="game.handleInput(4)">4</button>
+        <button class="num-btn" onclick="game.handleInput(5)">5</button>
+        <button class="num-btn" onclick="game.handleInput(6)">6</button>
+        <button class="num-btn" onclick="game.handleInput(7)">7</button>
+        <button class="num-btn" onclick="game.handleInput(8)">8</button>
+        <button class="num-btn" onclick="game.handleInput(9)">9</button>
+        <button class="num-btn" onclick="game.handleInput(0)" style="color:var(--error)">✖️</button>
     </div>
 
     <div class="toolbar">
         <button class="tool-btn" onclick="game.undo()"><span>↩️</span>Undo</button>
         <button class="tool-btn" onclick="game.redo()"><span>↪️</span>Redo</button>
         <button class="tool-btn" id="note-toggle" onclick="game.toggleNoteMode()"><span>✏️</span>Notes</button>
+        <button class="tool-btn" id="highlight-toggle" onclick="game.toggleHighlight()"><span>🔦</span>סימון</button>
         <button class="tool-btn" onclick="game.advancedHint()"><span>💡</span>Hint</button>
     </div>
 
     <div id="start-modal" class="modal" style="display: flex;">
         <div class="modal-content">
-            <img src="logo.jpg" style="width:100px; border-radius: 20px; margin-bottom:15px;" alt="Logo">
+            <img src="logo.jpg" style="width:80px; border-radius:15px; margin-bottom:10px;" alt="Logo">
             <h2>Cube Sudoku Pro</h2>
-            <div id="resume-container" style="display:none">
-                <button class="modal-btn btn-secondary" onclick="game.resume()">המשך משחק</button>
-                <hr style="opacity:0.2; margin: 15px 0;">
-            </div>
-            <p>בחר רמת קושי למשחק חדש:</p>
+            <p>בחר רמת קושי:</p>
             <button class="modal-btn btn-primary" onclick="game.start('easy')">קל</button>
             <button class="modal-btn btn-primary" onclick="game.start('medium')">בינוני</button>
             <button class="modal-btn btn-primary" onclick="game.start('hard')">קשה</button>
@@ -193,7 +164,6 @@
             <h3>הגדרות</h3>
             <div style="text-align:right">
                 <label><input type="checkbox" id="set-sound" checked onchange="game.updateSettings()"> צלילים</label><br><br>
-                <label><input type="checkbox" id="set-vibrate" checked onchange="game.updateSettings()"> רטט</label><br><br>
                 <label><input type="checkbox" id="set-dark" onchange="game.updateSettings()"> מצב לילה</label>
             </div>
             <button class="modal-btn btn-primary" onclick="closeModal('settings-modal')">סגור</button>
@@ -202,23 +172,15 @@
 
     <div id="stats-modal" class="modal">
         <div class="modal-content">
-            <h3>הישגים וסטטיסטיקה</h3>
-            <div class="stats-grid">
-                <div class="stat-card"><span class="stat-val" id="stat-wins">0</span>ניצחונות</div>
-                <div class="stat-card"><span class="stat-val" id="stat-best">--:--</span>זמן שיא</div>
-            </div>
-            <div id="achievements" style="font-size:0.9rem; text-align:right;"></div>
+            <h3>סטטיסטיקה</h3>
+            <div id="stat-wins-text">ניצחונות: 0</div>
             <button class="modal-btn btn-primary" onclick="closeModal('stats-modal')">סגור</button>
         </div>
     </div>
 
     <script>
-        /** * Cube Sudoku Engine v4.0
-         * Includes Unique Solver, Audio, History, and State persistence.
-         */
-
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        
+
         const Solver = {
             isValid(b, i, n) {
                 const r = Math.floor(i/9), c = i%9, br = Math.floor(r/3)*3, bc = Math.floor(c/3)*3;
@@ -230,8 +192,7 @@
                 return true;
             },
             solve(board, findMultiple = false) {
-                let count = 0;
-                let result = null;
+                let count = 0; let result = null;
                 const solveInternal = (b) => {
                     const idx = b.indexOf(0);
                     if(idx === -1) { count++; result = [...b]; return true; }
@@ -255,8 +216,9 @@
                 this.state = {
                     board: [], initial: [], solution: [], notes: Array(81).fill().map(()=>[]),
                     history: [], redoStack: [], selected: null, noteMode: false,
-                    time: 0, level: 'medium', settings: { sound: true, vibrate: true, dark: false },
-                    stats: JSON.parse(localStorage.getItem('cube_stats') || '{"wins":0, "best":9999, "streak":0}')
+                    uiHighlight: true, // ההגדרה החדשה לסימון UI
+                    time: 0, settings: { sound: true, dark: false },
+                    stats: JSON.parse(localStorage.getItem('cube_stats') || '{"wins":0}')
                 };
                 this.timer = null;
                 this.init();
@@ -270,69 +232,51 @@
                     cell.onclick = () => this.select(i);
                     grid.appendChild(cell);
                 }
-                if(localStorage.getItem('cube_save')) document.getElementById('resume-container').style.display='block';
+                document.getElementById('highlight-toggle').classList.add('active');
             }
 
             start(level) {
-                this.state.level = level;
                 closeModal('start-modal');
-                
-                // 1. Generate full board
                 let full = Array(81).fill(0);
-                // Randomize first row to ensure different puzzles
                 let nums = [1,2,3,4,5,6,7,8,9].sort(()=>Math.random()-0.5);
                 for(let i=0; i<9; i++) full[i] = nums[i];
                 this.state.solution = Solver.solve(full);
 
-                // 2. Dig holes while maintaining uniqueness
                 let board = [...this.state.solution];
                 let indices = Array.from({length:81}, (_,i)=>i).sort(()=>Math.random()-0.5);
                 let holes = {easy: 35, medium: 45, hard: 55}[level];
-                
                 for(let idx of indices) {
                     if(holes <= 0) break;
-                    let temp = board[idx];
-                    board[idx] = 0;
-                    if(Solver.solve(board, true) === 1) holes--;
-                    else board[idx] = temp;
+                    let temp = board[idx]; board[idx] = 0;
+                    if(Solver.solve(board, true) === 1) holes--; else board[idx] = temp;
                 }
-
                 this.state.board = [...board];
                 this.state.initial = [...board];
-                this.state.notes = Array.from({length: 81}, () => []);
-                this.state.time = 0;
-                this.state.history = [];
                 this.render();
                 this.startTimer();
             }
 
             select(i) {
                 this.state.selected = i;
-                this.playSound(440, 0.05);
+                this.render();
+            }
+
+            toggleHighlight() {
+                this.state.uiHighlight = !this.state.uiHighlight;
+                document.getElementById('highlight-toggle').classList.toggle('active', this.state.uiHighlight);
                 this.render();
             }
 
             handleInput(n) {
                 if(this.state.selected === null || this.state.initial[this.state.selected] !== 0) return;
-                
                 this.pushHistory();
-
                 if(this.state.noteMode && n !== 0) {
-                    let cellNotes = this.state.notes[this.state.selected];
-                    this.state.notes[this.state.selected] = cellNotes.includes(n) ? cellNotes.filter(x=>x!==n) : [...cellNotes, n].sort();
+                    let cn = this.state.notes[this.state.selected];
+                    this.state.notes[this.state.selected] = cn.includes(n) ? cn.filter(x=>x!==n) : [...cn, n].sort();
                 } else {
                     this.state.board[this.state.selected] = n;
-                    if(n !== 0) {
-                        if(n !== this.state.solution[this.state.selected]) {
-                            this.playSound(150, 0.2, 'square');
-                            if(this.state.settings.vibrate) navigator.vibrate?.(100);
-                        } else {
-                            this.playSound(660, 0.1);
-                        }
-                    }
                 }
                 this.render();
-                this.save();
                 this.checkWin();
             }
 
@@ -364,9 +308,7 @@
 
             advancedHint() {
                 if(this.state.selected === null) return;
-                this.pushHistory();
                 this.state.board[this.state.selected] = this.state.solution[this.state.selected];
-                this.state.notes[this.state.selected] = [];
                 this.render();
             }
 
@@ -375,12 +317,13 @@
                 cells.forEach((cell, i) => {
                     cell.className = 'cell';
                     if(this.state.initial[i] !== 0) cell.classList.add('fixed');
-                    if(this.state.selected === i) cell.classList.add('selected');
+                    
+                    // בדיקה אם סימון ה-UI מופעל ואם התא נבחר
+                    if(this.state.uiHighlight && this.state.selected === i) {
+                        cell.classList.add('selected');
+                    }
                     
                     const val = this.state.board[i];
-                    const selectedVal = this.state.board[this.state.selected];
-                    if(selectedVal !== 0 && val === selectedVal) cell.classList.add('same-val');
-
                     if(val !== 0) {
                         cell.innerText = val;
                         if(this.state.initial[i] === 0 && val !== this.state.solution[i]) cell.classList.add('err');
@@ -397,17 +340,6 @@
                 return html + '</div>';
             }
 
-            playSound(freq, duration, type='sine') {
-                if(!this.state.settings.sound) return;
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = type; osc.frequency.value = freq;
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(); osc.stop(audioCtx.currentTime + duration);
-            }
-
             startTimer() {
                 if(this.timer) clearInterval(this.timer);
                 this.timer = setInterval(() => {
@@ -419,66 +351,22 @@
             }
 
             updateSettings() {
-                this.state.settings.sound = document.getElementById('set-sound').checked;
-                this.state.settings.vibrate = document.getElementById('set-vibrate').checked;
                 this.state.settings.dark = document.getElementById('set-dark').checked;
                 document.body.setAttribute('data-theme', this.state.settings.dark ? 'dark' : 'light');
-                this.save();
-            }
-
-            save() {
-                localStorage.setItem('cube_save', JSON.stringify(this.state));
-            }
-
-            resume() {
-                const saved = JSON.parse(localStorage.getItem('cube_save'));
-                if(saved) {
-                    this.state = saved;
-                    document.body.setAttribute('data-theme', this.state.settings.dark ? 'dark' : 'light');
-                    document.getElementById('set-dark').checked = this.state.settings.dark;
-                    closeModal('start-modal');
-                    this.render();
-                    this.startTimer();
-                }
             }
 
             checkWin() {
                 if(this.state.board.every((v,i) => v === this.state.solution[i])) {
                     clearInterval(this.timer);
-                    this.state.stats.wins++;
-                    if(this.state.time < this.state.stats.best) this.state.stats.best = this.state.time;
-                    localStorage.setItem('cube_stats', JSON.stringify(this.state.stats));
-                    localStorage.removeItem('cube_save');
-                    this.playSound(880, 0.5);
-                    setTimeout(() => alert("כל הכבוד! ניצחת!"), 500);
+                    alert("ניצחת!");
                 }
             }
         }
 
         const game = new SudokuGame();
 
-        function openModal(id) {
-            document.getElementById(id).style.display = 'flex';
-            if(id === 'stats-modal') {
-                document.getElementById('stat-wins').innerText = game.state.stats.wins;
-                const b = game.state.stats.best;
-                document.getElementById('stat-best').innerText = b === 9999 ? '--:--' : `${Math.floor(b/60)}:${(b%60).toString().padStart(2,'0')}`;
-            }
-        }
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-
-        // --- Service Worker Logic for Offline ---
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                const swCode = `
-                    const CACHE = 'cube-v4';
-                    self.addEventListener('install', e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./', './index.html', './logo.jpg']))));
-                    self.addEventListener('fetch', e => e.respondWith(caches.match(e.request).then(r => r || fetch(e.request))));
-                `;
-                const blob = new Blob([swCode], {type: 'application/javascript'});
-                navigator.serviceWorker.register(URL.createObjectURL(blob));
-            });
-        }
     </script>
 </body>
 </html>
