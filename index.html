@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#4A90E2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Sudoku Master Ultimate - V7.1</title>
+    <title>Sudoku Master Ultimate - V7.2</title>
     <link rel="manifest" href="manifest.json">
     <style>
         :root {
@@ -161,8 +161,9 @@
         .game-board {
             display: grid;
             grid-template-columns: repeat(9, 1fr);
-            gap: 0;
-            background: var(--border-heavy);
+            gap: 1px;
+            background: var(--border-light);
+            padding: 3px;
             border: 3px solid var(--border-heavy);
             border-radius: 8px;
             overflow: hidden;
@@ -170,6 +171,34 @@
             aspect-ratio: 1;
             width: 100%;
             max-width: 500px;
+            position: relative;
+        }
+
+        /* Create 3x3 block divisions with pseudo-elements */
+        .game-board::before,
+        .game-board::after {
+            content: '';
+            position: absolute;
+            background: var(--border-heavy);
+            z-index: 1;
+        }
+
+        /* Vertical lines */
+        .game-board::before {
+            width: 3px;
+            height: 100%;
+            top: 0;
+            left: calc(33.333% - 1.5px);
+            box-shadow: calc(33.333% + 1.5px) 0 0 0 var(--border-heavy);
+        }
+
+        /* Horizontal lines */
+        .game-board::after {
+            height: 3px;
+            width: 100%;
+            left: 0;
+            top: calc(33.333% - 1.5px);
+            box-shadow: 0 calc(33.333% + 1.5px) 0 0 var(--border-heavy);
         }
 
         .cell {
@@ -178,24 +207,13 @@
             align-items: center;
             justify-content: center;
             background: var(--bg-primary);
-            border: 1px solid var(--border-light);
             font-size: clamp(20px, 5vw, 32px);
             font-weight: 700;
             cursor: pointer;
             transition: background-color 0.15s;
             position: relative;
             user-select: none;
-        }
-
-        /* 3x3 block division using data attributes - more reliable */
-        .cell[data-col="2"],
-        .cell[data-col="5"] {
-            border-right: 3px solid var(--border-heavy);
-        }
-
-        .cell[data-row="2"],
-        .cell[data-row="5"] {
-            border-bottom: 3px solid var(--border-heavy);
+            z-index: 2;
         }
 
         .cell.fixed {
@@ -524,7 +542,7 @@
         <!-- Header -->
         <div class="header">
             <div class="app-title">Sudoku Master Ultimate</div>
-            <div class="version" id="versionBtn">גרסה 7.1</div>
+            <div class="version" id="versionBtn">גרסה 7.2</div>
         </div>
 
         <!-- Top Bar -->
@@ -1493,7 +1511,7 @@
         }
 
         // ============= INITIALIZE APP =============
-        const APP_VERSION = '7.1';
+        const APP_VERSION = '7.2';
         let gameState, uiController;
 
         window.addEventListener('DOMContentLoaded', () => {
