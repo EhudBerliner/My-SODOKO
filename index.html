@@ -2,17 +2,16 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cube Sudoku - גרסה 2.2.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cube Sudoku - גרסה 2.3.0</title>
     <link rel="icon" type="image/png" href="logo.png">
     <style>
         :root {
-            --primary-bg: #f0f4f8;
+            --primary-bg: #f4f7f6;
             --cube-blue: #4A90E2;
             --cube-purple: #8b5cf6;
-            --cube-teal: #2dd4bf;
             --error: #ef4444;
-            --fixed-bg: #e2e8f0;
+            --dark: #1e293b;
             --border-thick: 3px solid #1e293b;
         }
 
@@ -20,10 +19,11 @@
             font-family: 'Segoe UI', system-ui, sans-serif;
             margin: 0; background: var(--primary-bg);
             display: flex; flex-direction: column; align-items: center;
+            touch-action: manipulation;
         }
 
         .version-bar {
-            width: 100%; background: #0f172a; color: white;
+            width: 100%; background: var(--dark); color: white;
             padding: 8px 20px; font-size: 0.8rem; display: flex;
             justify-content: space-between; box-sizing: border-box;
         }
@@ -31,30 +31,29 @@
         /* עיצוב הלוח */
         #board {
             display: grid;
-            grid-template-columns: repeat(9, 45px);
-            grid-template-rows: repeat(9, 45px);
+            grid-template-columns: repeat(9, 40px);
+            grid-template-rows: repeat(9, 40px);
             gap: 1px;
             background: #94a3b8;
             border: var(--border-thick);
-            margin: 20px auto;
+            margin: 15px auto;
             border-radius: 4px;
         }
 
         .cell {
-            width: 45px; height: 45px; background: white;
+            width: 40px; height: 40px; background: white;
             display: flex; align-items: center; justify-content: center;
-            font-size: 1.3rem; font-weight: bold; cursor: pointer;
-            transition: all 0.2s;
+            font-size: 1.2rem; font-weight: bold; cursor: pointer;
         }
 
-        /* הדגשת בלוקים של 9 */
-        .cell:nth-child(3n) { border-left: var(--border-thick); }
-        .cell:nth-child(9n+1) { border-right: none; } /* תיקון לשוליים */
+        /* הדגשת בלוקים 3x3 */
+        .cell:nth-child(3n) { border-left: 2px solid var(--dark); }
+        .cell:nth-child(9n+1) { border-right: none; }
         .cell:nth-child(n+19):nth-child(-n+27), 
-        .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: var(--border-thick); }
+        .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 2px solid var(--dark); }
 
-        .cell.fixed { background: var(--fixed-bg); color: #475569; cursor: default; }
-        .cell.selected { background: var(--cube-blue); color: white; }
+        .cell.fixed { background: #e2e8f0; color: #475569; }
+        .cell.selected { background: var(--cube-blue) !important; color: white; }
         .cell.highlight-same { background: #fef08a; }
         .cell.conflict { background: var(--error) !important; color: white; animation: shake 0.4s; }
 
@@ -64,42 +63,71 @@
             75% { transform: translateX(4px); }
         }
 
-        .controls { display: flex; gap: 10px; margin-bottom: 20px; }
-        button {
-            padding: 10px 20px; border: none; border-radius: 6px;
-            background: var(--cube-blue); color: white; font-weight: bold;
-            cursor: pointer; transition: 0.3s;
+        /* לוח מספרים תחתון (Numpad) */
+        .numpad {
+            display: grid;
+            grid-template-columns: repeat(5, 55px);
+            gap: 10px;
+            margin: 15px 0;
+            padding: 15px;
+            background: #e2e8f0;
+            border-radius: 15px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
         }
-        button:hover { opacity: 0.8; }
 
-        .leaderboard-container { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 450px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        table { width: 100%; border-collapse: collapse; text-align: right; }
-        th, td { padding: 8px; border-bottom: 1px solid #eee; }
+        .num-btn {
+            width: 55px; height: 55px;
+            background: white; border: none; border-radius: 10px;
+            font-size: 1.4rem; font-weight: bold; color: var(--dark);
+            cursor: pointer; display: flex; align-items: center;
+            justify-content: center; box-shadow: 0 3px 0 #cbd5e1;
+            transition: 0.1s;
+        }
+
+        .num-btn:active { transform: translateY(2px); box-shadow: none; }
+        .num-btn.eraser { background: #fee2e2; color: #b91c1c; font-size: 1.1rem; }
+
+        .controls { display: flex; gap: 8px; margin-top: 5px; }
+        button.action-btn {
+            padding: 8px 15px; border-radius: 6px; border: none;
+            background: var(--dark); color: white; cursor: pointer;
+        }
+
+        .leaderboard-container { margin-top: 20px; width: 360px; font-size: 0.9rem; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
+        th, td { padding: 10px; text-align: right; border-bottom: 1px solid #eee; }
     </style>
 </head>
 <body>
 
 <div class="version-bar">
-    <span>גרסה 2.2.0 (מערכת חסימת התנגשויות)</span>
-    <span id="timer">זמן: 00:00</span>
-</div>
-
-<img src="logo.png" style="width: 60px; margin: 20px;">
-
-<div class="controls">
-    <button onclick="newGame('easy')">קל</button>
-    <button onclick="newGame('medium')">בינוני</button>
-    <button onclick="newGame('hard')">קשה</button>
+    <span id="level-display">רמה: קל | 2.3.0</span>
+    <span id="timer">00:00</span>
 </div>
 
 <div id="board"></div>
 
+<div class="numpad">
+    <button class="num-btn" onclick="inputNumber(1)">1</button>
+    <button class="num-btn" onclick="inputNumber(2)">2</button>
+    <button class="num-btn" onclick="inputNumber(3)">3</button>
+    <button class="num-btn" onclick="inputNumber(4)">4</button>
+    <button class="num-btn" onclick="inputNumber(5)">5</button>
+    <button class="num-btn" onclick="inputNumber(6)">6</button>
+    <button class="num-btn" onclick="inputNumber(7)">7</button>
+    <button class="num-btn" onclick="inputNumber(8)">8</button>
+    <button class="num-btn" onclick="inputNumber(9)">9</button>
+    <button class="num-btn eraser" onclick="inputNumber(0)">🗑️</button>
+</div>
+
 <div class="controls">
-    <button onclick="undo()">⬅️ בטל מהלך</button>
+    <button class="action-btn" onclick="newGame('easy')">קל</button>
+    <button class="action-btn" onclick="newGame('medium')">בינוני</button>
+    <button class="action-btn" onclick="newGame('hard')">קשה</button>
+    <button class="action-btn" onclick="undo()" style="background:var(--cube-purple)">↩️ בטל</button>
 </div>
 
 <div class="leaderboard-container">
-    <h3>🏆 עשרת הגדולים - <span id="level-label">קל</span></h3>
     <table id="leaderboard">
         <thead><tr><th>מקום</th><th>זמן</th><th>תאריך</th></tr></thead>
         <tbody></tbody>
@@ -121,6 +149,7 @@
         for (let i = 0; i < 81; i++) {
             const cell = document.createElement('div');
             cell.className = 'cell';
+            cell.dataset.idx = i;
             cell.onclick = () => selectCell(i);
             boardDiv.appendChild(cell);
         }
@@ -136,70 +165,70 @@
         });
     }
 
-    // לוגיקת בדיקת תקינות
-    function isValid(idx, num) {
+    // פונקציית הזנת מספר (ממקלדת או מה-Numpad)
+    function inputNumber(num) {
+        if (selectedIdx === null || initial[selectedIdx] !== 0) return;
+
+        if (num === 0) { // מחק
+            board[selectedIdx] = 0;
+            render();
+            return;
+        }
+
+        const conflictIdx = checkConflict(selectedIdx, num);
+        if (conflictIdx !== -1) {
+            const cells = document.querySelectorAll('.cell');
+            cells[conflictIdx].classList.add('conflict');
+            setTimeout(() => cells[conflictIdx].classList.remove('conflict'), 800);
+            return;
+        }
+
+        history.push([...board]);
+        board[selectedIdx] = num;
+        saveGame();
+        render();
+        checkWin();
+    }
+
+    function checkConflict(idx, num) {
         const row = Math.floor(idx / 9);
         const col = idx % 9;
-        const blockRow = Math.floor(row / 3) * 3;
-        const blockCol = Math.floor(col / 3) * 3;
+        const bR = Math.floor(row / 3) * 3;
+        const bC = Math.floor(col / 3) * 3;
 
         for (let i = 0; i < 9; i++) {
-            // בדיקת שורה
             if (board[row * 9 + i] === num) return row * 9 + i;
-            // בדיקת עמודה
             if (board[i * 9 + col] === num) return i * 9 + col;
-            // בדיקת בלוק 3x3
-            let bIdx = (blockRow + Math.floor(i / 3)) * 9 + (blockCol + i % 3);
+            let bIdx = (bR + Math.floor(i / 3)) * 9 + (bC + i % 3);
             if (board[bIdx] === num) return bIdx;
         }
         return -1;
     }
 
     window.addEventListener('keydown', (e) => {
-        if (selectedIdx === null || initial[selectedIdx] !== 0) return;
-        const num = parseInt(e.key);
-        if (num >= 1 && num <= 9) {
-            const conflictIdx = isValid(selectedIdx, num);
-            if (conflictIdx !== -1) {
-                // הדגשת התנגשות
-                const cells = document.querySelectorAll('.cell');
-                cells[conflictIdx].classList.add('conflict');
-                setTimeout(() => cells[conflictIdx].classList.remove('conflict'), 1000);
-                return;
-            }
-            
-            history.push([...board]);
-            board[selectedIdx] = num;
-            saveGame();
-            render();
-            checkWin();
-        } else if (e.key === "Backspace" || e.key === "Delete") {
-            board[selectedIdx] = 0;
-            render();
-        }
+        const n = parseInt(e.key);
+        if (n >= 0 && n <= 9) inputNumber(n);
+        if (e.key === "Backspace") inputNumber(0);
     });
 
     function newGame(lvl) {
         currentLvl = lvl;
-        document.getElementById('level-label').innerText = lvl;
+        document.getElementById('level-display').innerText = `רמה: ${lvl} | 2.3.0`;
         seconds = 0;
         clearInterval(timerRef);
         startTimer();
 
-        // יצירת לוח בסיסי (סידורי לצורך הדגמה, ניתן להחליף באלגוריתם ייצור מלא)
+        // ייצור לוח (דוגמה בסיסית)
         board = Array(81).fill(0);
-        const seeds = [1,2,3,4,5,6,7,8,9];
-        let count = lvl === 'easy' ? 35 : lvl === 'medium' ? 25 : 15;
-        
+        let count = lvl === 'easy' ? 35 : lvl === 'medium' ? 26 : 18;
         while(count > 0) {
-            let pos = Math.floor(Math.random()*81);
-            let n = seeds[Math.floor(Math.random()*9)];
-            if(board[pos] === 0 && isValid(pos, n) === -1) {
-                board[pos] = n;
+            let p = Math.floor(Math.random()*81);
+            let n = Math.floor(Math.random()*9)+1;
+            if(board[p] === 0 && checkConflict(p, n) === -1) {
+                board[p] = n;
                 count--;
             }
         }
-
         initial = [...board];
         history = [];
         render();
@@ -220,12 +249,8 @@
             seconds++;
             let m = Math.floor(seconds/60).toString().padStart(2,'0');
             let s = (seconds%60).toString().padStart(2,'0');
-            document.getElementById('timer').innerText = `זמן: ${m}:${s}`;
+            document.getElementById('timer').innerText = `${m}:${s}`;
         }, 1000);
-    }
-
-    function saveGame() {
-        localStorage.setItem('cube_sudoku_save', JSON.stringify({board, initial, seconds, currentLvl}));
     }
 
     function undo() {
@@ -233,6 +258,10 @@
             board = history.pop();
             render();
         }
+    }
+
+    function saveGame() {
+        localStorage.setItem('cube_sudoku_save', JSON.stringify({board, initial, seconds, currentLvl}));
     }
 
     function updateLeaderboard() {
@@ -244,7 +273,7 @@
     function checkWin() {
         if (!board.includes(0)) {
             clearInterval(timerRef);
-            alert("ניצחון!");
+            alert("ניצחון מוחלט!");
             let scores = JSON.parse(localStorage.getItem('scores_'+currentLvl) || '[]');
             scores.push({time: document.getElementById('timer').innerText, date: new Date().toLocaleDateString()});
             scores.sort((a,b) => a.time.localeCompare(b.time));
@@ -256,15 +285,13 @@
     window.onload = () => {
         createBoardUI();
         const saved = localStorage.getItem('cube_sudoku_save');
-        if(saved) {
+        if(saved && confirm("להמשיך משחק קודם?")) {
             const data = JSON.parse(saved);
-            if(confirm("להמשיך משחק קודם?")) {
-                board = data.board; initial = data.initial; seconds = data.seconds; currentLvl = data.currentLvl;
-                startTimer(); render(); updateLeaderboard();
-                return;
-            }
+            board = data.board; initial = data.initial; seconds = data.seconds; currentLvl = data.currentLvl;
+            startTimer(); render(); updateLeaderboard();
+        } else {
+            newGame('easy');
         }
-        newGame('easy');
     };
 </script>
 </body>
