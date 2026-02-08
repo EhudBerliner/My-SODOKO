@@ -232,7 +232,7 @@
             justify-content: center;
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
-            font-size: clamp(20px, 6vw, 32px);
+            font-size: clamp(24px, 8vw, 40px);
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.15s;
@@ -586,11 +586,11 @@
 
         <div class="controls">
             <button id="newGameBtn" class="btn-primary">🎮 משחק חדש</button>
-            <button id="hintBtn" class="btn-success">💡 רמז</button>
-            <button id="noteBtn" class="btn-secondary">📝 הערות</button>
-            <button id="undoBtn" class="btn-secondary">↶ ביטול</button>
-            <button id="redoBtn" class="btn-secondary">↷ חזור</button>
-            <button id="statsBtn" class="btn-secondary">📊 סטטיסטיקה</button>
+            <button id="hintBtn" class="btn-success">💡</button>
+            <button id="noteBtn" class="btn-secondary">📝</button>
+            <button id="undoBtn" class="btn-secondary">↶</button>
+            <button id="redoBtn" class="btn-secondary">↷</button>
+            <button id="statsBtn" class="btn-secondary">📊</button>
             <button id="themeToggle" class="btn-secondary">🌙</button>
         </div>
 
@@ -629,13 +629,13 @@
             <div class="modal-header">בחר דרגת קושי</div>
             <div class="difficulty-options">
                 <button class="difficulty-btn btn-success" onclick="uiController.startNewGame('easy')">
-                    😊 קל - למתחילים
+                     קל 
                 </button>
                 <button class="difficulty-btn btn-primary" onclick="uiController.startNewGame('medium')">
-                    🎯 בינוני - אתגר סביר
+                     בינוני 
                 </button>
                 <button class="difficulty-btn btn-danger" onclick="uiController.startNewGame('hard')">
-                    🔥 קשה - מומחים בלבד
+                     קשה 
                 </button>
             </div>
             <div id="resumeContainer" style="display: none; margin-top: 12px;">
@@ -1493,9 +1493,9 @@
                 const stars = '⭐'.repeat(rating) + '☆'.repeat(5 - rating);
                 
                 const difficultyNames = {
-                    easy: 'קל 😊',
-                    medium: 'בינוני 🎯',
-                    hard: 'קשה 🔥'
+                    easy: 'קל ',
+                    medium: 'בינוני ',
+                    hard: 'קשה '
                 };
                 
                 document.getElementById('victoryTime').textContent = this.game.formatTime(timeInSeconds);
