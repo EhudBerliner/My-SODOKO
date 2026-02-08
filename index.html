@@ -224,20 +224,22 @@
             user-select: none;
         }
 
-        /* קו אנכי עבה אחרי כל 3 עמודות */
-        .cell:nth-child(3n):not(:nth-child(9n)) {
+        /* קווים אנכיים עבים - מופיעים אחרי כל עמודה שלישית */
+        /* בגלל dir=rtl, אנחנו משתמשים ב-border-left */
+        .cell:nth-child(9n+4), 
+        .cell:nth-child(9n+7) {
             border-right: 3px solid var(--border-heavy) !important;
         }
         
-        /* קו אופקי עבה אחרי כל 3 שורות */
-        .cell:nth-child(n+19):nth-child(-n+27),
+        /* קווים אופקיים עבים - מופיעים אחרי כל שורה שלישית */
+        .cell:nth-child(n+19):nth-child(-n+27), 
         .cell:nth-child(n+46):nth-child(-n+54) {
             border-bottom: 3px solid var(--border-heavy) !important;
         }
         
-        /* תיקון צבע הגבול הכללי כדי שלא יבלע את הקווים העבים */
+        /* מוודא שכל שאר הגבולות דקים ואחידים */
         .cell {
-            border: 0.5px solid var(--border-light);
+            border: 1px solid var(--border-light);
         }
 
         .cell.fixed {
