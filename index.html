@@ -3,159 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cube Sudoku Pro - Clean Edition</title>
+    <title>Cube Sudoku Pro - Ultimate Edition</title>
     
     <style>
         :root {
-            --bg: #f8fafc;
+            /* Palette V2.3.0 Retro */
+            --bg: #f0f4f8;
             --surface: #ffffff;
             --text: #0f172a;
             --primary: #4A90E2;
-            --secondary: #8b5cf6;
-            --grid-line: #cbd5e1;
+            --accent: #8b5cf6;
+            --grid-gap: #94a3b8;
             --grid-bold: #1e293b;
             --selected: #dbeafe;
             --error: #ef4444;
-            --fixed: #64748b;
-            --note: #94a3b8;
-            --transition: 0.15s ease;
+            --fixed: #475569;
+            --note: #64748b;
         }
 
         [data-theme="dark"] {
-            --bg: #0f172a;
-            --surface: #1e293b;
-            --text: #f8fafc;
-            --grid-line: #334155;
-            --grid-bold: #f8fafc;
-            --selected: #1e40af;
+            --bg: #0f172a; --surface: #1e293b; --text: #f8fafc;
+            --grid-gap: #334155; --grid-bold: #f8fafc;
+            --selected: #1e40af; --fixed: #94a3b8;
         }
 
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             margin: 0; background: var(--bg); color: var(--text);
             display: flex; flex-direction: column; align-items: center;
             height: 100vh; overflow: hidden; user-select: none;
+            touch-action: manipulation;
         }
 
-        /* --- Header --- */
-        .top-nav {
-            width: 100%; max-width: 450px; padding: 15px;
-            display: flex; justify-content: space-between; align-items: center;
-            box-sizing: border-box;
+        /* Header & Settings */
+        .top-bar {
+            width: 95vw; max-width: 450px;
+            display: flex; justify-content: space-between; padding: 10px 0;
         }
-        .timer-display {
-            font-variant-numeric: tabular-nums;
-            font-size: 1.6rem; font-weight: 800; color: var(--primary);
-        }
-        .icon-btn { font-size: 1.4rem; cursor: pointer; padding: 5px; }
+        .icon-btn { font-size: 1.4rem; cursor: pointer; opacity: 0.8; }
 
-        /* --- Sudoku Grid --- */
-        .grid-container { position: relative; margin: 10px 0; }
+        /* Timer Centered Above Board */
+        .timer-container { text-align: center; margin-bottom: 8px; }
+        .timer-box {
+            font-variant-numeric: tabular-nums; font-weight: 800; font-size: 1.6rem;
+            color: var(--primary); background: var(--surface);
+            padding: 4px 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        /* Sudoku Grid - Retro Gap Style */
         #grid {
             display: grid; grid-template-columns: repeat(9, 1fr);
-            width: 92vw; max-width: 420px; aspect-ratio: 1/1;
-            background: var(--grid-line); border: 3px solid var(--grid-bold);
-            gap: 1px; border-radius: 8px; overflow: hidden;
+            width: 94vw; max-width: 440px; aspect-ratio: 1/1;
+            background: var(--grid-gap); gap: 1px;
+            border: 3px solid var(--grid-bold); border-radius: 4px;
         }
         .cell {
-            background: var(--surface); display: flex; align-items: center; justify-content: center;
-            font-size: 1.5rem; font-weight: 700; cursor: pointer; position: relative;
+            background: var(--surface); display: flex; align-items: center;
+            justify-content: center; font-size: 1.5rem; font-weight: bold;
+            position: relative; transition: background 0.1s;
         }
-        
-        /* Block Borders */
-        .cell:nth-child(3n):not(:nth-child(9n)) { border-left: 2px solid var(--grid-bold); }
-        .cell:nth-child(n+19):nth-child(-n+27), .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 2px solid var(--grid-bold); }
-        
-        /* Cell States */
+        /* Thick borders for 3x3 blocks */
+        .cell:nth-child(3n):not(:nth-child(9n)) { border-right: 2px solid var(--grid-bold); }
+        .cell:nth-child(n+19):nth-child(-n+27), 
+        .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 2px solid var(--grid-bold); }
+
         .cell.selected { background: var(--selected) !important; }
-        .cell.fixed { color: var(--fixed); background: rgba(0,0,0,0.02); }
-        .cell.err { color: var(--error); }
+        .cell.fixed { color: var(--fixed); }
+        .cell.err { color: var(--error); background: #fee2e2; }
+        [data-theme="dark"] .cell.err { background: #7f1d1d; }
 
-        /* Notes Display */
-        .notes-grid { display: grid; grid-template-columns: repeat(3, 1fr); width: 100%; height: 100%; pointer-events: none; padding: 2px; box-sizing: border-box; }
-        .note { font-size: 0.6rem; color: var(--note); display: flex; align-items: center; justify-content: center; font-weight: 400; }
+        .notes-grid { display: grid; grid-template-columns: repeat(3, 1fr); width: 100%; height: 100%; pointer-events: none; }
+        .note { font-size: 0.6rem; color: var(--note); display: flex; align-items: center; justify-content: center; }
 
-        /* --- Controls --- */
+        /* Numpad - Directly Below Board */
         .numpad {
             display: grid; grid-template-columns: repeat(5, 1fr);
-            gap: 10px; width: 92vw; max-width: 420px; margin: 15px 0;
+            gap: 10px; width: 94vw; max-width: 440px; margin: 15px 0;
         }
         .num-btn {
-            background: var(--surface); border: 1px solid var(--grid-line);
-            height: 55px; border-radius: 12px; font-size: 1.5rem; font-weight: 800;
-            color: var(--text); cursor: pointer; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            background: var(--surface); border: 1px solid var(--grid-gap);
+            height: 52px; border-radius: 10px; font-size: 1.4rem; font-weight: bold;
+            color: var(--text); box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-        .num-btn:active { background: var(--primary); color: white; transform: translateY(2px); }
+        .num-btn:active { background: var(--primary); color: white; transform: scale(0.95); }
 
+        /* Toolbar - Below Numpad */
         .toolbar {
-            display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; width: 92vw; max-width: 420px;
+            display: flex; gap: 8px; width: 94vw; max-width: 440px; justify-content: space-between;
         }
         .tool-btn {
-            padding: 10px 2px; border-radius: 10px; border: 1px solid var(--grid-line);
-            background: var(--surface); color: var(--text); font-size: 0.65rem; font-weight: 600;
+            flex: 1; padding: 8px 0; border-radius: 10px; border: 1px solid var(--grid-gap);
+            background: var(--surface); color: var(--text); font-size: 0.7rem; font-weight: 600;
             display: flex; flex-direction: column; align-items: center; cursor: pointer;
         }
         .tool-btn span { font-size: 1.2rem; margin-bottom: 2px; }
         .tool-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* --- Modals --- */
+        /* Modals */
         .modal {
             position: fixed; inset: 0; background: rgba(0,0,0,0.8);
-            display: none; align-items: center; justify-content: center; z-index: 1000;
-            backdrop-filter: blur(4px);
+            display: none; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(5px);
         }
         .modal-content {
-            background: var(--surface); padding: 30px; border-radius: 24px;
-            width: 85%; max-width: 380px; text-align: center;
+            background: var(--surface); padding: 30px; border-radius: 20px;
+            width: 80%; max-width: 380px; text-align: center;
         }
-        .modal-btn {
-            width: 100%; padding: 15px; margin: 8px 0; border: none; border-radius: 12px;
-            font-size: 1.1rem; font-weight: 700; cursor: pointer;
+        .m-btn {
+            width: 100%; padding: 14px; margin: 8px 0; border: none; border-radius: 10px;
+            font-size: 1.1rem; font-weight: bold; cursor: pointer; background: var(--primary); color: white;
         }
-        .btn-primary { background: var(--primary); color: white; }
     </style>
 </head>
 <body data-theme="light">
 
-    <div class="top-nav">
-        <div class="icon-btn" onclick="openModal('settings-modal')">⚙️</div>
-        <div class="timer-display" id="timer">00:00</div>
-        <div class="icon-btn" onclick="openModal('stats-modal')">🏆</div>
+    <div class="top-bar">
+        <span class="icon-btn" onclick="openModal('settings-modal')">⚙️</span>
+        <span class="icon-btn" onclick="openModal('stats-modal')">📊</span>
     </div>
 
-    <div class="grid-container">
-        <div id="grid"></div>
+    <div class="timer-container">
+        <div class="timer-box" id="timer">00:00</div>
     </div>
 
-    <div class="numpad" id="numpad">
-        <button class="num-btn" onclick="game.handleInput(1)">1</button>
-        <button class="num-btn" onclick="game.handleInput(2)">2</button>
-        <button class="num-btn" onclick="game.handleInput(3)">3</button>
-        <button class="num-btn" onclick="game.handleInput(4)">4</button>
-        <button class="num-btn" onclick="game.handleInput(5)">5</button>
-        <button class="num-btn" onclick="game.handleInput(6)">6</button>
-        <button class="num-btn" onclick="game.handleInput(7)">7</button>
-        <button class="num-btn" onclick="game.handleInput(8)">8</button>
-        <button class="num-btn" onclick="game.handleInput(9)">9</button>
-        <button class="num-btn" onclick="game.handleInput(0)" style="color:var(--error)">✖️</button>
+    <div id="grid"></div>
+
+    <div class="numpad">
+        <script>for(let i=1; i<=9; i++) document.write(`<button class="num-btn" onclick="game.input(${i})">${i}</button>`);</script>
+        <button class="num-btn" onclick="game.input(0)" style="color:var(--error)">✖️</button>
     </div>
 
     <div class="toolbar">
         <button class="tool-btn" onclick="game.undo()"><span>↩️</span>Undo</button>
         <button class="tool-btn" onclick="game.redo()"><span>↪️</span>Redo</button>
-        <button class="tool-btn" id="note-toggle" onclick="game.toggleNoteMode()"><span>✏️</span>Notes</button>
-        <button class="tool-btn" id="highlight-toggle" onclick="game.toggleHighlight()"><span>🔦</span>סימון</button>
-        <button class="tool-btn" onclick="game.advancedHint()"><span>💡</span>Hint</button>
+        <button class="tool-btn" id="note-toggle" onclick="game.toggleNotes()"><span>✏️</span>Notes</button>
+        <button class="tool-btn" id="hi-toggle" onclick="game.toggleHighlight()"><span>🔦</span>סימון</button>
+        <button class="tool-btn" onclick="game.getHint()"><span>💡</span>Hint</button>
     </div>
 
     <div id="start-modal" class="modal" style="display: flex;">
         <div class="modal-content">
-            <img src="logo.jpg" style="width:80px; border-radius:15px; margin-bottom:10px;" alt="Logo">
+            <img src="logo.jpg" style="width:70px; border-radius:15px; margin-bottom:15px;">
             <h2>Cube Sudoku Pro</h2>
-            <p>בחר רמת קושי:</p>
-            <button class="modal-btn btn-primary" onclick="game.start('easy')">קל</button>
-            <button class="modal-btn btn-primary" onclick="game.start('medium')">בינוני</button>
-            <button class="modal-btn btn-primary" onclick="game.start('hard')">קשה</button>
+            <div id="resume-box" style="display:none">
+                <button class="m-btn" style="background:var(--accent)" onclick="game.resume()">המשך משחק</button>
+                <hr style="opacity:0.2">
+            </div>
+            <p>משחק חדש:</p>
+            <button class="m-btn" onclick="game.newGame('easy')">קל</button>
+            <button class="m-btn" onclick="game.newGame('medium')">בינוני</button>
+            <button class="m-btn" onclick="game.newGame('hard')">קשה</button>
+        </div>
+    </div>
+
+    <div id="stats-modal" class="modal">
+        <div class="modal-content">
+            <h3>סטטיסטיקה</h3>
+            <div id="stats-view" style="text-align:right; margin:20px 0;"></div>
+            <button class="m-btn" onclick="closeModal('stats-modal')">סגור</button>
         </div>
     </div>
 
@@ -163,210 +167,271 @@
         <div class="modal-content">
             <h3>הגדרות</h3>
             <div style="text-align:right">
-                <label><input type="checkbox" id="set-sound" checked onchange="game.updateSettings()"> צלילים</label><br><br>
-                <label><input type="checkbox" id="set-dark" onchange="game.updateSettings()"> מצב לילה</label>
+                <p><label><input type="checkbox" id="set-sound" checked onchange="game.updateSettings()"> צלילים</label></p>
+                <p><label><input type="checkbox" id="set-vibrate" checked onchange="game.updateSettings()"> רטט</label></p>
+                <p><label><input type="checkbox" id="set-dark" onchange="game.updateSettings()"> מצב לילה</label></p>
             </div>
-            <button class="modal-btn btn-primary" onclick="closeModal('settings-modal')">סגור</button>
-        </div>
-    </div>
-
-    <div id="stats-modal" class="modal">
-        <div class="modal-content">
-            <h3>סטטיסטיקה</h3>
-            <div id="stat-wins-text">ניצחונות: 0</div>
-            <button class="modal-btn btn-primary" onclick="closeModal('stats-modal')">סגור</button>
+            <button class="m-btn" onclick="closeModal('settings-modal')">סגור</button>
         </div>
     </div>
 
     <script>
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        // --- 1. Sound Engine (Web Audio) ---
+        const AudioEngine = {
+            ctx: new (window.AudioContext || window.webkitAudioContext)(),
+            play(freq, type="sine", dur=0.1) {
+                if(!game.state.settings.sound) return;
+                const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+                o.type = type; o.frequency.value = freq;
+                g.gain.setValueAtTime(0.1, this.ctx.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + dur);
+                o.connect(g); g.connect(this.ctx.destination);
+                o.start(); o.stop(this.ctx.currentTime + dur);
+            }
+        };
 
+        // --- 2. Advanced Solver & Unique Generator ---
         const Solver = {
-            isValid(b, i, n) {
-                const r = Math.floor(i/9), c = i%9, br = Math.floor(r/3)*3, bc = Math.floor(c/3)*3;
-                for(let k=0; k<9; k++) {
-                    if(b[r*9+k] === n || b[k*9+c] === n) return false;
-                    const bi = (br + Math.floor(k/3))*9 + (bc + k%3);
+            isValid(b, idx, n) {
+                let r = Math.floor(idx/9), c = idx%9, br = Math.floor(r/3)*3, bc = Math.floor(c/3)*3;
+                for(let i=0; i<9; i++) {
+                    if(b[r*9+i] === n || b[i*9+c] === n) return false;
+                    let bi = (br + Math.floor(i/3))*9 + (bc + i%3);
                     if(b[bi] === n) return false;
                 }
                 return true;
             },
-            solve(board, findMultiple = false) {
-                let count = 0; let result = null;
-                const solveInternal = (b) => {
-                    const idx = b.indexOf(0);
-                    if(idx === -1) { count++; result = [...b]; return true; }
+            solve(board, countLimit = 1) {
+                let count = 0, found = null;
+                const solveInner = (b) => {
+                    let idx = b.indexOf(0);
+                    if(idx === -1) { count++; found = [...b]; return true; }
                     for(let n=1; n<=9; n++) {
                         if(this.isValid(b, idx, n)) {
                             b[idx] = n;
-                            if(solveInternal(b) && !findMultiple) return true;
+                            if(solveInner(b) && count >= countLimit) return true;
                             b[idx] = 0;
-                            if(count > 1 && findMultiple) return true;
                         }
                     }
                     return false;
                 };
-                solveInternal([...board]);
-                return findMultiple ? count : result;
+                solveInner([...board]);
+                return countLimit === 1 ? found : count;
             }
         };
 
-        class SudokuGame {
+        // --- 3. Main Game Logic ---
+        class SudokuPro {
             constructor() {
                 this.state = {
                     board: [], initial: [], solution: [], notes: Array(81).fill().map(()=>[]),
-                    history: [], redoStack: [], selected: null, noteMode: false,
-                    uiHighlight: true, // ההגדרה החדשה לסימון UI
-                    time: 0, settings: { sound: true, dark: false },
-                    stats: JSON.parse(localStorage.getItem('cube_stats') || '{"wins":0}')
+                    history: [], redo: [], selected: null, noteMode: false, highlight: true,
+                    time: 0, level: 'medium', settings: { sound: true, vibrate: true, dark: false },
+                    stats: JSON.parse(localStorage.getItem('cube_stats_v4') || '{"wins":0, "best":9999}')
                 };
-                this.timer = null;
-                this.init();
+                this.timerInterval = null;
+                this.initUI();
             }
 
-            init() {
+            initUI() {
                 const grid = document.getElementById('grid');
                 for(let i=0; i<81; i++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'cell';
-                    cell.onclick = () => this.select(i);
-                    grid.appendChild(cell);
+                    const c = document.createElement('div');
+                    c.className = 'cell';
+                    c.onclick = () => this.select(i);
+                    grid.appendChild(c);
                 }
-                document.getElementById('highlight-toggle').classList.add('active');
+                document.getElementById('hi-toggle').classList.add('active');
+                if(localStorage.getItem('cube_save_v4')) document.getElementById('resume-box').style.display='block';
             }
 
-            start(level) {
+            newGame(lvl) {
+                this.state.level = lvl;
                 closeModal('start-modal');
-                let full = Array(81).fill(0);
-                let nums = [1,2,3,4,5,6,7,8,9].sort(()=>Math.random()-0.5);
-                for(let i=0; i<9; i++) full[i] = nums[i];
-                this.state.solution = Solver.solve(full);
-
-                let board = [...this.state.solution];
+                
+                // Generate Puzzle
+                let b = Array(81).fill(0);
+                // Randomize first row
+                let seeds = [1,2,3,4,5,6,7,8,9].sort(()=>Math.random()-0.5);
+                for(let i=0; i<9; i++) b[i] = seeds[i];
+                
+                this.state.solution = Solver.solve(b);
+                let gameBoard = [...this.state.solution];
                 let indices = Array.from({length:81}, (_,i)=>i).sort(()=>Math.random()-0.5);
-                let holes = {easy: 35, medium: 45, hard: 55}[level];
-                for(let idx of indices) {
+                let holes = {easy: 32, medium: 46, hard: 56}[lvl];
+                
+                for(let i of indices) {
                     if(holes <= 0) break;
-                    let temp = board[idx]; board[idx] = 0;
-                    if(Solver.solve(board, true) === 1) holes--; else board[idx] = temp;
+                    let temp = gameBoard[i];
+                    gameBoard[i] = 0;
+                    if(Solver.solve(gameBoard, 2) === 1) holes--;
+                    else gameBoard[i] = temp;
                 }
-                this.state.board = [...board];
-                this.state.initial = [...board];
+
+                this.state.board = [...gameBoard];
+                this.state.initial = [...gameBoard];
+                this.state.notes = Array(81).fill().map(()=>[]);
+                this.state.time = 0;
+                this.state.history = [];
                 this.render();
                 this.startTimer();
             }
 
             select(i) {
                 this.state.selected = i;
+                AudioEngine.play(440, "sine", 0.05);
                 this.render();
             }
 
-            toggleHighlight() {
-                this.state.uiHighlight = !this.state.uiHighlight;
-                document.getElementById('highlight-toggle').classList.toggle('active', this.state.uiHighlight);
-                this.render();
-            }
-
-            handleInput(n) {
+            input(n) {
                 if(this.state.selected === null || this.state.initial[this.state.selected] !== 0) return;
-                this.pushHistory();
+                
+                // History Management
+                this.state.history.push(JSON.stringify({b: this.state.board, n: this.state.notes}));
+                this.state.redo = [];
+
                 if(this.state.noteMode && n !== 0) {
                     let cn = this.state.notes[this.state.selected];
                     this.state.notes[this.state.selected] = cn.includes(n) ? cn.filter(x=>x!==n) : [...cn, n].sort();
                 } else {
                     this.state.board[this.state.selected] = n;
+                    if(n !== 0) {
+                        if(n !== this.state.solution[this.state.selected]) {
+                            AudioEngine.play(150, "square", 0.2);
+                            if(this.state.settings.vibrate) navigator.vibrate?.(100);
+                        } else {
+                            AudioEngine.play(660, "sine", 0.1);
+                        }
+                    }
                 }
                 this.render();
+                this.save();
                 this.checkWin();
-            }
-
-            pushHistory() {
-                this.state.history.push(JSON.stringify({b: this.state.board, n: this.state.notes}));
-                this.state.redoStack = [];
             }
 
             undo() {
                 if(!this.state.history.length) return;
-                this.state.redoStack.push(JSON.stringify({b: this.state.board, n: this.state.notes}));
-                const prev = JSON.parse(this.state.history.pop());
+                this.state.redo.push(JSON.stringify({b: this.state.board, n: this.state.notes}));
+                let prev = JSON.parse(this.state.history.pop());
                 this.state.board = prev.b; this.state.notes = prev.n;
                 this.render();
             }
 
             redo() {
-                if(!this.state.redoStack.length) return;
+                if(!this.state.redo.length) return;
                 this.state.history.push(JSON.stringify({b: this.state.board, n: this.state.notes}));
-                const next = JSON.parse(this.state.redoStack.pop());
+                let next = JSON.parse(this.state.redo.pop());
                 this.state.board = next.b; this.state.notes = next.n;
                 this.render();
             }
 
-            toggleNoteMode() {
+            toggleNotes() {
                 this.state.noteMode = !this.state.noteMode;
                 document.getElementById('note-toggle').classList.toggle('active', this.state.noteMode);
             }
 
-            advancedHint() {
+            toggleHighlight() {
+                this.state.highlight = !this.state.highlight;
+                document.getElementById('hi-toggle').classList.toggle('active', this.state.highlight);
+                this.render();
+            }
+
+            getHint() {
                 if(this.state.selected === null) return;
+                // Advanced Hint Logic: Check if current cell has only 1 logic possibility
+                let options = [];
+                for(let n=1; n<=9; n++) if(Solver.isValid(this.state.board, this.state.selected, n)) options.push(n);
+                
+                if(options.length === 1) alert("רמז לוגי: רק מספר אחד אפשרי בתא זה מבחינה חוקית!");
+                
                 this.state.board[this.state.selected] = this.state.solution[this.state.selected];
                 this.render();
             }
 
             render() {
                 const cells = document.querySelectorAll('.cell');
-                cells.forEach((cell, i) => {
-                    cell.className = 'cell';
-                    if(this.state.initial[i] !== 0) cell.classList.add('fixed');
-                    
-                    // בדיקה אם סימון ה-UI מופעל ואם התא נבחר
-                    if(this.state.uiHighlight && this.state.selected === i) {
-                        cell.classList.add('selected');
-                    }
-                    
-                    const val = this.state.board[i];
+                cells.forEach((c, i) => {
+                    c.className = 'cell' + (this.state.initial[i]!==0?' fixed':'') + (this.state.highlight && this.state.selected===i?' selected':'');
+                    let val = this.state.board[i];
                     if(val !== 0) {
-                        cell.innerText = val;
-                        if(this.state.initial[i] === 0 && val !== this.state.solution[i]) cell.classList.add('err');
+                        c.innerText = val;
+                        if(this.state.initial[i] === 0 && val !== this.state.solution[i]) c.classList.add('err');
                     } else {
-                        cell.innerHTML = this.renderNotes(this.state.notes[i]);
+                        let h = '<div class="notes-grid">';
+                        for(let n=1; n<=9; n++) h += `<div class="note">${this.state.notes[i].includes(n)?n:''}</div>`;
+                        c.innerHTML = h + '</div>';
                     }
                 });
             }
 
-            renderNotes(notes) {
-                if(!notes.length) return '';
-                let html = '<div class="notes-grid">';
-                for(let i=1; i<=9; i++) html += `<div class="note">${notes.includes(i) ? i : ''}</div>`;
-                return html + '</div>';
-            }
-
             startTimer() {
-                if(this.timer) clearInterval(this.timer);
-                this.timer = setInterval(() => {
+                if(this.timerInterval) clearInterval(this.timerInterval);
+                this.timerInterval = setInterval(() => {
                     this.state.time++;
-                    const m = Math.floor(this.state.time/60).toString().padStart(2,'0');
-                    const s = (this.state.time%60).toString().padStart(2,'0');
+                    let m = Math.floor(this.state.time/60).toString().padStart(2,'0');
+                    let s = (this.state.time%60).toString().padStart(2,'0');
                     document.getElementById('timer').innerText = `${m}:${s}`;
                 }, 1000);
             }
 
+            save() { localStorage.setItem('cube_save_v4', JSON.stringify(this.state)); }
+            
+            resume() {
+                let saved = JSON.parse(localStorage.getItem('cube_save_v4'));
+                if(saved) {
+                    this.state = saved;
+                    document.getElementById('set-dark').checked = this.state.settings.dark;
+                    this.updateSettings();
+                    closeModal('start-modal');
+                    this.render();
+                    this.startTimer();
+                }
+            }
+
             updateSettings() {
+                this.state.settings.sound = document.getElementById('set-sound').checked;
+                this.state.settings.vibrate = document.getElementById('set-vibrate').checked;
                 this.state.settings.dark = document.getElementById('set-dark').checked;
                 document.body.setAttribute('data-theme', this.state.settings.dark ? 'dark' : 'light');
+                this.save();
             }
 
             checkWin() {
-                if(this.state.board.every((v,i) => v === this.state.solution[i])) {
-                    clearInterval(this.timer);
-                    alert("ניצחת!");
+                if(this.state.board.every((v,i)=>v === this.state.solution[i])) {
+                    clearInterval(this.timerInterval);
+                    this.state.stats.wins++;
+                    if(this.state.time < this.state.stats.best) this.state.stats.best = this.state.time;
+                    localStorage.setItem('cube_stats_v4', JSON.stringify(this.state.stats));
+                    localStorage.removeItem('cube_save_v4');
+                    alert("ניצחת! זמן: " + document.getElementById('timer').innerText);
                 }
             }
         }
 
-        const game = new SudokuGame();
+        const game = new SudokuPro();
 
-        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function openModal(id) {
+            document.getElementById(id).style.display = 'flex';
+            if(id === 'stats-modal') {
+                const s = game.state.stats;
+                document.getElementById('stats-view').innerHTML = `
+                    <div style="font-size:1.2rem">ניצחונות: <b>${s.wins}</b></div>
+                    <div style="font-size:1.2rem">זמן שיא: <b>${s.best===9999?'--':s.best+' ש\''}</b></div>
+                `;
+            }
+        }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        // --- 4. Service Worker (Offline Support) ---
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                const CACHE = 'cube-v4.5';
+                self.addEventListener('install', e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./', 'index.html', 'logo.jpg']))));
+                self.addEventListener('fetch', e => e.respondWith(caches.match(e.request).then(r => r || fetch(e.request))));
+            `;
+            const blob = new Blob([swCode], {type: 'text/javascript'});
+            navigator.serviceWorker.register(URL.createObjectURL(blob));
+        }
     </script>
 </body>
 </html>
