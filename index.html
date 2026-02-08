@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#4A90E2">
-    <title>Sudoku Master Ultimate - V5.8</title>
+    <title>Sudoku Master Ultimate - V5.9</title>
     <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiU3Vkb2t1IE1hc3RlciBVbHRpbWF0ZSIsInNob3J0X25hbWUiOiJTdWRva3UiLCJzdGFydF91cmwiOiIuLyIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmZmZmZmYiLCJ0aGVtZV9jb2xvciI6IiM0QTkwRTIifQ==">
     <style>
         :root {
@@ -240,6 +240,10 @@
 
         .cell.user {
             color: var(--cell-user);
+        }
+
+        .cell.wrong {
+            color: #f97316;
         }
 
         .cell.selected {
@@ -511,7 +515,7 @@
     <div class="container">
         <header>
             <h1>Sudoku Master Ultimate</h1>
-            <div class="version">Engine V5.8</div>
+            <div class="version">Engine V5.9</div>
         </header>
 
         <div class="info-bar">
@@ -943,22 +947,25 @@
                     this.saveGame();
                     return { success: true };
                 } else {
-                    // Check for conflicts
+                    // IMPORTANT: Only check for CONFLICTS (duplicates), NOT correctness
+                    // This allows users to enter wrong numbers as long as they don't conflict
                     const conflicts = this.engine.getConflicts(pos, num);
                     
                     if (conflicts.size > 0) {
+                        // Conflict found - do NOT allow placement
                         this.audio.playError();
                         return { success: false, conflicts: Array.from(conflicts) };
                     }
 
-                    // Place number
+                    // No conflict - allow placement (even if wrong answer)
+                    // Wrong answers will be shown in orange color
                     this.engine.board[pos] = num;
                     this.engine.notes[pos].clear();
                     this.saveSnapshot();
                     this.audio.playInput();
                     this.saveGame();
 
-                    // Check for win
+                    // Check for win (all cells correct)
                     if (this.checkWin()) {
                         this.onWin();
                     }
@@ -1357,6 +1364,12 @@
                         cell.classList.add('fixed');
                     } else {
                         cell.classList.add('user');
+                        
+                        // Mark wrong answers (but not conflicting ones)
+                        if (this.game.engine.board[index] !== 0 && 
+                            this.game.engine.board[index] !== this.game.engine.solution[index]) {
+                            cell.classList.add('wrong');
+                        }
                     }
 
                     // Selected cell only
