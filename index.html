@@ -10,7 +10,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="description" content="משחק סודוקו מתקדם עם רמות קושי, רמזים, הערות ועוד">
     
-    <title>Sudoku - V7.1</title>
+    <title>Sudoku Master Ultimate - V7.1</title>
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="./manifest.json">
@@ -232,7 +232,7 @@
             justify-content: center;
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
-            font-size: clamp(24px, 8vw, 40px);
+            font-size: clamp(16px, 4vw, 24px);
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.15s;
@@ -334,7 +334,7 @@
 
         .number-btn {
             aspect-ratio: 1.2;
-            font-size: 32px;
+            font-size: 18px;
             font-weight: 700;
             position: relative;
             padding: 12px 8px;
@@ -581,16 +581,16 @@
     <div class="container">
         <header>
             <h1>🎯 Sudoku Master Ultimate</h1>
-            <div class="version">גרסה 7.1 - </div>
+            <div class="version">גרסה 7.1 - PWA Edition</div>
         </header>
 
         <div class="controls">
             <button id="newGameBtn" class="btn-primary">🎮 משחק חדש</button>
-            <button id="hintBtn" class="btn-success">💡</button>
-            <button id="noteBtn" class="btn-secondary">📝</button>
-            <button id="undoBtn" class="btn-secondary">↶</button>
-            <button id="redoBtn" class="btn-secondary">↷</button>
-            <button id="statsBtn" class="btn-secondary">📊</button>
+            <button id="hintBtn" class="btn-success">💡 רמז</button>
+            <button id="noteBtn" class="btn-secondary">📝 הערות</button>
+            <button id="undoBtn" class="btn-secondary">↶ ביטול</button>
+            <button id="redoBtn" class="btn-secondary">↷ חזור</button>
+            <button id="statsBtn" class="btn-secondary">📊 סטטיסטיקה</button>
             <button id="themeToggle" class="btn-secondary">🌙</button>
         </div>
 
@@ -629,13 +629,13 @@
             <div class="modal-header">בחר דרגת קושי</div>
             <div class="difficulty-options">
                 <button class="difficulty-btn btn-success" onclick="uiController.startNewGame('easy')">
-                     קל 
+                    😊 קל - למתחילים
                 </button>
                 <button class="difficulty-btn btn-primary" onclick="uiController.startNewGame('medium')">
-                     בינוני 
+                    🎯 בינוני - אתגר סביר
                 </button>
                 <button class="difficulty-btn btn-danger" onclick="uiController.startNewGame('hard')">
-                     קשה 
+                    🔥 קשה - מומחים בלבד
                 </button>
             </div>
             <div id="resumeContainer" style="display: none; margin-top: 12px;">
@@ -1493,9 +1493,9 @@
                 const stars = '⭐'.repeat(rating) + '☆'.repeat(5 - rating);
                 
                 const difficultyNames = {
-                    easy: 'קל ',
-                    medium: 'בינוני ',
-                    hard: 'קשה '
+                    easy: 'קל 😊',
+                    medium: 'בינוני 🎯',
+                    hard: 'קשה 🔥'
                 };
                 
                 document.getElementById('victoryTime').textContent = this.game.formatTime(timeInSeconds);
@@ -1583,7 +1583,7 @@
         let gameState, uiController;
 
         console.log('═══════════════════════════════════════════');
-        console.log('🎮 Sudoku v7.1');
+        console.log('🎮 Sudoku Master Ultimate v7.1');
         console.log('═══════════════════════════════════════════');
 
         window.addEventListener('DOMContentLoaded', () => {
