@@ -10,7 +10,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="description" content="משחק סודוקו מתקדם עם רמות קושי, רמזים, הערות ועוד">
     
-    <title>Sudoku Master Ultimate - V7.1</title>
+    <title>Sudoku Master Ultimate - V7.2</title>
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="./manifest.json">
@@ -232,7 +232,7 @@
             justify-content: center;
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
-            font-size: clamp(16px, 4vw, 24px);
+            font-size: clamp(20px, 6vw, 32px);
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.15s;
@@ -581,7 +581,7 @@
     <div class="container">
         <header>
             <h1>🎯 Sudoku Master Ultimate</h1>
-            <div class="version">גרסה 7.1 - PWA Edition</div>
+            <div class="version">גרסה 7.2 - PWA Edition</div>
         </header>
 
         <div class="controls">
@@ -1493,9 +1493,9 @@
                 const stars = '⭐'.repeat(rating) + '☆'.repeat(5 - rating);
                 
                 const difficultyNames = {
-                    easy: 'קל 😊',
-                    medium: 'בינוני 🎯',
-                    hard: 'קשה 🔥'
+                    easy: 'קל',
+                    medium: 'בינוני',
+                    hard: 'קשה'
                 };
                 
                 document.getElementById('victoryTime').textContent = this.game.formatTime(timeInSeconds);
@@ -1583,7 +1583,7 @@
         let gameState, uiController;
 
         console.log('═══════════════════════════════════════════');
-        console.log('🎮 Sudoku Master Ultimate v7.1');
+        console.log('Sudoku v7.1');
         console.log('═══════════════════════════════════════════');
 
         window.addEventListener('DOMContentLoaded', () => {
