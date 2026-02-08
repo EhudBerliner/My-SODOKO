@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#4A90E2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Sudoku Master Ultimate - V7.3</title>
+    <title>Sudoku  - V7.4</title>
     <link rel="manifest" href="manifest.json">
     <style>
         :root {
@@ -188,16 +188,22 @@
         }
 
         /* Vertical division - after columns 3 and 6 (cells 3,6,12,15,21,24,30,33,39,42,48,51,57,60,66,69,75,78) */
-        .cell:nth-child(3), .cell:nth-child(12), .cell:nth-child(21), 
-        .cell:nth-child(30), .cell:nth-child(39), .cell:nth-child(48),
-        .cell:nth-child(57), .cell:nth-child(66), .cell:nth-child(75) {
-            border-right: 3px solid var(--border-heavy);
+        /* קווי הפרדה אנכיים - גבול עבה בין הבלוקים (אחרי עמודה 3 ו-6) */
+        /* בגלל dir="rtl", הגבול השמאלי של התאים בעמודות האלו יוצר את ההפרדה */
+        .cell:nth-child(9n+3), 
+        .cell:nth-child(9n+6) {
+            border-left: 3px solid var(--border-heavy) !important;
         }
-
-        .cell:nth-child(6), .cell:nth-child(15), .cell:nth-child(24),
-        .cell:nth-child(33), .cell:nth-child(42), .cell:nth-child(51),
-        .cell:nth-child(60), .cell:nth-child(69), .cell:nth-child(78) {
-            border-right: 3px solid var(--border-heavy);
+        
+        /* קווי הפרדה אופקיים - גבול עבה בין הבלוקים (אחרי שורה 3 ו-6) */
+        .cell:nth-child(n+19):nth-child(-n+27),
+        .cell:nth-child(n+46):nth-child(-n+54) {
+            border-bottom: 3px solid var(--border-heavy) !important;
+        }
+        
+        /* תיקון קטן למניעת קפיצות של התאים בגלל עובי הגבול */
+        .cell {
+            box-sizing: border-box;
         }
 
         /* Horizontal division - after rows 3 and 6 (cells 19-27 and 46-54) */
@@ -535,8 +541,8 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <div class="app-title">Sudoku Master Ultimate</div>
-            <div class="version" id="versionBtn">גרסה 7.3</div>
+            <div class="app-title">Sudoku </div>
+            <div class="version" id="versionBtn">גרסה 7.4</div>
         </div>
 
         <!-- Top Bar -->
@@ -1511,7 +1517,7 @@
         }
 
         // ============= INITIALIZE APP =============
-        const APP_VERSION = '7.3';
+        const APP_VERSION = '7.4';
         let gameState, uiController;
 
         window.addEventListener('DOMContentLoaded', () => {
