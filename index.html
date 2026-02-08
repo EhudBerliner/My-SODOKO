@@ -795,26 +795,111 @@
                     attempts++;
                     
                     const backup = this.board[pos];
+        // ============= SUDOKU ENGINE =============
+        class SudokuEngine {
+            constructor() {
+                this.board = Array(81).fill(0);
+                this.solution = Array(81).fill(0);
+                this.fixed = Array(81).fill(false);
+                this.notes = Array(81).fill(null).map(() => new Set());
+            }
+
+            generateComplete() {
+                this.board = Array(81).fill(0);
+                this.fillDiagonalBlocks();
+                this.fillRemaining(0);
+                return [...this.board];
+            }
+
+            fillDiagonalBlocks() {
+                for (let block = 0; block < 3; block++) {
+                    const startRow = block * 3;
+                    const startCol = block * 3;
+                    const nums = this.shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+                    let idx = 0;
+                    for (let r = 0; r < 3; r++) {
+                        for (let c = 0; c < 3; c++) {
+                            const pos = (startRow + r) * 9 + (startCol + c);
+                            this.board[pos] = nums[idx++];
+                        }
+                    }
+                }
+            }
+
+            fillRemaining(pos) {
+                while (pos < 81 && this.board[pos] !== 0) pos++;
+                if (pos >= 81) return true;
+                const numbers = this.shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+                for (let num of numbers) {
+                    if (this.isValid(pos, num)) {
+                        this.board[pos] = num;
+                        if (this.fillRemaining(pos + 1)) return true;
+                        this.board[pos] = 0;
+                    }
+                }
+                return false;
+            }
+
+            isValid(pos, num) {
+                const row = Math.floor(pos / 9);
+                const col = pos % 9;
+                for (let c = 0; c < 9; c++) if (this.board[row * 9 + c] === num) return false;
+                for (let r = 0; r < 9; r++) if (this.board[r * 9 + col] === num) return false;
+                const blockRow = Math.floor(row / 3) * 3;
+                const blockCol = Math.floor(col / 3) * 3;
+                for (let r = blockRow; r < blockRow + 3; r++) {
+                    for (let c = blockCol; c < blockCol + 3; c++) {
+                        if (this.board[r * 9 + c] === num) return false;
+                    }
+                }
+                return true;
+            }
+
+            shuffle(array) {
+                const arr = [...array];
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+                return arr;
+            }
+
+            generatePuzzle(difficulty = 'medium') {
+                const targetMap = { 
+                    easy: 38,    // 43 מספרים גלויים
+                    medium: 52,  // 29 מספרים גלויים
+                    hard: 64     // 17 מספרים גלויים - רמת מומחה
+                };
+                
+                const complete = this.generateComplete();
+                this.solution = [...complete];
+                this.board = [...complete];
+                this.fixed = Array(81).fill(true);
+
+                const target = targetMap[difficulty] || 45;
+                const positions = Array.from({length: 81}, (_, i) => i);
+                this.shuffleArray(positions);
+                
+                let removed = 0;
+                const maxAttempts = 250; 
+                let attempts = 0;
+
+                for (let pos of positions) {
+                    if (removed >= target || attempts >= maxAttempts) break;
+                    attempts++;
+                    const backup = this.board[pos];
                     this.board[pos] = 0;
                     
                     if (this.hasUniqueSolution()) {
                         this.fixed[pos] = false;
                         removed++;
-                        attempts = 0;
+                        attempts = 0; 
                     } else {
                         this.board[pos] = backup;
                     }
                 }
-
                 this.notes = Array(81).fill(null).map(() => new Set());
-                
-                console.log(`Generated ${difficulty} puzzle: ${removed} cells removed`);
-                
-                return {
-                    board: [...this.board],
-                    solution: [...this.solution],
-                    fixed: [...this.fixed]
-                };
+                return { board: [...this.board], solution: [...this.solution], fixed: [...this.fixed] };
             }
 
             shuffleArray(array) {
@@ -826,8 +911,8 @@
 
             hasUniqueSolution() {
                 const solutions = [];
-                const board = [...this.board];
-                this.solveCount(board, solutions, 2);
+                const boardCopy = [...this.board];
+                this.solveCount(boardCopy, solutions, 2);
                 return solutions.length === 1;
             }
 
@@ -839,57 +924,60 @@
                     return;
                 }
                 for (let num = 1; num <= 9; num++) {
-                    const tempBoard = [...board];
-                    this.board = tempBoard;
-                    if (this.isValid(pos, num)) {
-                        tempBoard[pos] = num;
-                        this.solveCount(tempBoard, solutions, limit);
+                    if (this.isSafeToPlace(board, pos, num)) {
+                        board[pos] = num;
+                        this.solveCount(board, solutions, limit);
+                        board[pos] = 0;
                     }
                 }
-                this.board = board;
+            }
+
+            isSafeToPlace(board, pos, num) {
+                const row = Math.floor(pos / 9);
+                const col = pos % 9;
+                for (let i = 0; i < 9; i++) {
+                    if (board[row * 9 + i] === num || board[i * 9 + col] === num) return false;
+                }
+                const startRow = Math.floor(row / 3) * 3;
+                const startCol = Math.floor(col / 3) * 3;
+                for (let r = 0; r < 3; r++) {
+                    for (let c = 0; c < 3; c++) {
+                        if (board[(startRow + r) * 9 + (startCol + c)] === num) return false;
+                    }
+                }
+                return true;
             }
 
             getConflicts(pos, num) {
                 const conflicts = new Set();
                 const row = Math.floor(pos / 9);
                 const col = pos % 9;
-
                 for (let c = 0; c < 9; c++) {
                     const checkPos = row * 9 + c;
-                    if (checkPos !== pos && this.board[checkPos] === num) {
-                        conflicts.add(checkPos);
-                    }
+                    if (checkPos !== pos && this.board[checkPos] === num) conflicts.add(checkPos);
                 }
-
                 for (let r = 0; r < 9; r++) {
                     const checkPos = r * 9 + col;
-                    if (checkPos !== pos && this.board[checkPos] === num) {
-                        conflicts.add(checkPos);
-                    }
+                    if (checkPos !== pos && this.board[checkPos] === num) conflicts.add(checkPos);
                 }
-
                 const blockRow = Math.floor(row / 3) * 3;
                 const blockCol = Math.floor(col / 3) * 3;
                 for (let r = blockRow; r < blockRow + 3; r++) {
                     for (let c = blockCol; c < blockCol + 3; c++) {
                         const checkPos = r * 9 + c;
-                        if (checkPos !== pos && this.board[checkPos] === num) {
-                            conflicts.add(checkPos);
-                        }
+                        if (checkPos !== pos && this.board[checkPos] === num) conflicts.add(checkPos);
                     }
                 }
-
                 return conflicts;
             }
 
             countNumber(num) {
                 let count = 0;
-                for (let i = 0; i < 81; i++) {
-                    if (this.board[i] === num) count++;
-                }
+                for (let i = 0; i < 81; i++) if (this.board[i] === num) count++;
                 return count;
             }
         }
+
 
         // ============= GAME STATE MANAGER =============
         class GameState {
