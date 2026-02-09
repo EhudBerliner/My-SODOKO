@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#4A90E2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Sudoku Pro - V8.0</title>
+    <title>Sudoku Pro - V8.1</title>
     <link rel="manifest" href="manifest.json">
     <style>
         :root {
@@ -32,22 +32,25 @@
         }
 
         [data-theme="dark"] {
-            --bg-primary: #1a1a1a;
-            --bg-secondary: #2d2d2d;
-            --bg-tertiary: #404040;
-            --text-primary: #e5e5e5;
-            --text-secondary: #a0a0a0;
-            --border-light: #808080;
-            --border-medium: #606060;
-            --border-heavy: #808080;
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-light: #475569;
+            --border-medium: #64748b;
+            --border-heavy: #cbd5e1;
             --cell-fixed: #60a5fa;
             --cell-fixed-bg: #1e3a5f;
-            --cell-user: #e5e5e5;
-            --cell-selected: #1e3a5f;
-            --cell-highlighted: #2d4a6f;
-            --cell-conflict: #4a1a1a;
-            --cell-error: #dc2626;
-            --shadow: rgba(0, 0, 0, 0.3);
+            --cell-user: #f1f5f9;
+            --cell-selected: #3b82f6;
+            --cell-highlighted: #2563eb;
+            --cell-conflict: #7f1d1d;
+            --cell-error: #ef4444;
+            --btn-primary: #3b82f6;
+            --btn-success: #10b981;
+            --btn-danger: #ef4444;
+            --shadow: rgba(0, 0, 0, 0.5);
         }
 
         * {
@@ -71,7 +74,7 @@
         .container {
             max-width: 600px;
             margin: 0 auto;
-            padding: 8px;
+            padding: 4px;
             height: 100%;
             display: flex;
             flex-direction: column;
@@ -171,7 +174,7 @@
             box-shadow: 0 4px 12px var(--shadow);
             aspect-ratio: 1;
             width: 100%;
-            max-width: 500px;
+            max-width: 100%;
         }
 
         .cell {
@@ -181,7 +184,7 @@
             justify-content: center;
             background: var(--bg-primary);
             border: 0.5px solid var(--border-light);
-            font-size: clamp(20px, 5vw, 32px);
+            font-size: clamp(28px, 7vw, 48px);
             font-weight: 700;
             cursor: pointer;
             transition: background-color 0.15s;
@@ -285,7 +288,7 @@
             border-radius: 8px;
             background: var(--bg-secondary);
             color: var(--text-primary);
-            font-size: 36px;
+            font-size: 42px;
             font-weight: 700;
             cursor: pointer;
             box-shadow: 0 2px 4px var(--shadow);
@@ -536,6 +539,87 @@
                 font-size: 18px;
             }
         }
+    
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            top: 110px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from {
+                transform: translateX(-50%) translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Install prompt */
+        #installPrompt {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 15px 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            display: none;
+            align-items: center;
+            gap: 15px;
+            z-index: 1500;
+            max-width: 90%;
+            border: 2px solid var(--btn-primary);
+        }
+        
+        #installPrompt.visible {
+            display: flex;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        #installPrompt button {
+            background: var(--btn-primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        #installPrompt .close-install {
+            color: #999;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
     </style>
 </head>
 <body data-theme="light">
@@ -770,7 +854,7 @@
             }
 
             generatePuzzle(difficulty = 'medium') {
-                // ========== V8.0 PROFESSIONAL PUZZLE GENERATOR ==========
+                // ========== V8.1 PROFESSIONAL PUZZLE GENERATOR ==========
                 // 4 difficulty levels with symmetry and unique solution verification
                 
                 const cellsToRemove = { 
@@ -780,7 +864,7 @@
                     expert: 64      // ~17 clues - MAXIMUM difficulty!
                 };
                 
-                console.log(`🎯 Generating ${difficulty.toUpperCase()} puzzle with V8.0 Pro Engine...`);
+                console.log(`🎯 Generating ${difficulty.toUpperCase()} puzzle with V8.1 Pro Engine...`);
                 const startTime = performance.now();
                 
                 // Step 1: Generate complete solution
@@ -1331,8 +1415,8 @@
                 this.menuOverlay.addEventListener('click', () => this.toggleMenu());
 
                 document.getElementById('versionBtn').addEventListener('click', () => {
-                    this.showReinstallModal();
-                });
+            showResetMenu();
+        });
 
                 document.getElementById('confirmReinstall').addEventListener('click', async () => {
                     await this.performReinstall();
@@ -1729,6 +1813,226 @@
                 }
             });
         }
+    
+    // ============= TOAST NOTIFICATIONS =============
+    function showToast(message, type = 'info') {
+        const toast = document.getElementById('toast');
+        if (!toast) return;
+        
+        toast.textContent = message;
+        toast.style.display = 'flex';
+        toast.style.background = type === 'error' 
+            ? 'rgba(239, 68, 68, 0.9)' 
+            : type === 'success'
+            ? 'rgba(16, 185, 129, 0.9)'
+            : 'rgba(0, 0, 0, 0.85)';
+        
+        setTimeout(() => { toast.style.display = 'none'; }, 3000);
+    }
+
+    // ============= PWA INSTALLATION =============
+    let deferredPrompt;
+    
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        const hasInstalled = localStorage.getItem('sudoku_pwa_installed');
+        const promptDismissed = localStorage.getItem('sudoku_install_dismissed');
+        
+        if (!hasInstalled && !promptDismissed) {
+            setTimeout(() => {
+                const prompt = document.getElementById('installPrompt');
+                if (prompt) prompt.classList.add('visible');
+            }, 10000); // Show after 10 seconds
+        }
+    });
+
+    const installBtn = document.getElementById('installBtn');
+    if (installBtn) {
+        installBtn.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            
+            if (outcome === 'accepted') {
+                localStorage.setItem('sudoku_pwa_installed', 'true');
+                showToast('האפליקציה מותקנת...', 'info');
+            }
+            
+            deferredPrompt = null;
+            const prompt = document.getElementById('installPrompt');
+            if (prompt) prompt.classList.remove('visible');
+        });
+    }
+
+    function closeInstallPrompt() {
+        const prompt = document.getElementById('installPrompt');
+        if (prompt) prompt.classList.remove('visible');
+        localStorage.setItem('sudoku_install_dismissed', 'true');
+    }
+
+    window.addEventListener('appinstalled', () => {
+        localStorage.setItem('sudoku_pwa_installed', 'true');
+        showToast('האפליקציה הותקנה בהצלחה!', 'success');
+        const prompt = document.getElementById('installPrompt');
+        if (prompt) prompt.classList.remove('visible');
+    });
+
+    // ============= APP RESET =============
+    window.resetApp = async function() {
+        if (!confirm('האם אתה בטוח שברצונך לאפס את האפליקציה? כל המידע השמור ימחק (משחקים, סטטיסטיקות, הגדרות).')) {
+            return;
+        }
+        
+        showToast('מאפס אפליקציה...', 'info');
+        
+        try {
+            // 1. Delete all caches
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                await Promise.all(
+                    cacheNames.map(cacheName => {
+                        console.log('Deleting cache:', cacheName);
+                        return caches.delete(cacheName);
+                    })
+                );
+            }
+            
+            // 2. Unregister all service workers
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                await Promise.all(
+                    registrations.map(registration => {
+                        console.log('Unregistering SW');
+                        return registration.unregister();
+                    })
+                );
+            }
+            
+            // 3. Clear localStorage
+            localStorage.clear();
+            
+            // 4. Clear sessionStorage
+            sessionStorage.clear();
+            
+            showToast('האפליקציה אופסה בהצלחה! טוען מחדש...', 'success');
+            
+            // 5. Reload after 1.5 seconds
+            setTimeout(() => {
+                window.location.reload(true);
+            }, 1500);
+            
+        } catch (error) {
+            console.error('Error resetting app:', error);
+            showToast('שגיאה באיפוס האפליקציה', 'error');
+        }
+    }
+
+    // ============= RESET MENU =============
+    window.showResetMenu = function() {
+        const menu = document.createElement('div');
+        menu.id = 'resetMenu';
+        menu.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5000;
+            backdrop-filter: blur(4px);
+        `;
+        
+        menu.innerHTML = `
+            <div style="
+                background: var(--bg-primary);
+                border-radius: 15px;
+                padding: 25px;
+                max-width: 400px;
+                width: 90%;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            ">
+                <h3 style="margin: 0 0 15px 0; color: var(--btn-primary); text-align: center;">
+                    ⚙️ הגדרות מתקדמות
+                </h3>
+                
+                <div style="margin-bottom: 20px; padding: 15px; background: var(--bg-secondary); border-radius: 8px;">
+                    <div style="font-weight: bold; margin-bottom: 5px;">גרסת אפליקציה:</div>
+                    <div style="font-family: monospace; color: var(--btn-primary);">v8.1</div>
+                </div>
+                
+                <div style="margin-bottom: 15px; font-size: 0.95em; line-height: 1.5; color: var(--text-secondary);">
+                    <strong>איפוס התקנה</strong> ימחק:<br>
+                    • כל המטמון (Cache)<br>
+                    • Service Worker<br>
+                    • משחקים שמורים<br>
+                    • סטטיסטיקות<br>
+                    • הגדרות<br>
+                    <br>
+                    <span style="color: var(--btn-danger); font-weight: bold;">⚠️ פעולה זו בלתי הפיכה!</span>
+                </div>
+                
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="closeResetMenu()" style="
+                        flex: 1;
+                        padding: 12px;
+                        border: 2px solid var(--bg-tertiary);
+                        background: var(--bg-primary);
+                        color: var(--text-primary);
+                        border-radius: 8px;
+                        font-weight: bold;
+                        cursor: pointer;
+                    ">ביטול</button>
+                    
+                    <button onclick="closeResetMenu(); resetApp();" style="
+                        flex: 1;
+                        padding: 12px;
+                        border: none;
+                        background: var(--btn-danger);
+                        color: white;
+                        border-radius: 8px;
+                        font-weight: bold;
+                        cursor: pointer;
+                    ">
+                        🔄 אפס עכשיו
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        menu.onclick = (e) => {
+            if (e.target === menu) closeResetMenu();
+        };
+        
+        document.body.appendChild(menu);
+    }
+
+    window.closeResetMenu = function() {
+        const menu = document.getElementById('resetMenu');
+        if (menu) menu.remove();
+    }
+
+
     </script>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Install Prompt -->
+    <div id="installPrompt">
+        <span style="font-size: 1.5rem;">📱</span>
+        <div style="flex: 1;">
+            <div style="font-weight: bold; color: var(--btn-primary);">התקן את האפליקציה</div>
+            <div style="font-size: 0.9em; color: #666;">גישה מהירה ללא דפדפן</div>
+        </div>
+        <button id="installBtn">התקן</button>
+        <span class="close-install" onclick="closeInstallPrompt()">✕</span>
+    </div>
+
 </body>
 </html>
