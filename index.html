@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#4A90E2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Sudoku Pro - V8.1</title>
+    <title>Sudoku Pro - V8.2</title>
     <link rel="manifest" href="manifest.json">
     <style>
         :root {
@@ -627,7 +627,7 @@
         <!-- Header -->
         <div class="header">
             <div class="app-title" id="appTitle">Sudoku Pro</div>
-            <div class="version" id="versionBtn">Version 8.1</div>
+            <div class="version" id="versionBtn">Version 8.2</div>
         </div>
 
         <!-- Top Bar -->
@@ -699,7 +699,8 @@
             <h2>Select Difficulty</h2>
             <div id="resumeSection" style="display: none;">
                 <button class="modal-btn success" id="resumeBtn">Resume Saved Game</button>
-                <hr style="margin: 16px 0; opacity: 0.2;">
+                    <hr style="font-size: 11px; opacity: 0.7;">
+                //  <hr style="margin: 16px 0; opacity: 0.2;">
             </div>
             <div class="difficulty-grid">
                 <div class="difficulty-btn" data-difficulty="easy">Easy<br><small style="font-size: 11px; opacity: 0.7;">~43 clues</small></div>
@@ -854,7 +855,7 @@
             }
 
             generatePuzzle(difficulty = 'medium') {
-                // ========== V8.1 PROFESSIONAL PUZZLE GENERATOR ==========
+                // ========== V8.2 PROFESSIONAL PUZZLE GENERATOR ==========
                 // 4 difficulty levels with symmetry and unique solution verification
                 
                 const cellsToRemove = { 
@@ -864,7 +865,7 @@
                     expert: 64      // ~17 clues - MAXIMUM difficulty!
                 };
                 
-                console.log(`🎯 Generating ${difficulty.toUpperCase()} puzzle with V8.1 Pro Engine...`);
+                console.log(`🎯 Generating ${difficulty.toUpperCase()} puzzle with V8.2 Pro Engine...`);
                 const startTime = performance.now();
                 
                 // Step 1: Generate complete solution
@@ -1769,7 +1770,7 @@
         }
 
         // ============= INITIALIZE APP =============
-        const APP_VERSION = '8.1';
+        const APP_VERSION = '8.2';
         let gameState, uiController;
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -1963,7 +1964,7 @@
                 
                 <div style="margin-bottom: 20px; padding: 15px; background: var(--bg-secondary); border-radius: 8px;">
                     <div style="font-weight: bold; margin-bottom: 5px;">גרסת אפליקציה:</div>
-                    <div style="font-family: monospace; color: var(--btn-primary);">v8.1</div>
+                    <div style="font-family: monospace; color: var(--btn-primary);">v8.2</div>
                 </div>
                 
                 <div style="margin-bottom: 15px; font-size: 0.95em; line-height: 1.5; color: var(--text-secondary);">
