@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -542,16 +542,16 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <div class="app-title">Sudoku</div>
-            <div class="version" id="versionBtn">גרסה 8.0 Pro</div>
+            <div class="app-title" id="appTitle">Sudoku Pro</div>
+            <div class="version" id="versionBtn">Version 8.0</div>
         </div>
 
         <!-- Top Bar -->
         <div class="top-bar">
             <div class="timer" id="timer">00:00</div>
             <div class="top-buttons">
-                <button class="icon-btn" id="undoBtn" title="ביטול">↶</button>
-                <button class="icon-btn" id="menuBtn" title="תפריט">⋮</button>
+                <button class="icon-btn" id="undoBtn" title="Undo">↶</button>
+                <button class="icon-btn" id="menuBtn" title="Menu">⋮</button>
             </div>
         </div>
 
@@ -563,22 +563,20 @@
         <!-- Number Pad -->
         <div class="number-pad">
             <div class="number-row first">
-                <button class="num-btn" data-num="6">6</button>
-                <button class="num-btn" data-num="5">5</button>
-                <button class="num-btn" data-num="4">4</button>
-                <button class="num-btn" data-num="3">3</button>
-                <button class="num-btn" data-num="2">2</button>
                 <button class="num-btn" data-num="1">1</button>
+                <button class="num-btn" data-num="2">2</button>
+                <button class="num-btn" data-num="3">3</button>
+                <button class="num-btn" data-num="4">4</button>
+                <button class="num-btn" data-num="5">5</button>
+                <button class="num-btn" data-num="6">6</button>
             </div>
             <div class="number-row second">
-            
-             <button class="num-btn placeholder"></button>  
-                <button class="num-btn notes" id="noteBtn">✏️</button> 
-                <button class="num-btn delete" data-num="0">🗑️</button>
-                <button class="num-btn" data-num="9">9</button>
-                <button class="num-btn" data-num="8">8</button>
                 <button class="num-btn" data-num="7">7</button>
-                
+                <button class="num-btn" data-num="8">8</button>
+                <button class="num-btn" data-num="9">9</button>
+                <button class="num-btn delete" data-num="0">🗑️</button>
+                <button class="num-btn notes" id="noteBtn">✏️</button> 
+                <button class="num-btn placeholder"></button>  
             </div>
         </div>
     </div>
@@ -586,27 +584,27 @@
     <!-- Hamburger Menu -->
     <div class="menu-overlay" id="menuOverlay"></div>
     <div class="menu-panel" id="menuPanel">
-        <div class="menu-header">תפריט</div>
+        <div class="menu-header">Menu</div>
         <div class="menu-items">
             <div class="menu-item" id="newGameMenu">
                 <div class="menu-item-icon">🎮</div>
-                <div>משחק חדש</div>
+                <div>New Game</div>
             </div>
             <div class="menu-item" id="hintMenu">
                 <div class="menu-item-icon">💡</div>
-                <div>רמז</div>
+                <div>Hint</div>
             </div>
             <div class="menu-item" id="redoMenu">
                 <div class="menu-item-icon">↷</div>
-                <div>חזור על פעולה</div>
+                <div>Redo</div>
             </div>
             <div class="menu-item" id="statsMenu">
                 <div class="menu-item-icon">📊</div>
-                <div>סטטיסטיקה</div>
+                <div>Statistics</div>
             </div>
             <div class="menu-item" id="themeMenu">
                 <div class="menu-item-icon">🌙</div>
-                <div>מצב כהה</div>
+                <div>Dark Mode</div>
             </div>
         </div>
     </div>
@@ -614,16 +612,16 @@
     <!-- Difficulty Modal -->
     <div class="modal" id="difficultyModal">
         <div class="modal-content">
-            <h2>בחר רמת קושי</h2>
+            <h2>Select Difficulty</h2>
             <div id="resumeSection" style="display: none;">
-                <button class="modal-btn success" id="resumeBtn">המשך משחק שמור</button>
+                <button class="modal-btn success" id="resumeBtn">Resume Saved Game</button>
                 <hr style="margin: 16px 0; opacity: 0.2;">
             </div>
             <div class="difficulty-grid">
-                <div class="difficulty-btn" data-difficulty="easy">קל<br><small style="font-size: 11px; opacity: 0.7;">~43 רמזים</small></div>
-                <div class="difficulty-btn" data-difficulty="medium">בינוני<br><small style="font-size: 11px; opacity: 0.7;">~33 רמזים</small></div>
-                <div class="difficulty-btn" data-difficulty="hard">קשה<br><small style="font-size: 11px; opacity: 0.7;">~23 רמזים</small></div>
-                <div class="difficulty-btn" data-difficulty="expert">מומחה 🔥<br><small style="font-size: 11px; opacity: 0.7;">~17 רמזים</small></div>
+                <div class="difficulty-btn" data-difficulty="easy">Easy<br><small style="font-size: 11px; opacity: 0.7;">~43 clues</small></div>
+                <div class="difficulty-btn" data-difficulty="medium">Medium<br><small style="font-size: 11px; opacity: 0.7;">~33 clues</small></div>
+                <div class="difficulty-btn" data-difficulty="hard">Hard<br><small style="font-size: 11px; opacity: 0.7;">~23 clues</small></div>
+                <div class="difficulty-btn" data-difficulty="expert">Expert 🔥<br><small style="font-size: 11px; opacity: 0.7;">~17 clues</small></div>
             </div>
         </div>
     </div>
@@ -631,11 +629,11 @@
     <!-- Victory Modal -->
     <div class="modal" id="victoryModal">
         <div class="modal-content">
-            <h2>🎉 כל הכבוד! 🎉</h2>
+            <h2>🎉 Congratulations! 🎉</h2>
             <p id="victoryTime" style="text-align: center; margin: 12px 0; font-size: 18px;"></p>
             <div class="modal-buttons">
-                <button class="modal-btn primary" id="newGameAfterWin">משחק חדש</button>
-                <button class="modal-btn secondary" id="closeVictory">סגור</button>
+                <button class="modal-btn primary" id="newGameAfterWin">New Game</button>
+                <button class="modal-btn secondary" id="closeVictory">Close</button>
             </div>
         </div>
     </div>
@@ -643,28 +641,28 @@
     <!-- Stats Modal -->
     <div class="modal" id="statsModal">
         <div class="modal-content">
-            <h2>📊 סטטיסטיקה</h2>
+            <h2>📊 Statistics</h2>
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-value" id="totalWins">0</div>
-                    <div class="stat-label">ניצחונות</div>
+                    <div class="stat-label">Wins</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value" id="bestTime">--:--</div>
-                    <div class="stat-label">שיא זמן</div>
+                    <div class="stat-label">Best Time</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value" id="avgHints">0</div>
-                    <div class="stat-label">ממוצע רמזים</div>
+                    <div class="stat-label">Avg. Hints</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value" id="gamesPlayed">0</div>
-                    <div class="stat-label">משחקים</div>
+                    <div class="stat-label">Games</div>
                 </div>
             </div>
             <div class="modal-buttons">
-                <button class="modal-btn danger" id="resetStats">איפוס סטטיסטיקה</button>
-                <button class="modal-btn secondary" id="closeStats">סגור</button>
+                <button class="modal-btn danger" id="resetStats">Reset Statistics</button>
+                <button class="modal-btn secondary" id="closeStats">Close</button>
             </div>
         </div>
     </div>
@@ -672,18 +670,18 @@
     <!-- Reinstall Modal -->
     <div class="modal" id="reinstallModal">
         <div class="modal-content">
-            <h2>⚠️ התקנה מחדש</h2>
+            <h2>⚠️ Reinstall</h2>
             <p style="text-align: center; margin: 16px 0; line-height: 1.6;">
-                פעולה זו תמחק את כל הנתונים:<br>
-                • משחק שמור<br>
-                • סטטיסטיקות<br>
-                • הגדרות<br>
+                This will delete all data:<br>
+                • Saved game<br>
+                • Statistics<br>
+                • Settings<br>
                 <br>
-                <strong>האם להמשיך?</strong>
+                <strong>Continue?</strong>
             </p>
             <div class="modal-buttons">
-                <button class="modal-btn danger" id="confirmReinstall">כן, מחק הכל והתקן מחדש</button>
-                <button class="modal-btn secondary" id="cancelReinstall">ביטול</button>
+                <button class="modal-btn danger" id="confirmReinstall">Yes, delete all and reinstall</button>
+                <button class="modal-btn secondary" id="cancelReinstall">Cancel</button>
             </div>
         </div>
     </div>
@@ -1386,6 +1384,7 @@
                 document.getElementById('resumeBtn')?.addEventListener('click', () => {
                     if (this.game.loadGame()) {
                         this.difficultyModal.classList.remove('active');
+                        this.updateDifficultyTitle(this.game.difficulty);
                         this.updateUI();
                     }
                 });
@@ -1404,7 +1403,7 @@
                 });
 
                 document.getElementById('resetStats').addEventListener('click', () => {
-                    if (confirm('האם אתה בטוח שברצונך לאפס את כל הסטטיסטיקה?')) {
+                    if (confirm('Are you sure you want to reset all statistics?')) {
                         this.game.stats = {
                             totalWins: 0,
                             gamesPlayed: 0,
@@ -1457,10 +1456,10 @@
                 const text = themeMenuItem.querySelector('div:last-child');
                 if (current === 'dark') {
                     icon.textContent = '☀️';
-                    text.textContent = 'מצב בהיר';
+                    text.textContent = 'Light Mode';
                 } else {
                     icon.textContent = '🌙';
-                    text.textContent = 'מצב כהה';
+                    text.textContent = 'Dark Mode';
                 }
             }
 
@@ -1538,7 +1537,19 @@
             startNewGame(difficulty) {
                 this.difficultyModal.classList.remove('active');
                 this.game.newGame(difficulty);
+                this.updateDifficultyTitle(difficulty);
                 this.updateUI();
+            }
+
+            updateDifficultyTitle(difficulty) {
+                const difficultyNames = {
+                    easy: 'Easy',
+                    medium: 'Medium',
+                    hard: 'Hard',
+                    expert: 'Expert 🔥'
+                };
+                const titleElement = document.getElementById('appTitle');
+                titleElement.textContent = `Sudoku Pro - ${difficultyNames[difficulty] || 'Medium'}`;
             }
 
             showStats() {
@@ -1632,13 +1643,13 @@
             showVictory() {
                 const usedHints = 3 - this.game.hints;
                 document.getElementById('victoryTime').textContent = 
-                    `זמן: ${this.game.formatTime(this.game.timer)} | רמזים: ${usedHints}`;
+                    `Time: ${this.game.formatTime(this.game.timer)} | Hints: ${usedHints}`;
                 this.victoryModal.classList.add('active');
             }
 
             showReinstallModal() {
                 if (!navigator.onLine) {
-                    alert('התקנה מחדש דורשת חיבור לאינטרנט');
+                    alert('Reinstall requires internet connection');
                     return;
                 }
                 document.getElementById('reinstallModal').classList.add('active');
@@ -1664,11 +1675,11 @@
                         }
                     }
                     
-                    alert('כל הנתונים נמחקו. העמוד ייטען מחדש.');
+                    alert('All data deleted. Page will reload.');
                     window.location.reload(true);
                 } catch (error) {
                     console.error('Reinstall error:', error);
-                    alert('שגיאה בתהליך ההתקנה מחדש: ' + error.message);
+                    alert('Reinstall error: ' + error.message);
                 }
             }
         }
