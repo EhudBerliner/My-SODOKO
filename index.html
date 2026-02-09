@@ -471,8 +471,8 @@
         }
 
         .difficulty-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            display: flex;
+            flex-direction: column; /* מסדר את האלמנטים בטור */
             gap: 12px;
             margin: 16px 0;
         }
@@ -627,7 +627,7 @@
         <!-- Header -->
         <div class="header">
             <div class="app-title" id="appTitle">Sudoku Pro</div>
-            <div class="version" id="versionBtn">Version 8.0</div>
+            <div class="version" id="versionBtn">Version 8.1</div>
         </div>
 
         <!-- Top Bar -->
@@ -1769,7 +1769,7 @@
         }
 
         // ============= INITIALIZE APP =============
-        const APP_VERSION = '8.0';
+        const APP_VERSION = '8.1';
         let gameState, uiController;
 
         window.addEventListener('DOMContentLoaded', () => {
