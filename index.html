@@ -6,31 +6,36 @@
     <meta name="theme-color" content="#4A90E2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
     <title>Sudoku Pro - V8.2</title>
+    
     <link rel="manifest" href="manifest.json">
+    
     <style>
+        /* CSS Variables: Centralized color management for consistent theming and easy maintenance */
         :root {
-            --bg-primary: #ffffff;
-            --bg-secondary: #f8f9fa;
-            --bg-tertiary: #e9ecef;
-            --text-primary: #212529;
-            --text-secondary: #6c757d;
-            --border-light: #212529;
-            --border-medium: #495057;
-            --border-heavy: #212529;
-            --cell-fixed: #212529;
-            --cell-fixed-bg: #e2e8f0;
-            --cell-user: #2d3748;
-            --cell-selected: #bfdbfe;
-            --cell-highlighted: #93c5fd;
-            --cell-conflict: #fee2e2;
-            --cell-error: #ef4444;
-            --btn-primary: #4A90E2;
-            --btn-success: #10b981;
-            --btn-danger: #ef4444;
-            --shadow: rgba(0, 0, 0, 0.1);
+            --bg-primary: #ffffff;      /* Main background color */
+            --bg-secondary: #f8f9fa;    /* Secondary background for UI elements */
+            --bg-tertiary: #e9ecef;     /* Background for buttons and placeholders */
+            --text-primary: #212529;    /* Primary text color */
+            --text-secondary: #6c757d;  /* Muted text for notes and secondary labels */
+            --border-light: #212529;    /* Standard cell border */
+            --border-medium: #495057;   /* Medium thickness borders */
+            --border-heavy: #212529;    /* Thick borders for 3x3 block separation */
+            --cell-fixed: #212529;      /* Color for pre-filled system numbers */
+            --cell-fixed-bg: #e2e8f0;   /* Background for pre-filled cells */
+            --cell-user: #2d3748;       /* Color for numbers entered by the user */
+            --cell-selected: #bfdbfe;   /* Background for the currently selected cell */
+            --cell-highlighted: #93c5fd; /* Background for cells with the same number or region */
+            --cell-conflict: #fee2e2;    /* Background color when a rule is violated (error) */
+            --cell-error: #ef4444;       /* Text color for conflicting numbers */
+            --btn-primary: #4A90E2;     /* Primary action button color */
+            --btn-success: #10b981;     /* Success/Resume action color */
+            --btn-danger: #ef4444;      /* Destructive/Delete action color */
+            --shadow: rgba(0, 0, 0, 0.1); /* Standard UI shadow */
         }
 
+        /* Dark Mode Theme: Overrides root variables when data-theme="dark" is applied */
         [data-theme="dark"] {
             --bg-primary: #0f172a;
             --bg-secondary: #1e293b;
@@ -53,6 +58,7 @@
             --shadow: rgba(0, 0, 0, 0.5);
         }
 
+        /* Reset and Global Styles */
         * {
             margin: 0;
             padding: 0;
@@ -64,13 +70,14 @@
             background: var(--bg-primary);
             color: var(--text-primary);
             transition: background-color 0.3s;
-            position: fixed;
+            position: fixed; /* Prevents unwanted bounce effects on mobile scroll */
             width: 100%;
             height: 100vh;
-            height: -webkit-fill-available;
+            height: -webkit-fill-available; /* Handles mobile browser address bar height */
             overflow: hidden;
         }
 
+        /* Layout Containers */
         .container {
             max-width: 600px;
             margin: 0 auto;
@@ -80,7 +87,7 @@
             flex-direction: column;
         }
 
-        /* Header */
+        /* Header Components */
         .header {
             text-align: center;
             margin-bottom: 8px;
@@ -105,7 +112,7 @@
             color: var(--btn-primary);
         }
 
-        /* Top Bar */
+        /* Top Control Bar: Timer and high-level actions */
         .top-bar {
             display: flex;
             justify-content: space-between;
@@ -121,7 +128,7 @@
             font-size: 20px;
             font-weight: 700;
             color: var(--btn-primary);
-            font-variant-numeric: tabular-nums;
+            font-variant-numeric: tabular-nums; /* Prevents shifting during time changes */
         }
 
         .top-buttons {
@@ -155,7 +162,7 @@
             cursor: not-allowed;
         }
 
-        /* Game Board */
+        /* Game Board Styling */
         .game-board-container {
             flex: 0 0 auto;
             display: flex;
@@ -177,6 +184,7 @@
             max-width: 100%;
         }
 
+        /* Sudoku Cell Styles */
         .cell {
             aspect-ratio: 1;
             display: flex;
@@ -184,7 +192,7 @@
             justify-content: center;
             background: var(--bg-primary);
             border: 0.5px solid var(--border-light);
-            font-size: clamp(28px, 7vw, 48px);
+            font-size: clamp(28px, 7vw, 48px); /* Responsive font sizing */
             font-weight: 700;
             cursor: pointer;
             transition: background-color 0.15s;
@@ -192,9 +200,10 @@
             user-select: none;
         }
 
+        /* Grid lines for 3x3 blocks separation */
         .cell:nth-child(9n+3), 
         .cell:nth-child(9n+6) {
-            border-left: 3px solid var(--border-heavy) !important;
+            border-right: 3px solid var(--border-heavy) !important;
         }
         
         .cell:nth-child(n+19):nth-child(-n+27),
@@ -202,8 +211,10 @@
             border-bottom: 3px solid var(--border-heavy) !important;
         }
         
-        .cell {
-            box-sizing: border-box;
+        /* Specific Fix for Left borders as requested in earlier version logic */
+        .cell:nth-child(9n+4), 
+        .cell:nth-child(9n+7) {
+            border-left: 0.5px solid var(--border-light);
         }
 
         .cell.fixed {
@@ -225,7 +236,6 @@
 
         .cell.highlighted {
             background: var(--cell-highlighted) !important;
-            /* box-shadow: inset 0 0 0 2px var(--btn-primary); */ 
         }
 
         .cell.conflict {
@@ -236,6 +246,7 @@
             z-index: 100;
         }
 
+        /* Note (Pencil Mark) Container within a cell */
         .cell .notes {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -255,13 +266,14 @@
             font-weight: 500;
         }
 
+        /* Error Feedback Animation */
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-4px); }
             75% { transform: translateX(4px); }
         }
 
-        /* Number Pad */
+        /* Number Pad: Interaction layer for inputting numbers */
         .number-pad {
             display: flex;
             flex-direction: column;
@@ -274,11 +286,7 @@
             gap: 6px;
         }
 
-        .number-row.first {
-            grid-template-columns: repeat(6, 1fr);
-        }
-
-        .number-row.second {
+        .number-row.first, .number-row.second {
             grid-template-columns: repeat(6, 1fr);
         }
 
@@ -307,13 +315,7 @@
             cursor: not-allowed;
         }
 
-        .num-btn.delete {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            font-size: 22px;
-        }
-
-        .num-btn.notes {
+        .num-btn.delete, .num-btn.notes {
             background: var(--bg-tertiary);
             font-size: 22px;
         }
@@ -328,7 +330,7 @@
             pointer-events: none;
         }
 
-        /* Hamburger Menu */
+        /* Overlay and Panel for Sidebar Menu */
         .menu-overlay {
             position: fixed;
             top: 0;
@@ -398,7 +400,7 @@
             text-align: center;
         }
 
-        /* Modal */
+        /* Modal Styles: Dialogs for Game Start, Stats, and Win conditions */
         .modal {
             display: none;
             position: fixed;
@@ -450,29 +452,15 @@
             transition: all 0.2s;
         }
 
-        .modal-btn.primary {
-            background: var(--btn-primary);
-            color: white;
-        }
+        .modal-btn.primary { background: var(--btn-primary); color: white; }
+        .modal-btn.success { background: var(--btn-success); color: white; }
+        .modal-btn.danger { background: var(--btn-danger); color: white; }
+        .modal-btn.secondary { background: var(--bg-tertiary); color: var(--text-primary); }
 
-        .modal-btn.success {
-            background: var(--btn-success);
-            color: white;
-        }
-
-        .modal-btn.danger {
-            background: var(--btn-danger);
-            color: white;
-        }
-
-        .modal-btn.secondary {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-        }
-
+        /* Vertical Difficulty Selection List */
         .difficulty-grid {
             display: flex;
-            flex-direction: column; /* מסדר את האלמנטים בטור */
+            flex-direction: column; 
             gap: 12px;
             margin: 16px 0;
         }
@@ -494,6 +482,7 @@
             color: white;
         }
 
+        /* Statistics Layout */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -520,27 +509,15 @@
             color: var(--text-secondary);
         }
 
+        /* Responsive UI adjustments for smaller mobile screens */
         @media (max-width: 480px) {
-            .container {
-                padding: 6px;
-            }
-
-            .num-btn {
-                font-size: 16px;
-            }
-
-            .icon-btn {
-                width: 36px;
-                height: 36px;
-                font-size: 16px;
-            }
-
-            .timer {
-                font-size: 18px;
-            }
+            .container { padding: 6px; }
+            .num-btn { font-size: 16px; }
+            .icon-btn { width: 36px; height: 36px; font-size: 16px; }
+            .timer { font-size: 18px; }
         }
     
-        /* Toast notifications */
+        /* Notification System: Toast styling */
         .toast {
             position: fixed;
             top: 110px;
@@ -560,17 +537,11 @@
         }
         
         @keyframes slideDown {
-            from {
-                transform: translateX(-50%) translateY(-20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(-50%) translateY(0);
-                opacity: 1;
-            }
+            from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
         }
 
-        /* Install prompt */
+        /* PWA Installation Prompt Style */
         #installPrompt {
             position: fixed;
             bottom: 80px;
@@ -594,14 +565,8 @@
         }
         
         @keyframes slideUp {
-            from {
-                transform: translateX(-50%) translateY(20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(-50%) translateY(0);
-                opacity: 1;
-            }
+            from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
         }
         
         #installPrompt button {
@@ -614,23 +579,17 @@
             cursor: pointer;
         }
         
-        #installPrompt .close-install {
-            color: #999;
-            cursor: pointer;
-            font-size: 1.2rem;
-        }
+        #installPrompt .close-install { color: #999; cursor: pointer; font-size: 1.2rem; }
 
     </style>
 </head>
 <body data-theme="light">
     <div class="container">
-        <!-- Header -->
         <div class="header">
             <div class="app-title" id="appTitle">Sudoku Pro</div>
             <div class="version" id="versionBtn">Version 8.2</div>
         </div>
 
-        <!-- Top Bar -->
         <div class="top-bar">
             <div class="timer" id="timer">00:00</div>
             <div class="top-buttons">
@@ -639,12 +598,10 @@
             </div>
         </div>
 
-        <!-- Game Board -->
         <div class="game-board-container">
             <div class="game-board" id="gameBoard"></div>
         </div>
 
-        <!-- Number Pad -->
         <div class="number-pad">
             <div class="number-row first">
                 <button class="num-btn" data-num="1">1</button>
@@ -665,7 +622,6 @@
         </div>
     </div>
 
-    <!-- Hamburger Menu -->
     <div class="menu-overlay" id="menuOverlay"></div>
     <div class="menu-panel" id="menuPanel">
         <div class="menu-header">Menu</div>
@@ -693,7 +649,6 @@
         </div>
     </div>
 
-    <!-- Difficulty Modal -->
     <div class="modal" id="difficultyModal">
         <div class="modal-content">
             <h2>Select Difficulty</h2>
@@ -710,7 +665,6 @@
         </div>
     </div>
 
-    <!-- Victory Modal -->
     <div class="modal" id="victoryModal">
         <div class="modal-content">
             <h2>🎉 Congratulations! 🎉</h2>
@@ -722,7 +676,6 @@
         </div>
     </div>
 
-    <!-- Stats Modal -->
     <div class="modal" id="statsModal">
         <div class="modal-content">
             <h2>📊 Statistics</h2>
@@ -751,7 +704,6 @@
         </div>
     </div>
 
-    <!-- Reinstall Modal -->
     <div class="modal" id="reinstallModal">
         <div class="modal-content">
             <h2>⚠️ Reinstall</h2>
@@ -772,6 +724,10 @@
 
     <script>
         // ============= SUDOKU ENGINE =============
+        /**
+         * SudokuEngine handles the core mathematical generation and logic.
+         * Includes solvers, puzzle generators, and validity checkers.
+         */
         class SudokuEngine {
             constructor() {
                 this.board = Array(81).fill(0);
@@ -780,13 +736,20 @@
                 this.notes = Array(81).fill(null).map(() => new Set());
             }
 
+            /**
+             * Generates a fully solved Sudoku board.
+             */
             generateComplete() {
                 this.board = Array(81).fill(0);
-                this.fillDiagonalBlocks();
-                this.fillRemaining(0);
+                this.fillDiagonalBlocks(); // Fast-start by filling independent 3x3 blocks
+                this.fillRemaining(0);     // Backtracking solver to fill the rest
                 return [...this.board];
             }
 
+            /**
+             * Diagonal blocks in Sudoku don't influence each other, 
+             * so we can fill them with random 1-9 sets safely.
+             */
             fillDiagonalBlocks() {
                 for (let block = 0; block < 3; block++) {
                     const startRow = block * 3;
@@ -803,6 +766,9 @@
                 }
             }
 
+            /**
+             * Recursive backtracking function to solve/fill the board.
+             */
             fillRemaining(pos) {
                 while (pos < 81 && this.board[pos] !== 0) {
                     pos++;
@@ -822,18 +788,24 @@
                 return false;
             }
 
+            /**
+             * Validates if placing a number at a position follows Sudoku rules.
+             */
             isValid(pos, num) {
                 const row = Math.floor(pos / 9);
                 const col = pos % 9;
 
+                // Row check
                 for (let c = 0; c < 9; c++) {
                     if (this.board[row * 9 + c] === num) return false;
                 }
 
+                // Column check
                 for (let r = 0; r < 9; r++) {
                     if (this.board[r * 9 + col] === num) return false;
                 }
 
+                // Block check (3x3)
                 const blockRow = Math.floor(row / 3) * 3;
                 const blockCol = Math.floor(col / 3) * 3;
                 for (let r = blockRow; r < blockRow + 3; r++) {
@@ -844,6 +816,9 @@
                 return true;
             }
 
+            /**
+             * Randomizes array order using Fisher-Yates algorithm.
+             */
             shuffle(array) {
                 const arr = [...array];
                 for (let i = arr.length - 1; i > 0; i--) {
@@ -853,21 +828,19 @@
                 return arr;
             }
 
+            /**
+             * Professional Puzzle Generator:
+             * Removes cells from a full board based on difficulty while ensuring 
+             * symmetry and a unique solution exists.
+             */
             generatePuzzle(difficulty = 'medium') {
-                // ========== V8.2 PROFESSIONAL PUZZLE GENERATOR ==========
-                // 4 difficulty levels with symmetry and unique solution verification
-                
                 const cellsToRemove = { 
-                    easy: 38,       // ~43 clues - beginner friendly
-                    medium: 48,     // ~33 clues - intermediate
-                    hard: 58,       // ~23 clues - advanced
-                    expert: 64      // ~17 clues - MAXIMUM difficulty!
+                    easy: 38, medium: 48, hard: 58, expert: 64 
                 };
                 
                 console.log(`🎯 Generating ${difficulty.toUpperCase()} puzzle with V8.2 Pro Engine...`);
                 const startTime = performance.now();
                 
-                // Step 1: Generate complete solution
                 const complete = this.generateComplete();
                 this.solution = [...complete];
                 this.board = [...complete];
@@ -875,37 +848,24 @@
 
                 const target = cellsToRemove[difficulty] || 48;
                 
-                // Step 2: Create symmetric pairs (180° rotation)
                 const symmetricPairs = this.createSymmetricPairs();
                 this.shuffleArray(symmetricPairs);
                 
                 let removed = 0;
                 let attempts = 0;
-                const maxAttempts = 250; // Increased for expert level
+                const maxAttempts = 250; 
                 
-                // ========== PHASE 1: SYMMETRIC REMOVAL ==========
-                console.log(`📐 Phase 1: Symmetric pair removal (target: ${target} cells)`);
-                
+                // PHASE 1: Symmetric Removal (Preserves 180° rotation visual style)
                 for (let pair of symmetricPairs) {
-                    if (removed >= target) break;
-                    if (attempts >= maxAttempts) {
-                        console.warn(`⚠️ Max attempts reached at ${removed} cells`);
-                        break;
-                    }
+                    if (removed >= target || attempts >= maxAttempts) break;
                     
                     attempts++;
-                    
-                    // Backup both positions
                     const backup1 = this.board[pair[0]];
                     const backup2 = this.board[pair[1]];
                     
-                    // Try removing both cells (or one if it's the center)
                     this.board[pair[0]] = 0;
-                    if (pair[0] !== pair[1]) { // Not center cell
-                        this.board[pair[1]] = 0;
-                    }
+                    if (pair[0] !== pair[1]) this.board[pair[1]] = 0;
                     
-                    // Verify unique solution
                     if (this.hasUniqueSolution()) {
                         this.fixed[pair[0]] = false;
                         if (pair[0] !== pair[1]) {
@@ -914,140 +874,68 @@
                         } else {
                             removed += 1;
                         }
-                        attempts = 0; // Reset on success
-                        
-                        if (removed % 10 === 0) {
-                            console.log(`   Progress: ${removed}/${target} cells removed`);
-                        }
+                        attempts = 0;
                     } else {
-                        // Restore if multiple solutions exist
                         this.board[pair[0]] = backup1;
-                        if (pair[0] !== pair[1]) {
-                            this.board[pair[1]] = backup2;
-                        }
+                        if (pair[0] !== pair[1]) this.board[pair[1]] = backup2;
                     }
                 }
                 
-                console.log(`   ✓ Symmetric phase complete: ${removed}/${target} cells`);
-                
-                // ========== PHASE 2: SINGLE CELL REMOVAL ==========
+                // PHASE 2: Single Cell Strategic Removal (To reach target clue count)
                 if (removed < target) {
-                    console.log(`📝 Phase 2: Strategic single cell removal (${target - removed} remaining)`);
-                    
-                    // Collect remaining filled cells
                     const remainingCells = [];
-                    for (let i = 0; i < 81; i++) {
-                        if (this.board[i] !== 0) {
-                            remainingCells.push(i);
-                        }
-                    }
-                    
-                    // Prioritize cells that create logical bottlenecks
+                    for (let i = 0; i < 81; i++) if (this.board[i] !== 0) remainingCells.push(i);
                     this.shuffleArray(remainingCells);
                     
                     attempts = 0;
                     for (let pos of remainingCells) {
-                        if (removed >= target) break;
-                        if (attempts >= maxAttempts * 2) {
-                            console.warn(`⚠️ Phase 2 max attempts reached`);
-                            break;
-                        }
-                        
+                        if (removed >= target || attempts >= maxAttempts * 2) break;
                         attempts++;
                         const backup = this.board[pos];
                         this.board[pos] = 0;
-                        
                         if (this.hasUniqueSolution()) {
                             this.fixed[pos] = false;
                             removed++;
                             attempts = 0;
-                            
-                            if ((removed - (target - (target - removed))) % 5 === 0) {
-                                console.log(`   Progress: ${removed}/${target} cells`);
-                            }
                         } else {
                             this.board[pos] = backup;
                         }
                     }
-                    
-                    console.log(`   ✓ Single cell phase complete: ${removed}/${target} cells`);
                 }
 
                 this.notes = Array(81).fill(null).map(() => new Set());
-                
-                // ========== GENERATION SUMMARY ==========
-                const endTime = performance.now();
-                const duration = ((endTime - startTime) / 1000).toFixed(2);
-                const symmetryPercent = this.getSymmetryPercent();
-                
-                console.log(`\n✅ PUZZLE GENERATED SUCCESSFULLY!`);
-                console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-                console.log(`   🎲 Difficulty: ${difficulty.toUpperCase()}`);
-                console.log(`   📊 Cells removed: ${removed}/${target}`);
-                console.log(`   🎯 Clues given: ${81 - removed}`);
-                console.log(`   🔄 Symmetry: ${symmetryPercent >= 0.95 ? 'PERFECT ✓' : Math.round(symmetryPercent * 100) + '%'}`);
-                console.log(`   ⏱️ Generation time: ${duration}s`);
-                console.log(`   ✔️ Unique solution: VERIFIED`);
-                console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
+                const duration = ((performance.now() - startTime) / 1000).toFixed(2);
                 
                 return {
                     board: [...this.board],
                     solution: [...this.solution],
                     fixed: [...this.fixed],
-                    metadata: {
-                        difficulty,
-                        cellsRemoved: removed,
-                        cluesGiven: 81 - removed,
-                        symmetry: symmetryPercent,
-                        generationTime: duration
-                    }
+                    metadata: { difficulty, cluesGiven: 81 - removed, generationTime: duration }
                 };
             }
 
+            /**
+             * Creates list of cell pairs for 180° rotational symmetry.
+             */
             createSymmetricPairs() {
-                // Create 180-degree rotational symmetry pairs
-                // Each position (i) pairs with position (80-i)
                 const pairs = [];
                 const used = new Set();
-                
                 for (let i = 0; i < 81; i++) {
                     if (used.has(i)) continue;
-                    
-                    const symmetric = 80 - i; // 180° rotation
-                    
-                    if (i === symmetric) {
-                        // Center cell (position 40) - pairs with itself
-                        pairs.push([i, i]);
-                        used.add(i);
-                    } else if (!used.has(symmetric)) {
-                        // Regular pair
-                        pairs.push([i, symmetric]);
-                        used.add(i);
-                        used.add(symmetric);
-                    }
+                    const symmetric = 80 - i;
+                    pairs.push([i, symmetric]);
+                    used.add(i);
+                    used.add(symmetric);
                 }
-                
                 return pairs;
             }
 
             getSymmetryPercent() {
-                // Calculate symmetry percentage (0-1)
                 let symmetricPairs = 0;
-                let totalPairs = 0;
-                
-                for (let i = 0; i < 41; i++) { // Check only half + center
-                    const symmetric = 80 - i;
-                    totalPairs++;
-                    
-                    const isEmpty1 = this.board[i] === 0;
-                    const isEmpty2 = this.board[symmetric] === 0;
-                    
-                    if (isEmpty1 === isEmpty2) {
-                        symmetricPairs++;
-                    }
+                for (let i = 0; i < 41; i++) {
+                    if ((this.board[i] === 0) === (this.board[80 - i] === 0)) symmetricPairs++;
                 }
-                
-                return symmetricPairs / totalPairs;
+                return symmetricPairs / 41;
             }
 
             shuffleArray(array) {
@@ -1057,6 +945,9 @@
                 }
             }
 
+            /**
+             * Checks if the board has exactly one valid solution.
+             */
             hasUniqueSolution() {
                 const solutions = [];
                 const board = [...this.board];
@@ -1082,6 +973,9 @@
                 this.board = board;
             }
 
+            /**
+             * Identifies which other cells conflict with a proposed move.
+             */
             getConflicts(pos, num) {
                 const conflicts = new Set();
                 const row = Math.floor(pos / 9);
@@ -1089,42 +983,35 @@
 
                 for (let c = 0; c < 9; c++) {
                     const checkPos = row * 9 + c;
-                    if (checkPos !== pos && this.board[checkPos] === num) {
-                        conflicts.add(checkPos);
-                    }
+                    if (checkPos !== pos && this.board[checkPos] === num) conflicts.add(checkPos);
                 }
-
                 for (let r = 0; r < 9; r++) {
                     const checkPos = r * 9 + col;
-                    if (checkPos !== pos && this.board[checkPos] === num) {
-                        conflicts.add(checkPos);
-                    }
+                    if (checkPos !== pos && this.board[checkPos] === num) conflicts.add(checkPos);
                 }
-
                 const blockRow = Math.floor(row / 3) * 3;
                 const blockCol = Math.floor(col / 3) * 3;
                 for (let r = blockRow; r < blockRow + 3; r++) {
                     for (let c = blockCol; c < blockCol + 3; c++) {
                         const checkPos = r * 9 + c;
-                        if (checkPos !== pos && this.board[checkPos] === num) {
-                            conflicts.add(checkPos);
-                        }
+                        if (checkPos !== pos && this.board[checkPos] === num) conflicts.add(checkPos);
                     }
                 }
-
                 return conflicts;
             }
 
             countNumber(num) {
                 let count = 0;
-                for (let i = 0; i < 81; i++) {
-                    if (this.board[i] === num) count++;
-                }
+                for (let i = 0; i < 81; i++) if (this.board[i] === num) count++;
                 return count;
             }
         }
 
         // ============= GAME STATE MANAGER =============
+        /**
+         * GameState manages persistence, history (undo/redo), 
+         * player progress, and session data.
+         */
         class GameState {
             constructor() {
                 this.engine = new SudokuEngine();
@@ -1142,10 +1029,7 @@
             loadStats() {
                 const stored = localStorage.getItem('sudoku_stats');
                 return stored ? JSON.parse(stored) : {
-                    totalWins: 0,
-                    gamesPlayed: 0,
-                    bestTime: null,
-                    totalHints: 0
+                    totalWins: 0, gamesPlayed: 0, bestTime: null, totalHints: 0
                 };
             }
 
@@ -1173,6 +1057,9 @@
                 this.saveStats();
             }
 
+            /**
+             * Stores current board state in the history stack.
+             */
             saveSnapshot() {
                 if (this.historyIndex < this.history.length - 1) {
                     this.history = this.history.slice(0, this.historyIndex + 1);
@@ -1213,13 +1100,13 @@
                 return false;
             }
 
+            /**
+             * Orchestrates placing a number or note on the board.
+             */
             placeNumber(pos, num) {
                 if (this.engine.fixed[pos]) return { success: false };
 
-                // Check if number is already at max count (9)
-                if (num !== 0 && this.engine.countNumber(num) >= 9) {
-                    return { success: false, maxed: true };
-                }
+                if (num !== 0 && this.engine.countNumber(num) >= 9) return { success: false, maxed: true };
 
                 if (num === 0) {
                     this.engine.board[pos] = 0;
@@ -1230,62 +1117,47 @@
                 }
 
                 if (this.noteMode) {
-                    if (this.engine.notes[pos].has(num)) {
-                        this.engine.notes[pos].delete(num);
-                    } else {
-                        this.engine.notes[pos].add(num);
-                    }
+                    if (this.engine.notes[pos].has(num)) this.engine.notes[pos].delete(num);
+                    else this.engine.notes[pos].add(num);
                     this.saveSnapshot();
                     this.saveGame();
                     return { success: true };
                 } else {
                     const conflicts = this.engine.getConflicts(pos, num);
-                    if (conflicts.size > 0) {
-                        return { success: false, conflicts: Array.from(conflicts) };
-                    }
+                    if (conflicts.size > 0) return { success: false, conflicts: Array.from(conflicts) };
+                    
                     this.engine.board[pos] = num;
                     this.engine.notes[pos].clear();
                     this.saveSnapshot();
                     this.saveGame();
-                    if (this.checkWin()) {
-                        this.onWin();
-                    }
+                    if (this.checkWin()) this.onWin();
                     return { success: true };
                 }
             }
 
             giveHint() {
-                if (this.hints <= 0 || this.selectedCell === null) return false;
-                if (this.engine.fixed[this.selectedCell]) return false;
+                if (this.hints <= 0 || this.selectedCell === null || this.engine.fixed[this.selectedCell]) return false;
+                
                 const correctNum = this.engine.solution[this.selectedCell];
                 this.engine.board[this.selectedCell] = correctNum;
                 this.engine.notes[this.selectedCell].clear();
                 this.hints--;
                 this.saveSnapshot();
                 this.saveGame();
-                if (this.checkWin()) {
-                    this.onWin();
-                }
+                if (this.checkWin()) this.onWin();
                 return true;
             }
 
             checkWin() {
-                for (let i = 0; i < 81; i++) {
-                    if (this.engine.board[i] !== this.engine.solution[i]) {
-                        return false;
-                    }
-                }
+                for (let i = 0; i < 81; i++) if (this.engine.board[i] !== this.engine.solution[i]) return false;
                 return true;
             }
 
             onWin() {
                 this.stopTimer();
                 this.stats.totalWins++;
-                const usedHints = 3 - this.hints;
-                this.stats.totalHints += usedHints;
-                if (!this.stats.bestTime || this.timer < this.stats.bestTime) {
-                    this.stats.bestTime = this.timer;
-                }
+                this.stats.totalHints += (3 - this.hints);
+                if (!this.stats.bestTime || this.timer < this.stats.bestTime) this.stats.bestTime = this.timer;
                 this.saveStats();
                 this.clearSavedGame();
             }
@@ -1299,10 +1171,7 @@
             }
 
             stopTimer() {
-                if (this.timerInterval) {
-                    clearInterval(this.timerInterval);
-                    this.timerInterval = null;
-                }
+                if (this.timerInterval) { clearInterval(this.timerInterval); this.timerInterval = null; }
             }
 
             formatTime(seconds) {
@@ -1342,21 +1211,18 @@
                     this.historyIndex = gameData.historyIndex || -1;
                     this.startTimer();
                     return true;
-                } catch (e) {
-                    return false;
-                }
+                } catch (e) { return false; }
             }
 
-            clearSavedGame() {
-                localStorage.removeItem('sudoku_current_game');
-            }
-
-            hasSavedGame() {
-                return localStorage.getItem('sudoku_current_game') !== null;
-            }
+            clearSavedGame() { localStorage.removeItem('sudoku_current_game'); }
+            hasSavedGame() { return localStorage.getItem('sudoku_current_game') !== null; }
         }
 
         // ============= UI CONTROLLER =============
+        /**
+         * UIController manages DOM manipulation and user event listening.
+         * Connects the visual layer to the GameState logic.
+         */
         class UIController {
             constructor(gameState) {
                 this.game = gameState;
@@ -1386,6 +1252,9 @@
                 this.updateThemeMenuText();
             }
 
+            /**
+             * Dynamically populates the 9x9 HTML grid cells.
+             */
             createBoard() {
                 this.gameBoard.innerHTML = '';
                 for (let i = 0; i < 81; i++) {
@@ -1395,13 +1264,9 @@
                     
                     const row = Math.floor(i / 9);
                     const col = i % 9;
-                    const blockRow = Math.floor(row / 3);
-                    const blockCol = Math.floor(col / 3);
-                    const block = blockRow * 3 + blockCol;
-                    
                     cell.dataset.row = row;
                     cell.dataset.col = col;
-                    cell.dataset.block = block;
+                    cell.dataset.block = Math.floor(row / 3) * 3 + Math.floor(col / 3);
                     
                     cell.addEventListener('click', () => this.selectCell(i));
                     this.gameBoard.appendChild(cell);
@@ -1414,55 +1279,25 @@
                 this.noteBtn.addEventListener('click', () => this.toggleNoteMode());
                 this.menuOverlay.addEventListener('click', () => this.toggleMenu());
 
-                document.getElementById('versionBtn').addEventListener('click', () => {
-            showResetMenu();
-        });
+                document.getElementById('versionBtn').addEventListener('click', () => showResetMenu());
 
-                document.getElementById('confirmReinstall').addEventListener('click', async () => {
-                    await this.performReinstall();
-                });
-
+                document.getElementById('confirmReinstall').addEventListener('click', async () => await this.performReinstall());
                 document.getElementById('cancelReinstall').addEventListener('click', () => {
                     document.getElementById('reinstallModal').classList.remove('active');
                 });
 
-                document.getElementById('newGameMenu').addEventListener('click', () => {
-                    this.toggleMenu();
-                    this.showDifficultyModal();
-                });
-
-                document.getElementById('hintMenu').addEventListener('click', () => {
-                    this.toggleMenu();
-                    this.giveHint();
-                });
-
-                document.getElementById('redoMenu').addEventListener('click', () => {
-                    this.toggleMenu();
-                    this.redo();
-                });
-
-                document.getElementById('statsMenu').addEventListener('click', () => {
-                    this.toggleMenu();
-                    this.showStats();
-                });
-
-                document.getElementById('themeMenu').addEventListener('click', () => {
-                    this.toggleMenu();
-                    this.toggleTheme();
-                });
+                document.getElementById('newGameMenu').addEventListener('click', () => { this.toggleMenu(); this.showDifficultyModal(); });
+                document.getElementById('hintMenu').addEventListener('click', () => { this.toggleMenu(); this.giveHint(); });
+                document.getElementById('redoMenu').addEventListener('click', () => { this.toggleMenu(); this.redo(); });
+                document.getElementById('statsMenu').addEventListener('click', () => { this.toggleMenu(); this.showStats(); });
+                document.getElementById('themeMenu').addEventListener('click', () => { this.toggleMenu(); this.toggleTheme(); });
 
                 document.querySelectorAll('.num-btn[data-num]').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const num = parseInt(e.target.dataset.num);
-                        this.inputNumber(num);
-                    });
+                    btn.addEventListener('click', (e) => this.inputNumber(parseInt(e.target.dataset.num)));
                 });
 
                 document.querySelectorAll('.difficulty-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const difficulty = e.target.dataset.difficulty;
-                        this.startNewGame(difficulty);
-                    });
+                    btn.addEventListener('click', (e) => this.startNewGame(e.target.dataset.difficulty));
                 });
 
                 document.getElementById('resumeBtn')?.addEventListener('click', () => {
@@ -1478,46 +1313,27 @@
                     this.showDifficultyModal();
                 });
 
-                document.getElementById('closeVictory').addEventListener('click', () => {
-                    this.victoryModal.classList.remove('active');
-                });
-
-                document.getElementById('closeStats').addEventListener('click', () => {
-                    this.statsModal.classList.remove('active');
-                });
+                document.getElementById('closeVictory').addEventListener('click', () => this.victoryModal.classList.remove('active'));
+                document.getElementById('closeStats').addEventListener('click', () => this.statsModal.classList.remove('active'));
 
                 document.getElementById('resetStats').addEventListener('click', () => {
                     if (confirm('Are you sure you want to reset all statistics?')) {
-                        this.game.stats = {
-                            totalWins: 0,
-                            gamesPlayed: 0,
-                            bestTime: null,
-                            totalHints: 0
-                        };
+                        this.game.stats = { totalWins: 0, gamesPlayed: 0, bestTime: null, totalHints: 0 };
                         this.game.saveStats();
                         this.showStats();
                     }
                 });
 
+                // Physical Keyboard Support
                 document.addEventListener('keydown', (e) => {
-                    if (e.key >= '1' && e.key <= '9') {
-                        this.inputNumber(parseInt(e.key));
-                    } else if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0') {
-                        this.inputNumber(0);
-                    } else if (e.key === 'n' || e.key === 'N') {
-                        this.toggleNoteMode();
-                    } else if (e.ctrlKey && e.key === 'z') {
-                        e.preventDefault();
-                        this.undo();
-                    } else if (e.ctrlKey && e.key === 'y') {
-                        e.preventDefault();
-                        this.redo();
-                    }
+                    if (e.key >= '1' && e.key <= '9') this.inputNumber(parseInt(e.key));
+                    else if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0') this.inputNumber(0);
+                    else if (e.key.toLowerCase() === 'n') this.toggleNoteMode();
+                    else if (e.ctrlKey && e.key === 'z') { e.preventDefault(); this.undo(); }
+                    else if (e.ctrlKey && e.key === 'y') { e.preventDefault(); this.redo(); }
                 });
 
-                setInterval(() => {
-                    this.timer.textContent = this.game.formatTime(this.game.timer);
-                }, 1000);
+                setInterval(() => { this.timer.textContent = this.game.formatTime(this.game.timer); }, 1000);
             }
 
             toggleMenu() {
@@ -1526,8 +1342,7 @@
             }
 
             toggleTheme() {
-                const current = document.documentElement.getAttribute('data-theme');
-                const newTheme = current === 'dark' ? 'light' : 'dark';
+                const newTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
                 document.documentElement.setAttribute('data-theme', newTheme);
                 localStorage.setItem('sudoku_theme', newTheme);
                 this.updateThemeMenuText();
@@ -1538,13 +1353,8 @@
                 const themeMenuItem = document.getElementById('themeMenu');
                 const icon = themeMenuItem.querySelector('.menu-item-icon');
                 const text = themeMenuItem.querySelector('div:last-child');
-                if (current === 'dark') {
-                    icon.textContent = '☀️';
-                    text.textContent = 'Light Mode';
-                } else {
-                    icon.textContent = '🌙';
-                    text.textContent = 'Dark Mode';
-                }
+                icon.textContent = current === 'dark' ? '☀️' : '🌙';
+                text.textContent = current === 'dark' ? 'Light Mode' : 'Dark Mode';
             }
 
             selectCell(index) {
@@ -1554,67 +1364,28 @@
 
             inputNumber(num) {
                 if (this.game.selectedCell === null) return;
-
                 const result = this.game.placeNumber(this.game.selectedCell, num);
-
                 this.updateUI();
-                
-                if (!result.success && result.conflicts) {
-                    this.showConflicts(result.conflicts);
-                }
+                if (!result.success && result.conflicts) this.showConflicts(result.conflicts);
             }
 
             showConflicts(conflicts) {
                 const cells = this.gameBoard.querySelectorAll('.cell');
-                
-                if (this.game.selectedCell !== null) {
-                    cells[this.game.selectedCell].classList.add('conflict');
-                }
-                
-                conflicts.forEach(pos => {
-                    cells[pos].classList.add('conflict');
-                });
-
+                if (this.game.selectedCell !== null) cells[this.game.selectedCell].classList.add('conflict');
+                conflicts.forEach(pos => cells[pos].classList.add('conflict'));
                 setTimeout(() => {
-                    if (this.game.selectedCell !== null) {
-                        cells[this.game.selectedCell].classList.remove('conflict');
-                    }
-                    conflicts.forEach(pos => {
-                        cells[pos].classList.remove('conflict');
-                    });
+                    if (this.game.selectedCell !== null) cells[this.game.selectedCell].classList.remove('conflict');
+                    conflicts.forEach(pos => cells[pos].classList.remove('conflict'));
                 }, 600);
             }
 
-            toggleNoteMode() {
-                this.game.noteMode = !this.game.noteMode;
-                this.updateUI();
-            }
-
-            giveHint() {
-                if (this.game.giveHint()) {
-                    this.updateUI();
-                }
-            }
-
-            undo() {
-                if (this.game.undo()) {
-                    this.updateUI();
-                }
-            }
-
-            redo() {
-                if (this.game.redo()) {
-                    this.updateUI();
-                }
-            }
+            toggleNoteMode() { this.game.noteMode = !this.game.noteMode; this.updateUI(); }
+            giveHint() { if (this.game.giveHint()) this.updateUI(); }
+            undo() { if (this.game.undo()) this.updateUI(); }
+            redo() { if (this.game.redo()) this.updateUI(); }
 
             showDifficultyModal() {
-                const resumeSection = document.getElementById('resumeSection');
-                if (this.game.hasSavedGame()) {
-                    resumeSection.style.display = 'block';
-                } else {
-                    resumeSection.style.display = 'none';
-                }
+                document.getElementById('resumeSection').style.display = this.game.hasSavedGame() ? 'block' : 'none';
                 this.difficultyModal.classList.add('active');
             }
 
@@ -1626,27 +1397,16 @@
             }
 
             updateDifficultyTitle(difficulty) {
-                const difficultyNames = {
-                    easy: 'Easy',
-                    medium: 'Medium',
-                    hard: 'Hard',
-                    expert: 'Expert 🔥'
-                };
-                const titleElement = document.getElementById('appTitle');
-                titleElement.textContent = `Sudoku Pro - ${difficultyNames[difficulty] || 'Medium'}`;
+                const names = { easy: 'Easy', medium: 'Medium', hard: 'Hard', expert: 'Expert 🔥' };
+                document.getElementById('appTitle').textContent = `Sudoku Pro - ${names[difficulty] || 'Medium'}`;
             }
 
             showStats() {
                 const stats = this.game.stats;
                 document.getElementById('totalWins').textContent = stats.totalWins;
                 document.getElementById('gamesPlayed').textContent = stats.gamesPlayed;
-                document.getElementById('bestTime').textContent = stats.bestTime 
-                    ? this.game.formatTime(stats.bestTime) 
-                    : '--:--';
-                const avgHints = stats.totalWins > 0 
-                    ? (stats.totalHints / stats.totalWins).toFixed(1)
-                    : '0';
-                document.getElementById('avgHints').textContent = avgHints;
+                document.getElementById('bestTime').textContent = stats.bestTime ? this.game.formatTime(stats.bestTime) : '--:--';
+                document.getElementById('avgHints').textContent = stats.totalWins > 0 ? (stats.totalHints / stats.totalWins).toFixed(1) : '0';
                 this.statsModal.classList.add('active');
             }
 
@@ -1656,33 +1416,22 @@
                 this.updateNumberPad();
             }
 
+            /**
+             * Syncs the HTML grid with the internal engine board state.
+             */
             updateBoard() {
                 const cells = this.gameBoard.querySelectorAll('.cell');
-                
-                // Get selected number ONLY if a cell is selected that has a number
-                const selectedNum = (this.game.selectedCell !== null && 
-                                    this.game.engine.board[this.game.selectedCell] !== 0)
-                    ? this.game.engine.board[this.game.selectedCell] 
-                    : 0;
+                const selectedNum = (this.game.selectedCell !== null && this.game.engine.board[this.game.selectedCell] !== 0)
+                    ? this.game.engine.board[this.game.selectedCell] : 0;
                 
                 cells.forEach((cell, index) => {
                     cell.className = 'cell';
                     cell.innerHTML = '';
+                    if (this.game.engine.fixed[index]) cell.classList.add('fixed');
+                    else cell.classList.add('user');
 
-                    if (this.game.engine.fixed[index]) {
-                        cell.classList.add('fixed');
-                    } else {
-                        cell.classList.add('user');
-                    }
-
-                    if (index === this.game.selectedCell) {
-                        cell.classList.add('selected');
-                    }
-
-                    // Highlight same numbers ONLY when selectedNum is not 0
-                    if (selectedNum !== 0 && this.game.engine.board[index] === selectedNum) {
-                        cell.classList.add('highlighted');
-                    }
+                    if (index === this.game.selectedCell) cell.classList.add('selected');
+                    if (selectedNum !== 0 && this.game.engine.board[index] === selectedNum) cell.classList.add('highlighted');
 
                     if (this.game.engine.board[index] !== 0) {
                         cell.textContent = this.game.engine.board[index];
@@ -1690,81 +1439,59 @@
                         const notesDiv = document.createElement('div');
                         notesDiv.className = 'notes';
                         for (let i = 1; i <= 9; i++) {
-                            const noteSpan = document.createElement('span');
-                            noteSpan.textContent = this.game.engine.notes[index].has(i) ? i : '';
-                            notesDiv.appendChild(noteSpan);
+                            const span = document.createElement('span');
+                            span.textContent = this.game.engine.notes[index].has(i) ? i : '';
+                            notesDiv.appendChild(span);
                         }
                         cell.appendChild(notesDiv);
                     }
                 });
             }
 
+            /**
+             * Disables number buttons that have reached their max count (9 cells).
+             */
             updateNumberPad() {
-                // Disable buttons when number count reaches 9
                 for (let num = 1; num <= 9; num++) {
-                    const count = this.game.engine.countNumber(num);
                     const btn = document.querySelector(`.num-btn[data-num="${num}"]`);
-                    if (btn) {
-                        if (count >= 9) {
-                            btn.disabled = true;
-                        } else {
-                            btn.disabled = false;
-                        }
-                    }
+                    if (btn) btn.disabled = (this.game.engine.countNumber(num) >= 9);
                 }
             }
 
             updateControls() {
-                if (this.game.noteMode) {
-                    this.noteBtn.classList.add('active');
-                } else {
-                    this.noteBtn.classList.remove('active');
-                }
-
+                this.noteBtn.classList.toggle('active', this.game.noteMode);
                 this.undoBtn.disabled = this.game.historyIndex <= 0;
             }
 
             showVictory() {
-                const usedHints = 3 - this.game.hints;
                 document.getElementById('victoryTime').textContent = 
-                    `Time: ${this.game.formatTime(this.game.timer)} | Hints: ${usedHints}`;
+                    `Time: ${this.game.formatTime(this.game.timer)} | Hints: ${3 - this.game.hints}`;
                 this.victoryModal.classList.add('active');
             }
 
             showReinstallModal() {
-                if (!navigator.onLine) {
-                    alert('Reinstall requires internet connection');
-                    return;
-                }
+                if (!navigator.onLine) { alert('Reinstall requires internet connection'); return; }
                 document.getElementById('reinstallModal').classList.add('active');
             }
 
+            /**
+             * Purges all application data for a clean fresh state.
+             */
             async performReinstall() {
                 document.getElementById('reinstallModal').classList.remove('active');
-                
                 try {
                     localStorage.clear();
-                    
                     if ('serviceWorker' in navigator) {
-                        const registrations = await navigator.serviceWorker.getRegistrations();
-                        for (let registration of registrations) {
-                            await registration.unregister();
-                        }
+                        const regs = await navigator.serviceWorker.getRegistrations();
+                        for (let r of regs) await r.unregister();
                     }
-                    
                     if ('caches' in window) {
-                        const cacheNames = await caches.keys();
-                        for (let cacheName of cacheNames) {
-                            await caches.delete(cacheName);
-                        }
+                        const names = await caches.keys();
+                        for (let n of names) await caches.delete(n);
                     }
-                    
                     alert('All data deleted. Page will reload.');
                     window.location.reload(true);
-                } catch (error) {
-                    console.error('Reinstall error:', error);
-                    alert('Reinstall error: ' + error.message);
-                }
+                } catch (error) { alert('Reinstall error: ' + error.message); }
             }
         }
 
@@ -1785,66 +1512,43 @@
             uiController.showDifficultyModal();
         });
 
-        // Service Worker Registration
+        // Service Worker Management: Handles updates and offline caching
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', async () => {
                 try {
                     const registration = await navigator.serviceWorker.getRegistration();
-                    
-                    if (registration) {
-                        const currentVersion = localStorage.getItem('app_version');
-                        if (currentVersion !== APP_VERSION) {
-                            console.log('New version detected, updating...');
-                            await registration.unregister();
-                            const cacheNames = await caches.keys();
-                            for (let cacheName of cacheNames) {
-                                await caches.delete(cacheName);
-                            }
-                            localStorage.setItem('app_version', APP_VERSION);
-                        }
-                    } else {
-                        localStorage.setItem('app_version', APP_VERSION);
+                    if (registration && localStorage.getItem('app_version') !== APP_VERSION) {
+                        await registration.unregister();
+                        const names = await caches.keys();
+                        for (let n of names) await caches.delete(n);
                     }
-                    
+                    localStorage.setItem('app_version', APP_VERSION);
                     await navigator.serviceWorker.register('sw.js');
-                    console.log('Service Worker registered successfully');
-                } catch (err) {
-                    console.log('SW registration failed:', err);
-                }
+                } catch (err) { console.log('SW registration failed:', err); }
             });
         }
     
-    // ============= TOAST NOTIFICATIONS =============
+    // Toast Notification logic
     function showToast(message, type = 'info') {
         const toast = document.getElementById('toast');
         if (!toast) return;
-        
         toast.textContent = message;
         toast.style.display = 'flex';
-        toast.style.background = type === 'error' 
-            ? 'rgba(239, 68, 68, 0.9)' 
-            : type === 'success'
-            ? 'rgba(16, 185, 129, 0.9)'
-            : 'rgba(0, 0, 0, 0.85)';
-        
+        toast.style.background = type === 'error' ? 'rgba(239, 68, 68, 0.9)' : 
+                                 type === 'success' ? 'rgba(16, 185, 129, 0.9)' : 'rgba(0, 0, 0, 0.85)';
         setTimeout(() => { toast.style.display = 'none'; }, 3000);
     }
 
-    // ============= PWA INSTALLATION =============
+    // PWA Lifecycle: Handling the installation prompt
     let deferredPrompt;
-    
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
-        
-        const hasInstalled = localStorage.getItem('sudoku_pwa_installed');
-        const promptDismissed = localStorage.getItem('sudoku_install_dismissed');
-        
-        if (!hasInstalled && !promptDismissed) {
+        if (!localStorage.getItem('sudoku_pwa_installed') && !localStorage.getItem('sudoku_install_dismissed')) {
             setTimeout(() => {
                 const prompt = document.getElementById('installPrompt');
                 if (prompt) prompt.classList.add('visible');
-            }, 10000); // Show after 10 seconds
+            }, 10000);
         }
     });
 
@@ -1852,178 +1556,75 @@
     if (installBtn) {
         installBtn.addEventListener('click', async () => {
             if (!deferredPrompt) return;
-            
             deferredPrompt.prompt();
             const { outcome } = await deferredPrompt.userChoice;
-            
-            if (outcome === 'accepted') {
-                localStorage.setItem('sudoku_pwa_installed', 'true');
-                showToast('האפליקציה מותקנת...', 'info');
-            }
-            
+            if (outcome === 'accepted') localStorage.setItem('sudoku_pwa_installed', 'true');
             deferredPrompt = null;
-            const prompt = document.getElementById('installPrompt');
-            if (prompt) prompt.classList.remove('visible');
+            document.getElementById('installPrompt')?.classList.remove('visible');
         });
     }
 
     function closeInstallPrompt() {
-        const prompt = document.getElementById('installPrompt');
-        if (prompt) prompt.classList.remove('visible');
+        document.getElementById('installPrompt')?.classList.remove('visible');
         localStorage.setItem('sudoku_install_dismissed', 'true');
     }
 
     window.addEventListener('appinstalled', () => {
         localStorage.setItem('sudoku_pwa_installed', 'true');
         showToast('האפליקציה הותקנה בהצלחה!', 'success');
-        const prompt = document.getElementById('installPrompt');
-        if (prompt) prompt.classList.remove('visible');
+        document.getElementById('installPrompt')?.classList.remove('visible');
     });
 
-    // ============= APP RESET =============
+    // Master Reset Functionality
     window.resetApp = async function() {
-        if (!confirm('האם אתה בטוח שברצונך לאפס את האפליקציה? כל המידע השמור ימחק (משחקים, סטטיסטיקות, הגדרות).')) {
-            return;
-        }
-        
+        if (!confirm('האם אתה בטוח שברצונך לאפס את האפליקציה? כל המידע השמור ימחק.')) return;
         showToast('מאפס אפליקציה...', 'info');
-        
         try {
-            // 1. Delete all caches
             if ('caches' in window) {
-                const cacheNames = await caches.keys();
-                await Promise.all(
-                    cacheNames.map(cacheName => {
-                        console.log('Deleting cache:', cacheName);
-                        return caches.delete(cacheName);
-                    })
-                );
+                const names = await caches.keys();
+                await Promise.all(names.map(n => caches.delete(n)));
             }
-            
-            // 2. Unregister all service workers
             if ('serviceWorker' in navigator) {
-                const registrations = await navigator.serviceWorker.getRegistrations();
-                await Promise.all(
-                    registrations.map(registration => {
-                        console.log('Unregistering SW');
-                        return registration.unregister();
-                    })
-                );
+                const regs = await navigator.serviceWorker.getRegistrations();
+                await Promise.all(regs.map(r => r.unregister()));
             }
-            
-            // 3. Clear localStorage
             localStorage.clear();
-            
-            // 4. Clear sessionStorage
             sessionStorage.clear();
-            
             showToast('האפליקציה אופסה בהצלחה! טוען מחדש...', 'success');
-            
-            // 5. Reload after 1.5 seconds
-            setTimeout(() => {
-                window.location.reload(true);
-            }, 1500);
-            
-        } catch (error) {
-            console.error('Error resetting app:', error);
-            showToast('שגיאה באיפוס האפליקציה', 'error');
-        }
+            setTimeout(() => { window.location.reload(true); }, 1500);
+        } catch (error) { showToast('שגיאה באיפוס האפליקציה', 'error'); }
     }
 
-    // ============= RESET MENU =============
+    // Advanced Settings / Reset Menu UI
     window.showResetMenu = function() {
         const menu = document.createElement('div');
         menu.id = 'resetMenu';
-        menu.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 5000;
-            backdrop-filter: blur(4px);
-        `;
-        
+        menu.style.cssText = `position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: flex; align-items: center; justify-content: center; z-index: 5000; backdrop-filter: blur(4px);`;
         menu.innerHTML = `
-            <div style="
-                background: var(--bg-primary);
-                border-radius: 15px;
-                padding: 25px;
-                max-width: 400px;
-                width: 90%;
-                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            ">
-                <h3 style="margin: 0 0 15px 0; color: var(--btn-primary); text-align: center;">
-                    ⚙️ הגדרות מתקדמות
-                </h3>
-                
+            <div style="background: var(--bg-primary); border-radius: 15px; padding: 25px; max-width: 400px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+                <h3 style="margin: 0 0 15px 0; color: var(--btn-primary); text-align: center;">⚙️ הגדרות מתקדמות</h3>
                 <div style="margin-bottom: 20px; padding: 15px; background: var(--bg-secondary); border-radius: 8px;">
                     <div style="font-weight: bold; margin-bottom: 5px;">גרסת אפליקציה:</div>
                     <div style="font-family: monospace; color: var(--btn-primary);">v8.2</div>
                 </div>
-                
                 <div style="margin-bottom: 15px; font-size: 0.95em; line-height: 1.5; color: var(--text-secondary);">
-                    <strong>איפוס התקנה</strong> ימחק:<br>
-                    • כל המטמון (Cache)<br>
-                    • Service Worker<br>
-                    • משחקים שמורים<br>
-                    • סטטיסטיקות<br>
-                    • הגדרות<br>
-                    <br>
+                    <strong>איפוס התקנה</strong> ימחק את כל המידע המקומי.<br>
                     <span style="color: var(--btn-danger); font-weight: bold;">⚠️ פעולה זו בלתי הפיכה!</span>
                 </div>
-                
                 <div style="display: flex; gap: 10px;">
-                    <button onclick="closeResetMenu()" style="
-                        flex: 1;
-                        padding: 12px;
-                        border: 2px solid var(--bg-tertiary);
-                        background: var(--bg-primary);
-                        color: var(--text-primary);
-                        border-radius: 8px;
-                        font-weight: bold;
-                        cursor: pointer;
-                    ">ביטול</button>
-                    
-                    <button onclick="closeResetMenu(); resetApp();" style="
-                        flex: 1;
-                        padding: 12px;
-                        border: none;
-                        background: var(--btn-danger);
-                        color: white;
-                        border-radius: 8px;
-                        font-weight: bold;
-                        cursor: pointer;
-                    ">
-                        🔄 אפס עכשיו
-                    </button>
+                    <button onclick="closeResetMenu()" style="flex: 1; padding: 12px; border: 2px solid var(--bg-tertiary); background: var(--bg-primary); color: var(--text-primary); border-radius: 8px; font-weight: bold; cursor: pointer;">ביטול</button>
+                    <button onclick="closeResetMenu(); resetApp();" style="flex: 1; padding: 12px; border: none; background: var(--btn-danger); color: white; border-radius: 8px; font-weight: bold; cursor: pointer;">🔄 אפס עכשיו</button>
                 </div>
-            </div>
-        `;
-        
-        menu.onclick = (e) => {
-            if (e.target === menu) closeResetMenu();
-        };
-        
+            </div>`;
+        menu.onclick = (e) => { if (e.target === menu) closeResetMenu(); };
         document.body.appendChild(menu);
     }
 
-    window.closeResetMenu = function() {
-        const menu = document.getElementById('resetMenu');
-        if (menu) menu.remove();
-    }
-
-
+    window.closeResetMenu = function() { document.getElementById('resetMenu')?.remove(); }
     </script>
 
-    <!-- Toast notification -->
     <div id="toast" class="toast"></div>
 
-    <!-- Install Prompt -->
     <div id="installPrompt">
         <span style="font-size: 1.5rem;">📱</span>
         <div style="flex: 1;">
