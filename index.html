@@ -1765,31 +1765,7 @@
                 }
             });
         }
-        
-        // 1. פונקציה שנקראת כשפותחים תפריט
-            function openMenu() {
-                document.getElementById('menuPanel').classList.add('active');
-                document.getElementById('menuOverlay').classList.add('active');
-                
-                // מוסיפים "נקודה" בהיסטוריה כדי שלחצן ה-Back יתייחס אליה
-                history.pushState({ menuOpen: true }, "");
-            }
-            
-            // 2. האזנה לכפתור ה-Back של הטלפון
-            window.addEventListener('popstate', function(event) {
-                const menu = document.getElementById('menuPanel');
-                const overlay = document.getElementById('menuOverlay');
-            
-                // אם התפריט פתוח, נסגור אותו במקום לצאת מהדף
-                if (menu.classList.contains('active')) {
-                    menu.classList.remove('active');
-                    overlay.classList.remove('active');
-                }
-            });
-            
-            // 3. עדכון כפתור התפריט הקיים שלך
-            document.getElementById('menuBtn').addEventListener('click', openMenu);
-        
+              
     </script>
 </body>
 </html>
