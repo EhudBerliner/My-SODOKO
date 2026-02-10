@@ -1,7 +1,7 @@
 {
-  "name": "Sudoku Master Ultimate",
-  "short_name": "Sudoku",
-  "description": "משחק סודוקו מתקדם עם רמות קושי, רמזים, הערות ועוד - גרסה 8.3",
+  "name": "Sudoku Pro Ultimate",
+  "short_name": "Sudoku Pro",
+  "description": "Professional Sudoku game with 4 difficulty levels, hints, notes and more - Version 8.0",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -9,8 +9,8 @@
   "background_color": "#ffffff",
   "theme_color": "#4A90E2",
   "categories": ["games", "entertainment", "education"],
-  "lang": "he",
-  "dir": "rtl",
+  "lang": "en",
+  "dir": "ltr",
   "icons": [
     {
       "src": "logo3.png",
@@ -28,9 +28,9 @@
   ],
   "shortcuts": [
     {
-      "name": "משחק חדש - קל",
-      "short_name": "קל",
-      "description": "התחל משחק חדש ברמת קושי קלה",
+      "name": "New Game - Easy",
+      "short_name": "Easy",
+      "description": "Start a new easy game",
       "url": "./index.html?difficulty=easy",
       "icons": [
         {
@@ -40,9 +40,9 @@
       ]
     },
     {
-      "name": "משחק חדש - בינוני",
-      "short_name": "בינוני",
-      "description": "התחל משחק חדש ברמת קושי בינונית",
+      "name": "New Game - Medium",
+      "short_name": "Medium",
+      "description": "Start a new medium game",
       "url": "./index.html?difficulty=medium",
       "icons": [
         {
@@ -52,9 +52,9 @@
       ]
     },
     {
-      "name": "משחק חדש - קשה",
-      "short_name": "קשה",
-      "description": "התחל משחק חדש ברמת קושי גבוהה",
+      "name": "New Game - Hard",
+      "short_name": "Hard",
+      "description": "Start a new hard game",
       "url": "./index.html?difficulty=hard",
       "icons": [
         {
@@ -64,9 +64,21 @@
       ]
     },
     {
-      "name": "סטטיסטיקה",
-      "short_name": "סטטיסטיקה",
-      "description": "צפה בסטטיסטיקות המשחק שלך",
+      "name": "New Game - Expert",
+      "short_name": "Expert",
+      "description": "Start a new expert game",
+      "url": "./index.html?difficulty=expert",
+      "icons": [
+        {
+          "src": "logo3.png",
+          "sizes": "512x512"
+        }
+      ]
+    },
+    {
+      "name": "Statistics",
+      "short_name": "Stats",
+      "description": "View your game statistics",
       "url": "./index.html?view=stats",
       "icons": [
         {

@@ -6,11 +6,8 @@
     <meta name="theme-color" content="#4A90E2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Sudoku Pro - V8.3</title>
+    <title>Sudoku Pro - V8.0</title>
     <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/png" href="logo3.png">
-    <link rel="apple-touch-icon" href="logo3.png">
-
     <style>
         :root {
             --bg-primary: #ffffff;
@@ -24,8 +21,8 @@
             --cell-fixed: #212529;
             --cell-fixed-bg: #e2e8f0;
             --cell-user: #2d3748;
-            --cell-selected: #dbeafe;
-            --cell-highlighted: #bfdbfe;
+            --cell-selected: #bfdbfe;
+            --cell-highlighted: #93c5fd;
             --cell-conflict: #fee2e2;
             --cell-error: #ef4444;
             --btn-primary: #4A90E2;
@@ -35,25 +32,22 @@
         }
 
         [data-theme="dark"] {
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-tertiary: #334155;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --border-light: #475569;
-            --border-medium: #64748b;
-            --border-heavy: #cbd5e1;
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-tertiary: #404040;
+            --text-primary: #e5e5e5;
+            --text-secondary: #a0a0a0;
+            --border-light: #808080;
+            --border-medium: #606060;
+            --border-heavy: #808080;
             --cell-fixed: #60a5fa;
             --cell-fixed-bg: #1e3a5f;
-            --cell-user: #f1f5f9;
-            --cell-selected: #3b82f6;
-            --cell-highlighted: #2563eb;
-            --cell-conflict: #7f1d1d;
-            --cell-error: #ef4444;
-            --btn-primary: #3b82f6;
-            --btn-success: #10b981;
-            --btn-danger: #ef4444;
-            --shadow: rgba(0, 0, 0, 0.5);
+            --cell-user: #e5e5e5;
+            --cell-selected: #1e3a5f;
+            --cell-highlighted: #2d4a6f;
+            --cell-conflict: #4a1a1a;
+            --cell-error: #dc2626;
+            --shadow: rgba(0, 0, 0, 0.3);
         }
 
         * {
@@ -77,7 +71,7 @@
         .container {
             max-width: 600px;
             margin: 0 auto;
-            padding: 4px;
+            padding: 8px;
             height: 100%;
             display: flex;
             flex-direction: column;
@@ -177,7 +171,7 @@
             box-shadow: 0 4px 12px var(--shadow);
             aspect-ratio: 1;
             width: 100%;
-            max-width: 100%;
+            max-width: 500px;
         }
 
         .cell {
@@ -187,7 +181,7 @@
             justify-content: center;
             background: var(--bg-primary);
             border: 0.5px solid var(--border-light);
-            font-size: clamp(28px, 7vw, 48px);
+            font-size: clamp(20px, 5vw, 32px);
             font-weight: 700;
             cursor: pointer;
             transition: background-color 0.15s;
@@ -291,7 +285,7 @@
             border-radius: 8px;
             background: var(--bg-secondary);
             color: var(--text-primary);
-            font-size: 52px;
+            font-size: 36px;
             font-weight: 700;
             cursor: pointer;
             box-shadow: 0 2px 4px var(--shadow);
@@ -474,8 +468,8 @@
         }
 
         .difficulty-grid {
-            display: flex;
-            flex-direction: column; /* מסדר את האלמנטים בטור */
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 12px;
             margin: 16px 0;
         }
@@ -542,166 +536,6 @@
                 font-size: 18px;
             }
         }
-    
-        /* Toast notifications */
-        .toast {
-            position: fixed;
-            top: 110px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            z-index: 3000;
-            display: none;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-            animation: slideDown 0.3s ease;
-        }
-        
-        @keyframes slideDown {
-            from {
-                transform: translateX(-50%) translateY(-20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(-50%) translateY(0);
-                opacity: 1;
-            }
-        }
-
-        /* Install prompt */
-        #installPrompt {
-            position: fixed;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: white;
-            padding: 15px 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            display: none;
-            align-items: center;
-            gap: 15px;
-            z-index: 1500;
-            max-width: 90%;
-            border: 2px solid var(--btn-primary);
-        }
-        
-        #installPrompt.visible {
-            display: flex;
-            animation: slideUp 0.3s ease;
-        }
-        
-        @keyframes slideUp {
-            from {
-                transform: translateX(-50%) translateY(20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(-50%) translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        #installPrompt button {
-            background: var(--btn-primary);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        
-        #installPrompt .close-install {
-            color: #999;
-            cursor: pointer;
-            font-size: 1.2rem;
-        }
-
-    
-        /* ========== DESKTOP RESPONSIVE DESIGN ========== */
-        @media (min-width: 768px) {
-            body {
-                overflow: auto;
-            }
-            
-            .container {
-                max-width: 900px;
-                padding: 20px;
-            }
-            
-            .game-board-container {
-                margin-bottom: 20px;
-            }
-            
-            .game-board {
-                max-width: 650px;
-                margin: 0 auto;
-            }
-            
-            .number-pad {
-                max-width: 650px;
-                margin: 0 auto 20px;
-            }
-            
-            .header {
-                margin-bottom: 20px;
-            }
-            
-            .top-bar {
-                margin-bottom: 20px;
-                max-width: 650px;
-                margin-left: auto;
-                margin-right: auto;
-            }
-        }
-        
-        @media (min-width: 1024px) {
-            .container {
-                max-width: 1100px;
-                padding: 30px;
-            }
-            
-            .game-board {
-                max-width: 720px;
-            }
-            
-            .number-pad {
-                max-width: 720px;
-            }
-            
-            .top-bar {
-                max-width: 720px;
-            }
-            
-            .header {
-                margin-bottom: 25px;
-            }
-        }
-        
-        @media (min-width: 1440px) {
-            .container {
-                max-width: 1200px;
-            }
-            
-            .game-board {
-                max-width: 800px;
-            }
-            
-            .number-pad {
-                max-width: 800px;
-            }
-            
-            .top-bar {
-                max-width: 800px;
-            }
-        }
-
     </style>
 </head>
 <body data-theme="light">
@@ -709,7 +543,7 @@
         <!-- Header -->
         <div class="header">
             <div class="app-title" id="appTitle">Sudoku Pro</div>
-            <div class="version" id="versionBtn">Version 8.2</div>
+            <div class="version" id="versionBtn">Version 8.0</div>
         </div>
 
         <!-- Top Bar -->
@@ -770,11 +604,6 @@
             </div>
             <div class="menu-item" id="themeMenu">
                 <div class="menu-item-icon">🌙</div>
-            <div class="menu-item" id="uninstallMenu">
-                <div class="menu-item-icon">🗑️</div>
-                <div>הסר התקנה מלאה</div>
-            </div>
-            
                 <div>Dark Mode</div>
             </div>
         </div>
@@ -941,7 +770,7 @@
             }
 
             generatePuzzle(difficulty = 'medium') {
-                // ========== V8.3 PROFESSIONAL PUZZLE GENERATOR ==========
+                // ========== V8.0 PROFESSIONAL PUZZLE GENERATOR ==========
                 // 4 difficulty levels with symmetry and unique solution verification
                 
                 const cellsToRemove = { 
@@ -951,7 +780,7 @@
                     expert: 64      // ~17 clues - MAXIMUM difficulty!
                 };
                 
-                console.log(`🎯 Generating ${difficulty.toUpperCase()} puzzle with V8.3 Pro Engine...`);
+                console.log(`🎯 Generating ${difficulty.toUpperCase()} puzzle with V8.0 Pro Engine...`);
                 const startTime = performance.now();
                 
                 // Step 1: Generate complete solution
@@ -1502,8 +1331,8 @@
                 this.menuOverlay.addEventListener('click', () => this.toggleMenu());
 
                 document.getElementById('versionBtn').addEventListener('click', () => {
-            showResetMenu();
-        });
+                    this.showReinstallModal();
+                });
 
                 document.getElementById('confirmReinstall').addEventListener('click', async () => {
                     await this.performReinstall();
@@ -1856,7 +1685,7 @@
         }
 
         // ============= INITIALIZE APP =============
-        const APP_VERSION = '8.2';
+        const APP_VERSION = '8.0';
         let gameState, uiController;
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -1900,348 +1729,6 @@
                 }
             });
         }
-    
-    // ============= TOAST NOTIFICATIONS =============
-    function showToast(message, type = 'info') {
-        const toast = document.getElementById('toast');
-        if (!toast) return;
-        
-        toast.textContent = message;
-        toast.style.display = 'flex';
-        toast.style.background = type === 'error' 
-            ? 'rgba(239, 68, 68, 0.9)' 
-            : type === 'success'
-            ? 'rgba(16, 185, 129, 0.9)'
-            : 'rgba(0, 0, 0, 0.85)';
-        
-        setTimeout(() => { toast.style.display = 'none'; }, 3000);
-    }
-
-    // ============= PWA INSTALLATION =============
-    let deferredPrompt;
-    
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        
-        const hasInstalled = localStorage.getItem('sudoku_pwa_installed');
-        const promptDismissed = localStorage.getItem('sudoku_install_dismissed');
-        
-        if (!hasInstalled && !promptDismissed) {
-            setTimeout(() => {
-                const prompt = document.getElementById('installPrompt');
-                if (prompt) prompt.classList.add('visible');
-            }, 10000); // Show after 10 seconds
-        }
-    });
-
-    const installBtn = document.getElementById('installBtn');
-    if (installBtn) {
-        installBtn.addEventListener('click', async () => {
-            if (!deferredPrompt) return;
-            
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            
-            if (outcome === 'accepted') {
-                localStorage.setItem('sudoku_pwa_installed', 'true');
-                showToast('האפליקציה מותקנת...', 'info');
-            }
-            
-            deferredPrompt = null;
-            const prompt = document.getElementById('installPrompt');
-            if (prompt) prompt.classList.remove('visible');
-        });
-    }
-
-    function closeInstallPrompt() {
-        const prompt = document.getElementById('installPrompt');
-        if (prompt) prompt.classList.remove('visible');
-        localStorage.setItem('sudoku_install_dismissed', 'true');
-    }
-
-    window.addEventListener('appinstalled', () => {
-        localStorage.setItem('sudoku_pwa_installed', 'true');
-        showToast('האפליקציה הותקנה בהצלחה!', 'success');
-        const prompt = document.getElementById('installPrompt');
-        if (prompt) prompt.classList.remove('visible');
-    });
-
-    // ============= APP RESET =============
-    window.resetApp = async function() {
-        if (!confirm('האם אתה בטוח שברצונך לאפס את האפליקציה? כל המידע השמור ימחק (משחקים, סטטיסטיקות, הגדרות).')) {
-            return;
-        }
-        
-        showToast('מאפס אפליקציה...', 'info');
-        
-        try {
-            // 1. Delete all caches
-            if ('caches' in window) {
-                const cacheNames = await caches.keys();
-                await Promise.all(
-                    cacheNames.map(cacheName => {
-                        console.log('Deleting cache:', cacheName);
-                        return caches.delete(cacheName);
-                    })
-                );
-            }
-            
-            // 2. Unregister all service workers
-            if ('serviceWorker' in navigator) {
-                const registrations = await navigator.serviceWorker.getRegistrations();
-                await Promise.all(
-                    registrations.map(registration => {
-                        console.log('Unregistering SW');
-                        return registration.unregister();
-                    })
-                );
-            }
-            
-            // 3. Clear localStorage
-            localStorage.clear();
-            
-            // 4. Clear sessionStorage
-            sessionStorage.clear();
-            
-            showToast('האפליקציה אופסה בהצלחה! טוען מחדש...', 'success');
-            
-            // 5. Reload after 1.5 seconds
-            setTimeout(() => {
-                window.location.reload(true);
-            }, 1500);
-            
-        } catch (error) {
-            console.error('Error resetting app:', error);
-            showToast('שגיאה באיפוס האפליקציה', 'error');
-        }
-    }
-
-    // ============= RESET MENU =============
-    window.showResetMenu = function() {
-        const menu = document.createElement('div');
-        menu.id = 'resetMenu';
-        menu.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 5000;
-            backdrop-filter: blur(4px);
-        `;
-        
-        menu.innerHTML = `
-            <div style="
-                background: var(--bg-primary);
-                border-radius: 15px;
-                padding: 25px;
-                max-width: 400px;
-                width: 90%;
-                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            ">
-                <h3 style="margin: 0 0 15px 0; color: var(--btn-primary); text-align: center;">
-                    ⚙️ הגדרות מתקדמות
-                </h3>
-                
-                <div style="margin-bottom: 20px; padding: 15px; background: var(--bg-secondary); border-radius: 8px;">
-                    <div style="font-weight: bold; margin-bottom: 5px;">גרסת אפליקציה:</div>
-                    <div style="font-family: monospace; color: var(--btn-primary);">v8.3</div>
-                </div>
-                
-                <div style="margin-bottom: 15px; font-size: 0.95em; line-height: 1.5; color: var(--text-secondary);">
-                    <strong>איפוס התקנה</strong> ימחק:<br>
-                    • כל המטמון (Cache)<br>
-                    • Service Worker<br>
-                    • משחקים שמורים<br>
-                    • סטטיסטיקות<br>
-                    • הגדרות<br>
-                    <br>
-                    <span style="color: var(--btn-danger); font-weight: bold;">⚠️ פעולה זו בלתי הפיכה!</span>
-                </div>
-                
-                <div style="display: flex; gap: 10px;">
-                    <button onclick="closeResetMenu()" style="
-                        flex: 1;
-                        padding: 12px;
-                        border: 2px solid var(--bg-tertiary);
-                        background: var(--bg-primary);
-                        color: var(--text-primary);
-                        border-radius: 8px;
-                        font-weight: bold;
-                        cursor: pointer;
-                    ">ביטול</button>
-                    
-                    <button onclick="closeResetMenu(); resetApp();" style="
-                        flex: 1;
-                        padding: 12px;
-                        border: none;
-                        background: var(--btn-danger);
-                        color: white;
-                        border-radius: 8px;
-                        font-weight: bold;
-                        cursor: pointer;
-                    ">
-                        🔄 אפס עכשיו
-                    </button>
-                </div>
-            </div>
-        `;
-        
-        menu.onclick = (e) => {
-            if (e.target === menu) closeResetMenu();
-        };
-        
-        document.body.appendChild(menu);
-    }
-
-    window.closeResetMenu = function() {
-        const menu = document.getElementById('resetMenu');
-        if (menu) menu.remove();
-    }
-
-
-    
-    // ============= COMPLETE APP UNINSTALL =============
-    window.completeUninstall = async function() {
-        const confirmMessage = `⚠️ הסרה מלאה של האפליקציה ⚠️
-
-פעולה זו תמחק לצמיתות:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✗ כל קבצי המטמון (Cache)
-✗ Service Workers
-✗ משחקים שמורים
-✗ סטטיסטיקות
-✗ הגדרות אישיות  
-✗ LocalStorage
-✗ SessionStorage
-✗ IndexedDB
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-⚠️ פעולה זו בלתי הפיכה!
-
-האם אתה בטוח לחלוטין שברצונך להמשיך?`;
-
-        if (!confirm(confirmMessage)) {
-            console.log('[Uninstall] Cancelled by user');
-            return;
-        }
-
-        // Second confirmation
-        if (!confirm('זו ההזדמנות האחרונה לבטל!
-
-להמשיך בהסרה המלאה?')) {
-            console.log('[Uninstall] Cancelled on second confirmation');
-            return;
-        }
-
-        console.log('[Uninstall] Starting complete uninstall...');
-        showToast('מתחיל הסרה מלאה...', 'info');
-
-        try {
-            // 1. Delete all caches
-            if ('caches' in window) {
-                console.log('[Uninstall] Deleting all caches...');
-                const cacheNames = await caches.keys();
-                await Promise.all(cacheNames.map(name => {
-                    console.log('[Uninstall] Deleting cache:', name);
-                    return caches.delete(name);
-                }));
-                console.log('[Uninstall] ✓ All caches deleted');
-            }
-
-            // 2. Unregister all service workers
-            if ('serviceWorker' in navigator) {
-                console.log('[Uninstall] Unregistering service workers...');
-                const registrations = await navigator.serviceWorker.getRegistrations();
-                await Promise.all(registrations.map(reg => {
-                    console.log('[Uninstall] Unregistering:', reg);
-                    return reg.unregister();
-                }));
-                console.log('[Uninstall] ✓ All service workers unregistered');
-            }
-
-            // 3. Clear localStorage
-            console.log('[Uninstall] Clearing localStorage...');
-            localStorage.clear();
-            console.log('[Uninstall] ✓ localStorage cleared');
-
-            // 4. Clear sessionStorage
-            console.log('[Uninstall] Clearing sessionStorage...');
-            sessionStorage.clear();
-            console.log('[Uninstall] ✓ sessionStorage cleared');
-
-            // 5. Delete IndexedDB databases
-            if ('indexedDB' in window) {
-                console.log('[Uninstall] Deleting IndexedDB databases...');
-                try {
-                    const databases = await indexedDB.databases();
-                    databases.forEach(db => {
-                        console.log('[Uninstall] Deleting database:', db.name);
-                        indexedDB.deleteDatabase(db.name);
-                    });
-                    console.log('[Uninstall] ✓ IndexedDB databases deleted');
-                } catch (e) {
-                    console.log('[Uninstall] IndexedDB deletion skipped:', e);
-                }
-            }
-
-            console.log('[Uninstall] ✓✓✓ Complete uninstall successful! ✓✓✓');
-            showToast('האפליקציה הוסרה לחלוטין! סוגר...', 'success');
-
-            // 6. Close or redirect
-            setTimeout(() => {
-                console.log('[Uninstall] Attempting to close window...');
-                
-                // Try to close
-                window.close();
-                
-                // If close fails (in most browsers), redirect to blank page
-                setTimeout(() => {
-                    console.log('[Uninstall] Redirecting to blank page...');
-                    window.location.href = 'about:blank';
-                }, 1000);
-            }, 2500);
-
-        } catch (error) {
-            console.error('[Uninstall] Error during uninstall:', error);
-            showToast('שגיאה בהסרת ההתקנה: ' + error.message, 'error');
-        }
-    }
-
-    // Bind uninstall menu click
-    document.addEventListener('DOMContentLoaded', function() {
-        const uninstallMenu = document.getElementById('uninstallMenu');
-        if (uninstallMenu) {
-            uninstallMenu.addEventListener('click', function() {
-                toggleMenu();
-                setTimeout(() => {
-                    completeUninstall();
-                }, 300);
-            });
-            console.log('[Uninstall] Uninstall button bound successfully');
-        }
-    });
-
     </script>
-
-    <!-- Toast notification -->
-    <div id="toast" class="toast"></div>
-
-    <!-- Install Prompt -->
-    <div id="installPrompt">
-        <span style="font-size: 1.5rem;">📱</span>
-        <div style="flex: 1;">
-            <div style="font-weight: bold; color: var(--btn-primary);">התקן את האפליקציה</div>
-            <div style="font-size: 0.9em; color: #666;">גישה מהירה ללא דפדפן</div>
-        </div>
-        <button id="installBtn">התקן</button>
-        <span class="close-install" onclick="closeInstallPrompt()">✕</span>
-    </div>
-
 </body>
 </html>
