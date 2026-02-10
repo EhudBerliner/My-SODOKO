@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#4A90E2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Sudoku Pro - V8.3</title>
+    <title>Sudoku Pro - V8.4</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="logo3.png">
     <link rel="apple-touch-icon" href="logo3.png">
@@ -545,7 +545,7 @@
         <!-- Header -->
         <div class="header">
             <div class="app-title" id="appTitle">Sudoku Pro</div>
-            <div class="version" id="versionBtn">Version 8.3</div>
+            <div class="version" id="versionBtn">Version 8.4</div>
         </div>
 
         <!-- Top Bar -->
@@ -1721,7 +1721,7 @@
         }
 
         // ============= INITIALIZE APP =============
-        const APP_VERSION = '8.3';
+        const APP_VERSION = '8.4';
         let gameState, uiController;
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -1765,6 +1765,31 @@
                 }
             });
         }
+        
+        // 1. פונקציה שנקראת כשפותחים תפריט
+            function openMenu() {
+                document.getElementById('menuPanel').classList.add('active');
+                document.getElementById('menuOverlay').classList.add('active');
+                
+                // מוסיפים "נקודה" בהיסטוריה כדי שלחצן ה-Back יתייחס אליה
+                history.pushState({ menuOpen: true }, "");
+            }
+            
+            // 2. האזנה לכפתור ה-Back של הטלפון
+            window.addEventListener('popstate', function(event) {
+                const menu = document.getElementById('menuPanel');
+                const overlay = document.getElementById('menuOverlay');
+            
+                // אם התפריט פתוח, נסגור אותו במקום לצאת מהדף
+                if (menu.classList.contains('active')) {
+                    menu.classList.remove('active');
+                    overlay.classList.remove('active');
+                }
+            });
+            
+            // 3. עדכון כפתור התפריט הקיים שלך
+            document.getElementById('menuBtn').addEventListener('click', openMenu);
+        
     </script>
 </body>
 </html>
