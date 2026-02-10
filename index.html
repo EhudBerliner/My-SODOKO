@@ -6,8 +6,10 @@
     <meta name="theme-color" content="#4A90E2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Sudoku Pro - V8.0</title>
+    <title>Sudoku Pro - V8.1</title>
     <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="logo3.png">
+    <link rel="apple-touch-icon" href="logo3.png">
     <style>
         :root {
             --bg-primary: #ffffff;
@@ -21,8 +23,8 @@
             --cell-fixed: #212529;
             --cell-fixed-bg: #e2e8f0;
             --cell-user: #2d3748;
-            --cell-selected: #bfdbfe;
-            --cell-highlighted: #93c5fd;
+            --cell-selected: #dbeafe;
+            --cell-highlighted: #e0f2fe;
             --cell-conflict: #fee2e2;
             --cell-error: #ef4444;
             --btn-primary: #4A90E2;
@@ -285,7 +287,7 @@
             border-radius: 8px;
             background: var(--bg-secondary);
             color: var(--text-primary);
-            font-size: 36px;
+            font-size: 44px;
             font-weight: 700;
             cursor: pointer;
             box-shadow: 0 2px 4px var(--shadow);
@@ -523,7 +525,7 @@
             }
 
             .num-btn {
-                font-size: 16px;
+                font-size: 38px;
             }
 
             .icon-btn {
@@ -543,7 +545,7 @@
         <!-- Header -->
         <div class="header">
             <div class="app-title" id="appTitle">Sudoku Pro</div>
-            <div class="version" id="versionBtn">Version 8.0</div>
+            <div class="version" id="versionBtn">Version 8.1</div>
         </div>
 
         <!-- Top Bar -->
@@ -670,17 +672,20 @@
     <!-- Reinstall Modal -->
     <div class="modal" id="reinstallModal">
         <div class="modal-content">
-            <h2>⚠️ Reinstall</h2>
+            <h2>🗑️ Complete App Removal</h2>
             <p style="text-align: center; margin: 16px 0; line-height: 1.6;">
-                This will delete all data:<br>
-                • Saved game<br>
-                • Statistics<br>
-                • Settings<br>
+                This will completely remove the app:<br>
+                • All saved games<br>
+                • All statistics<br>
+                • All settings<br>
+                • Cache memory<br>
+                • Service workers<br>
+                • Local storage<br>
                 <br>
-                <strong>Continue?</strong>
+                <strong style="color: var(--btn-danger);">This action cannot be undone!</strong>
             </p>
             <div class="modal-buttons">
-                <button class="modal-btn danger" id="confirmReinstall">Yes, delete all and reinstall</button>
+                <button class="modal-btn danger" id="confirmReinstall">Yes, remove everything</button>
                 <button class="modal-btn secondary" id="cancelReinstall">Cancel</button>
             </div>
         </div>
@@ -1648,10 +1653,6 @@
             }
 
             showReinstallModal() {
-                if (!navigator.onLine) {
-                    alert('Reinstall requires internet connection');
-                    return;
-                }
                 document.getElementById('reinstallModal').classList.add('active');
             }
 
@@ -1659,33 +1660,68 @@
                 document.getElementById('reinstallModal').classList.remove('active');
                 
                 try {
+                    console.log('🗑️ Starting complete app removal...');
+                    
+                    // Step 1: Clear all localStorage
+                    console.log('   Clearing localStorage...');
                     localStorage.clear();
                     
+                    // Step 2: Clear all sessionStorage
+                    console.log('   Clearing sessionStorage...');
+                    sessionStorage.clear();
+                    
+                    // Step 3: Unregister all service workers
                     if ('serviceWorker' in navigator) {
+                        console.log('   Unregistering service workers...');
                         const registrations = await navigator.serviceWorker.getRegistrations();
                         for (let registration of registrations) {
                             await registration.unregister();
+                            console.log('   ✓ Service worker unregistered');
                         }
                     }
                     
+                    // Step 4: Clear all caches
                     if ('caches' in window) {
+                        console.log('   Clearing all caches...');
                         const cacheNames = await caches.keys();
                         for (let cacheName of cacheNames) {
                             await caches.delete(cacheName);
+                            console.log(`   ✓ Cache deleted: ${cacheName}`);
                         }
                     }
                     
-                    alert('All data deleted. Page will reload.');
-                    window.location.reload(true);
+                    // Step 5: Clear IndexedDB (if exists)
+                    if ('indexedDB' in window) {
+                        console.log('   Clearing IndexedDB...');
+                        const dbs = await indexedDB.databases();
+                        for (let db of dbs) {
+                            if (db.name) {
+                                indexedDB.deleteDatabase(db.name);
+                                console.log(`   ✓ Database deleted: ${db.name}`);
+                            }
+                        }
+                    }
+                    
+                    // Step 6: Clear cookies for this domain
+                    console.log('   Clearing cookies...');
+                    document.cookie.split(";").forEach(function(c) { 
+                        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                    });
+                    
+                    console.log('✅ Complete app removal finished!');
+                    alert('✅ App completely removed!\n\nAll data, cache, and storage cleared.\nPage will reload.');
+                    
+                    // Force hard reload
+                    window.location.href = window.location.href.split('?')[0] + '?t=' + new Date().getTime();
                 } catch (error) {
-                    console.error('Reinstall error:', error);
-                    alert('Reinstall error: ' + error.message);
+                    console.error('❌ Removal error:', error);
+                    alert('⚠️ Removal error: ' + error.message + '\n\nSome data may still remain.');
                 }
             }
         }
 
         // ============= INITIALIZE APP =============
-        const APP_VERSION = '8.0';
+        const APP_VERSION = '8.1';
         let gameState, uiController;
 
         window.addEventListener('DOMContentLoaded', () => {
