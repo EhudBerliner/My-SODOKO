@@ -1,7 +1,7 @@
 {
   "name": "Sudoku Master Ultimate",
   "short_name": "Sudoku",
-  "description": "משחק סודוקו מתקדם עם רמות קושי, רמזים, הערות ועוד - גרסה 7.0",
+  "description": "משחק סודוקו מתקדם עם רמות קושי, רמזים, הערות ועוד - גרסה 8.3",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

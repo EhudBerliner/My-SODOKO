@@ -6,8 +6,11 @@
     <meta name="theme-color" content="#4A90E2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Sudoku Pro - V8.2</title>
+    <title>Sudoku Pro - V8.3</title>
     <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="logo3.png">
+    <link rel="apple-touch-icon" href="logo3.png">
+
     <style>
         :root {
             --bg-primary: #ffffff;
@@ -21,8 +24,8 @@
             --cell-fixed: #212529;
             --cell-fixed-bg: #e2e8f0;
             --cell-user: #2d3748;
-            --cell-selected: #bfdbfe;
-            --cell-highlighted: #93c5fd;
+            --cell-selected: #dbeafe;
+            --cell-highlighted: #bfdbfe;
             --cell-conflict: #fee2e2;
             --cell-error: #ef4444;
             --btn-primary: #4A90E2;
@@ -288,7 +291,7 @@
             border-radius: 8px;
             background: var(--bg-secondary);
             color: var(--text-primary);
-            font-size: 42px;
+            font-size: 52px;
             font-weight: 700;
             cursor: pointer;
             box-shadow: 0 2px 4px var(--shadow);
@@ -620,6 +623,85 @@
             font-size: 1.2rem;
         }
 
+    
+        /* ========== DESKTOP RESPONSIVE DESIGN ========== */
+        @media (min-width: 768px) {
+            body {
+                overflow: auto;
+            }
+            
+            .container {
+                max-width: 900px;
+                padding: 20px;
+            }
+            
+            .game-board-container {
+                margin-bottom: 20px;
+            }
+            
+            .game-board {
+                max-width: 650px;
+                margin: 0 auto;
+            }
+            
+            .number-pad {
+                max-width: 650px;
+                margin: 0 auto 20px;
+            }
+            
+            .header {
+                margin-bottom: 20px;
+            }
+            
+            .top-bar {
+                margin-bottom: 20px;
+                max-width: 650px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .container {
+                max-width: 1100px;
+                padding: 30px;
+            }
+            
+            .game-board {
+                max-width: 720px;
+            }
+            
+            .number-pad {
+                max-width: 720px;
+            }
+            
+            .top-bar {
+                max-width: 720px;
+            }
+            
+            .header {
+                margin-bottom: 25px;
+            }
+        }
+        
+        @media (min-width: 1440px) {
+            .container {
+                max-width: 1200px;
+            }
+            
+            .game-board {
+                max-width: 800px;
+            }
+            
+            .number-pad {
+                max-width: 800px;
+            }
+            
+            .top-bar {
+                max-width: 800px;
+            }
+        }
+
     </style>
 </head>
 <body data-theme="light">
@@ -688,6 +770,11 @@
             </div>
             <div class="menu-item" id="themeMenu">
                 <div class="menu-item-icon">🌙</div>
+            <div class="menu-item" id="uninstallMenu">
+                <div class="menu-item-icon">🗑️</div>
+                <div>הסר התקנה מלאה</div>
+            </div>
+            
                 <div>Dark Mode</div>
             </div>
         </div>
@@ -854,7 +941,7 @@
             }
 
             generatePuzzle(difficulty = 'medium') {
-                // ========== V8.2 PROFESSIONAL PUZZLE GENERATOR ==========
+                // ========== V8.3 PROFESSIONAL PUZZLE GENERATOR ==========
                 // 4 difficulty levels with symmetry and unique solution verification
                 
                 const cellsToRemove = { 
@@ -864,7 +951,7 @@
                     expert: 64      // ~17 clues - MAXIMUM difficulty!
                 };
                 
-                console.log(`🎯 Generating ${difficulty.toUpperCase()} puzzle with V8.2 Pro Engine...`);
+                console.log(`🎯 Generating ${difficulty.toUpperCase()} puzzle with V8.3 Pro Engine...`);
                 const startTime = performance.now();
                 
                 // Step 1: Generate complete solution
@@ -1963,7 +2050,7 @@
                 
                 <div style="margin-bottom: 20px; padding: 15px; background: var(--bg-secondary); border-radius: 8px;">
                     <div style="font-weight: bold; margin-bottom: 5px;">גרסת אפליקציה:</div>
-                    <div style="font-family: monospace; color: var(--btn-primary);">v8.2</div>
+                    <div style="font-family: monospace; color: var(--btn-primary);">v8.3</div>
                 </div>
                 
                 <div style="margin-bottom: 15px; font-size: 0.95em; line-height: 1.5; color: var(--text-secondary);">
@@ -2017,6 +2104,128 @@
         if (menu) menu.remove();
     }
 
+
+    
+    // ============= COMPLETE APP UNINSTALL =============
+    window.completeUninstall = async function() {
+        const confirmMessage = `⚠️ הסרה מלאה של האפליקציה ⚠️
+
+פעולה זו תמחק לצמיתות:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✗ כל קבצי המטמון (Cache)
+✗ Service Workers
+✗ משחקים שמורים
+✗ סטטיסטיקות
+✗ הגדרות אישיות  
+✗ LocalStorage
+✗ SessionStorage
+✗ IndexedDB
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️ פעולה זו בלתי הפיכה!
+
+האם אתה בטוח לחלוטין שברצונך להמשיך?`;
+
+        if (!confirm(confirmMessage)) {
+            console.log('[Uninstall] Cancelled by user');
+            return;
+        }
+
+        // Second confirmation
+        if (!confirm('זו ההזדמנות האחרונה לבטל!
+
+להמשיך בהסרה המלאה?')) {
+            console.log('[Uninstall] Cancelled on second confirmation');
+            return;
+        }
+
+        console.log('[Uninstall] Starting complete uninstall...');
+        showToast('מתחיל הסרה מלאה...', 'info');
+
+        try {
+            // 1. Delete all caches
+            if ('caches' in window) {
+                console.log('[Uninstall] Deleting all caches...');
+                const cacheNames = await caches.keys();
+                await Promise.all(cacheNames.map(name => {
+                    console.log('[Uninstall] Deleting cache:', name);
+                    return caches.delete(name);
+                }));
+                console.log('[Uninstall] ✓ All caches deleted');
+            }
+
+            // 2. Unregister all service workers
+            if ('serviceWorker' in navigator) {
+                console.log('[Uninstall] Unregistering service workers...');
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                await Promise.all(registrations.map(reg => {
+                    console.log('[Uninstall] Unregistering:', reg);
+                    return reg.unregister();
+                }));
+                console.log('[Uninstall] ✓ All service workers unregistered');
+            }
+
+            // 3. Clear localStorage
+            console.log('[Uninstall] Clearing localStorage...');
+            localStorage.clear();
+            console.log('[Uninstall] ✓ localStorage cleared');
+
+            // 4. Clear sessionStorage
+            console.log('[Uninstall] Clearing sessionStorage...');
+            sessionStorage.clear();
+            console.log('[Uninstall] ✓ sessionStorage cleared');
+
+            // 5. Delete IndexedDB databases
+            if ('indexedDB' in window) {
+                console.log('[Uninstall] Deleting IndexedDB databases...');
+                try {
+                    const databases = await indexedDB.databases();
+                    databases.forEach(db => {
+                        console.log('[Uninstall] Deleting database:', db.name);
+                        indexedDB.deleteDatabase(db.name);
+                    });
+                    console.log('[Uninstall] ✓ IndexedDB databases deleted');
+                } catch (e) {
+                    console.log('[Uninstall] IndexedDB deletion skipped:', e);
+                }
+            }
+
+            console.log('[Uninstall] ✓✓✓ Complete uninstall successful! ✓✓✓');
+            showToast('האפליקציה הוסרה לחלוטין! סוגר...', 'success');
+
+            // 6. Close or redirect
+            setTimeout(() => {
+                console.log('[Uninstall] Attempting to close window...');
+                
+                // Try to close
+                window.close();
+                
+                // If close fails (in most browsers), redirect to blank page
+                setTimeout(() => {
+                    console.log('[Uninstall] Redirecting to blank page...');
+                    window.location.href = 'about:blank';
+                }, 1000);
+            }, 2500);
+
+        } catch (error) {
+            console.error('[Uninstall] Error during uninstall:', error);
+            showToast('שגיאה בהסרת ההתקנה: ' + error.message, 'error');
+        }
+    }
+
+    // Bind uninstall menu click
+    document.addEventListener('DOMContentLoaded', function() {
+        const uninstallMenu = document.getElementById('uninstallMenu');
+        if (uninstallMenu) {
+            uninstallMenu.addEventListener('click', function() {
+                toggleMenu();
+                setTimeout(() => {
+                    completeUninstall();
+                }, 300);
+            });
+            console.log('[Uninstall] Uninstall button bound successfully');
+        }
+    });
 
     </script>
 
