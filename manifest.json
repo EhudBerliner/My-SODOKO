@@ -1,7 +1,7 @@
 {
   "name": "Sudoku Pro Ultimate",
   "short_name": "Sudoku Pro",
-  "description": "Professional Sudoku game with 4 difficulty levels, hints, notes and more - Version 8.1",
+  "description": "Professional Sudoku game with 4 difficulty levels, hints, notes and more - Version 8.4",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
