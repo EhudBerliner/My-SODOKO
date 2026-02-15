@@ -1,5 +1,5 @@
 // Service Worker for Sudoku PWA - Dynamic Version
-const CACHE_NAME = 'sudoku-cache-v8.4';
+const CACHE_NAME = 'sudoku-cache-v8.5';
 const urlsToCache = [
   './',
   './index.html',

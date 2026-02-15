@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#4A90E2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Sudoku Pro - V8.4</title>
+    <title>Sudoku Pro - V8.5</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="logo3.png">
     <link rel="apple-touch-icon" href="logo3.png">
@@ -415,6 +415,15 @@
         .modal.active {
             display: flex;
         }
+        
+        /* Victory modal cannot be closed by clicking outside */
+        #victoryModal {
+            pointer-events: none;
+        }
+        
+        #victoryModal .modal-content {
+            pointer-events: auto;
+        }
 
         .modal-content {
             background: var(--bg-primary);
@@ -545,7 +554,7 @@
         <!-- Header -->
         <div class="header">
             <div class="app-title" id="appTitle">Sudoku Pro</div>
-            <div class="version" id="versionBtn">Version 8.4</div>
+            <div class="version" id="versionBtn">Version 8.5</div>
         </div>
 
         <!-- Top Bar -->
@@ -616,7 +625,11 @@
         <div class="modal-content">
             <h2>Select Difficulty</h2>
             <div id="resumeSection" style="display: none;">
-                <button class="difficulty-btn" id="resumeBtn" style="grid-column: span 2;">Resume Saved Game</button>
+                <div class="difficulty-grid" style="grid-template-columns: 1fr;">
+                    <button class="difficulty-btn" id="resumeBtn" style="background: var(--btn-success); color: white; border: 2px solid var(--btn-success);">
+                        📂 Resume Saved Game
+                    </button>
+                </div>
                 <hr style="margin: 16px 0; opacity: 0.2;">
             </div>
             <div class="difficulty-grid">
@@ -629,13 +642,12 @@
     </div>
 
     <!-- Victory Modal -->
-    <div class="modal" id="victoryModal">
+    <div class="modal" id="victoryModal" style="backdrop-filter: blur(8px);">
         <div class="modal-content">
             <h2>🎉 Congratulations! 🎉</h2>
             <p id="victoryTime" style="text-align: center; margin: 12px 0; font-size: 18px;"></p>
             <div class="modal-buttons">
                 <button class="modal-btn primary" id="newGameAfterWin">New Game</button>
-                <button class="modal-btn secondary" id="closeVictory">Close</button>
             </div>
         </div>
     </div>
@@ -1395,12 +1407,8 @@
                 });
 
                 document.getElementById('newGameAfterWin').addEventListener('click', () => {
-                    this.victoryModal.classList.remove('active');
+                    // Don't allow closing victory modal
                     this.showDifficultyModal();
-                });
-
-                document.getElementById('closeVictory').addEventListener('click', () => {
-                    this.victoryModal.classList.remove('active');
                 });
 
                 document.getElementById('closeStats').addEventListener('click', () => {
