@@ -616,7 +616,7 @@
         <div class="modal-content">
             <h2>Select Difficulty</h2>
             <div id="resumeSection" style="display: none;">
-                <button class="modal-btn success" id="resumeBtn">Resume Saved Game</button>
+                <button class="difficulty-btn" id="resumeBtn" style="grid-column: span 2;">Resume Saved Game</button>
                 <hr style="margin: 16px 0; opacity: 0.2;">
             </div>
             <div class="difficulty-grid">
@@ -1649,7 +1649,19 @@
                 const usedHints = 3 - this.game.hints;
                 document.getElementById('victoryTime').textContent = 
                     `Time: ${this.game.formatTime(this.game.timer)} | Hints: ${usedHints}`;
+                
                 this.victoryModal.classList.add('active');
+                
+                // Disable board interaction after victory
+                this.gameBoard.style.pointerEvents = 'none';
+                this.gameBoard.style.opacity = '0.7';
+                
+                // Disable all control buttons
+                document.querySelectorAll('.num-btn').forEach(btn => btn.disabled = true);
+                const noteBtn = document.getElementById('noteBtn');
+                if (noteBtn) noteBtn.disabled = true;
+                const undoBtn = document.getElementById('undoBtn');
+                if (undoBtn) undoBtn.disabled = true;
             }
 
             showReinstallModal() {
@@ -1766,6 +1778,63 @@
             });
         }
               
+    
+    // ============= BACK BUTTON HANDLER =============
+    let backButtonPressed = false;
+    
+    function handleBackButton() {
+        // Check if difficulty modal is open
+        const difficultyModal = document.getElementById('difficultyModal');
+        const isDifficultyModalOpen = difficultyModal && difficultyModal.classList.contains('active');
+        
+        if (isDifficultyModalOpen) {
+            // If difficulty modal is open, close app
+            console.log('[Back Button] Difficulty modal open - closing app');
+            
+            // Prevent default back behavior
+            history.pushState(null, null, location.href);
+            
+            // Try to close window (works in PWA/standalone mode)
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                // PWA mode - close app
+                navigator.app?.exitApp(); // Android
+                window.close(); // iOS/Desktop
+            } else {
+                // Browser mode - show confirmation
+                if (confirm('Close Sudoku Pro?')) {
+                    window.close();
+                }
+            }
+        } else {
+            // If playing game, show difficulty modal
+            console.log('[Back Button] Game active - showing difficulty modal');
+            backButtonPressed = true;
+            
+            if (typeof uiController !== 'undefined' && uiController.showDifficultyModal) {
+                uiController.showDifficultyModal();
+            }
+        }
+    }
+    
+    // Handle browser back button
+    window.addEventListener('popstate', (event) => {
+        handleBackButton();
+    });
+    
+    // Initialize history state
+    window.addEventListener('DOMContentLoaded', () => {
+        // Push initial state
+        history.pushState({page: 'game'}, 'Sudoku Pro', location.href);
+        
+        console.log('[Back Button] Handler initialized');
+    });
+    
+    // Handle Android back button (if in PWA)
+    document.addEventListener('backbutton', (e) => {
+        e.preventDefault();
+        handleBackButton();
+    }, false);
+
     </script>
 </body>
 </html>
