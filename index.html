@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#4A90E2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Sudoku Pro - V8.5</title>
+    <title>Sudoku Pro - V8.6</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="logo3.png">
     <link rel="apple-touch-icon" href="logo3.png">
@@ -554,7 +554,7 @@
         <!-- Header -->
         <div class="header">
             <div class="app-title" id="appTitle">Sudoku Pro</div>
-            <div class="version" id="versionBtn">Version 8.5</div>
+            <div class="version" id="versionBtn">Version 8.6</div>
         </div>
 
         <!-- Top Bar -->
@@ -1407,7 +1407,14 @@
                 });
 
                 document.getElementById('newGameAfterWin').addEventListener('click', () => {
-                    // Don't allow closing victory modal
+                    // Close victory modal and show difficulty selection
+                    this.victoryModal.classList.remove('active');
+                    
+                    // Re-enable board (will be reset anyway)
+                    this.gameBoard.style.pointerEvents = 'auto';
+                    this.gameBoard.style.opacity = '1';
+                    
+                    // Show difficulty modal
                     this.showDifficultyModal();
                 });
 
@@ -1791,6 +1798,28 @@
     let backButtonPressed = false;
     
     function handleBackButton() {
+        // Check if victory modal is open
+        const victoryModal = document.getElementById('victoryModal');
+        const isVictoryModalOpen = victoryModal && victoryModal.classList.contains('active');
+        
+        if (isVictoryModalOpen) {
+            // If victory modal is open, close it and show difficulty selection
+            console.log('[Back Button] Victory modal open - showing difficulty selection');
+            victoryModal.classList.remove('active');
+            
+            // Re-enable board
+            const gameBoard = document.getElementById('gameBoard');
+            if (gameBoard) {
+                gameBoard.style.pointerEvents = 'auto';
+                gameBoard.style.opacity = '1';
+            }
+            
+            if (typeof uiController !== 'undefined' && uiController.showDifficultyModal) {
+                uiController.showDifficultyModal();
+            }
+            return;
+        }
+        
         // Check if difficulty modal is open
         const difficultyModal = document.getElementById('difficultyModal');
         const isDifficultyModalOpen = difficultyModal && difficultyModal.classList.contains('active');
