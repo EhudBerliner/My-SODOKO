@@ -1,14 +1,18 @@
 {
   "name": "Sudoku Pro Ultimate",
   "short_name": "Sudoku Pro",
-  "description": "Professional Sudoku game with 4 difficulty levels, hints, notes and more - Version 8.6",
+  "description": "Professional Sudoku with 4 difficulty levels, offline play & smart engine - Version 9.0",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#4A90E2",
-  "categories": ["games", "entertainment", "education"],
+  "categories": [
+    "games",
+    "entertainment",
+    "education"
+  ],
   "lang": "en",
   "dir": "ltr",
   "icons": [

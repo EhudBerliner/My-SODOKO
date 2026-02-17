@@ -1,0 +1,20 @@
+{
+  "version": "9.0",
+  "releaseDate": "2026-02-17",
+  "changelog": [
+    "Version management with server-side check",
+    "Auto cache clearing on version upgrade",
+    "SW update polling every 300s",
+    "Offline banner and network monitoring",
+    "Data saver / slow connection detection",
+    "PWA install prompt (custom banner)",
+    "Pull-to-refresh gesture",
+    "Swipe gestures: open/close menu, dismiss modals",
+    "Haptic feedback: tap, error, win",
+    "Safe area support for notch devices",
+    "Toast notification system",
+    "Full settings UI with toggles",
+    "Selective reset modal",
+    "Complete app removal flow"
+  ]
+}
