@@ -1,10 +1,10 @@
 // Service Worker for Sudoku PWA - Dynamic Version
-const CACHE_NAME = 'sudoku-cache-v8.1';
+const CACHE_NAME = 'sudoku-cache-v9.0';
 const urlsToCache = [
   './',
   './index.html',
   './manifest.json',
-  './logo3.png'
+  './icon-512.png'
 ];
 
 // Install event - cache resources
@@ -27,11 +27,17 @@ self.addEventListener('install', (event) => {
 // Activate event - clean old caches
 self.addEventListener('activate', (event) => {
   console.log('[Service Worker] Activating...');
-  
+  const CURRENT_CACHE = 'sudoku-cache-v9.0';
   event.waitUntil(
-    self.clients.claim().then(() => {
-      console.log('[Service Worker] Activated successfully');
-    })
+    caches.keys().then(keys =>
+      Promise.all(
+        keys.filter(k => k !== CURRENT_CACHE).map(k => {
+          console.log('[Service Worker] Deleting old cache:', k);
+          return caches.delete(k);
+        })
+      )
+    ).then(() => self.clients.claim())
+      .then(() => console.log('[Service Worker] Activated successfully'))
   );
 });
 
