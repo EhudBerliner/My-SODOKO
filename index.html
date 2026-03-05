@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#4A90E2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Sudoku Pro - V9.0</title>
+    <title>Sudoku Pro - V9.1</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon-512.png">
     <link rel="apple-touch-icon" href="icon-512.png">
@@ -715,7 +715,7 @@
         <!-- Header -->
         <div class="header">
             <div class="app-title" id="appTitle">Sudoku Pro</div>
-            <div class="version" id="versionBtn">Version 9.0</div>
+            <div class="version" id="versionBtn">Version 9.1</div>
         </div>
 
         <!-- Top Bar -->
@@ -2001,7 +2001,7 @@
         }
 
         // ============= INITIALIZE APP =============
-        const APP_VERSION = '9.0';
+        const APP_VERSION = '9.1';
         let gameState, uiController;
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -2097,8 +2097,17 @@
 
             async checkRemoteVersion() {
                 // 1.2 Fetch version.json to detect newer version
+                // OFFLINE SAFE: Only check if online, fail silently otherwise
+                if (!navigator.onLine) {
+                    console.log('[Version] Offline - skipping remote version check');
+                    return;
+                }
+                
                 try {
-                    const res = await fetch('./version.json?t=' + Date.now(), { cache: 'no-store' });
+                    const res = await fetch('./version.json?t=' + Date.now(), { 
+                        cache: 'no-store',
+                        signal: AbortSignal.timeout(3000) // 3s timeout
+                    });
                     if (!res.ok) return;
                     const data = await res.json();
                     if (data.version && data.version !== APP_VERSION) {
@@ -2106,7 +2115,8 @@
                         this.showUpdatePrompt();
                     }
                 } catch (e) {
-                    // version.json not found – silently ignore
+                    // version.json not found or network error – silently ignore
+                    console.log('[Version] Remote check failed (offline or file missing)');
                 }
             },
 

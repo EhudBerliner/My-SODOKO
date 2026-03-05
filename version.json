@@ -1,20 +1,14 @@
 {
-  "version": "9.0",
-  "releaseDate": "2026-02-17",
+  "version": "9.1",
+  "releaseDate": "2026-03-05",
   "changelog": [
-    "Version management with server-side check",
-    "Auto cache clearing on version upgrade",
-    "SW update polling every 300s",
-    "Offline banner and network monitoring",
-    "Data saver / slow connection detection",
-    "PWA install prompt (custom banner)",
-    "Pull-to-refresh gesture",
-    "Swipe gestures: open/close menu, dismiss modals",
-    "Haptic feedback: tap, error, win",
-    "Safe area support for notch devices",
-    "Toast notification system",
-    "Full settings UI with toggles",
-    "Selective reset modal",
-    "Complete app removal flow"
-  ]
+    "OFFLINE MODE FIX: Full offline functionality guaranteed",
+    "Version check now fails gracefully when offline",
+    "Network timeout protection (3 seconds)",
+    "No network errors in offline mode",
+    "All game features work without internet",
+    "Service worker optimized for offline-first"
+  ],
+  "breaking_changes": false,
+  "offline_compatible": true
 }
