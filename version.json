@@ -1,22 +1,23 @@
 {
-  "version": "9.4.1",
+  "version": "9.5",
   "releaseDate": "2026-03-18",
   "changelog": [
-    "CRITICAL FIX: selectCell coordinate mapping (row/col vs pos)",
-    "CRITICAL FIX: Sticky digit parameter order",
-    "CRITICAL FIX: Global popup functions",
-    "CRITICAL FIX: DOUBLE_TAP_THRESHOLD initialization",
-    "CRITICAL FIX: Settings scope in GameState",
-    "CRITICAL FIX: Solution array access (1D not 2D)",
-    "CRITICAL FIX: maxMistakes initialization",
-    "CRITICAL FIX: Crosshairs implementation",
-    "CRITICAL FIX: Initial digits conditional highlighting",
-    "CRITICAL FIX: Coordinate conversion in helper functions",
-    "All 11 critical failures resolved"
+    "CRITICAL FIX: Fixed array access bugs preventing gameplay",
+    "Fixed: handleCellTap now accesses fixed array correctly",
+    "Fixed: Double-tap detection now works (DOUBLE_TAP_THRESHOLD initialized)",
+    "Fixed: Sticky digit mode uses correct parameters",
+    "Fixed: selectCell uses correct variable (pos instead of index)",
+    "Fixed: All settings now use AppSystems.settings correctly",
+    "Added: Crosshairs support (highlight row/col/block)",
+    "Added: highlightInitial setting now works",
+    "Added: boldInitial setting now works",
+    "Added: Popup transparency now applied correctly",
+    "Fixed: mistakeCounter uses this.maxMistakes correctly",
+    "Fixed: All settings references in SudokuEngine",
+    "Fixed: checkIncorrectWithLimit uses correct array access"
   ],
   "breaking_changes": false,
+  "fixes_count": 13,
   "offline_compatible": true,
-  "offline_first": true,
-  "settings_count": 18,
-  "critical_bugs_fixed": 11
+  "offline_first": true
 }

@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#4A90E2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Sudoku Pro - V9.4.1</title>
+    <title>Sudoku Pro - V9.5</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon-512.png">
     <link rel="apple-touch-icon" href="icon-512.png">
@@ -448,9 +448,32 @@
             background-color: var(--cell-fixed-bg);
             font-weight: 700;
         }
+        
+        /* Initial cell highlighting (when setting enabled) */
+        .cell.initial-highlight {
+            background-color: #dbeafe !important;
+        }
+        
+        [data-theme="dark"] .cell.initial-highlight {
+            background-color: #1e3a8a !important;
+        }
+        
+        /* Initial cell bold (when setting enabled) */
+        .cell.initial-bold {
+            font-weight: 900 !important;
+        }
 
         .cell.user {
             color: var(--cell-user);
+        }
+        
+        /* Crosshairs - highlight row/col/block */
+        .cell.crosshair {
+            background-color: #f0f9ff !important;
+        }
+        
+        [data-theme="dark"] .cell.crosshair {
+            background-color: #1e293b !important;
         }
 
         .cell.selected {
@@ -899,7 +922,7 @@
         <!-- Header -->
         <div class="header">
             <div class="app-title" id="appTitle">Sudoku Pro</div>
-            <div class="version" id="versionBtn">Version 9.4.1</div>
+            <div class="version" id="versionBtn">Version 9.5</div>
         </div>
 
         <!-- Top Bar -->
@@ -1659,7 +1682,8 @@
                     return new Set();
                 }
                 
-                if (!this.settings?.flagConflicts) {
+                // Fix: Use AppSystems.settings instead of this.settings
+                if (!AppSystems.settings?.flagConflicts) {
                     return new Set();
                 }
                 
@@ -1920,10 +1944,13 @@
             // Check incorrect value with mistake tracking
             checkIncorrectWithLimit(row, col, num) {
                 if (!this.isHelpAllowed('incorrect')) return false;
-                if (!this.settings?.flagIncorrect) return false;
+                
+                // Fix: Use AppSystems.settings instead of this.settings
+                if (!AppSystems.settings?.flagIncorrect) return false;
                 if (!this.solution) return false;
                 
-                const isIncorrect = (this.solution[row * 9 + col] !== num);
+                const pos = row * 9 + col;
+                const isIncorrect = (this.solution[pos] !== num);
                 
                 if (isIncorrect) {
                     this.mistakes++;
@@ -2018,6 +2045,20 @@
         class UIController {
             constructor(gameState) {
                 this.game = gameState;
+                
+                // Double-tap settings
+                this.DOUBLE_TAP_THRESHOLD = 300; // ms
+                this.lastTapTime = 0;
+                this.lastTapCell = null;
+                
+                // Pop-up targets
+                this.popupTargetRow = null;
+                this.popupTargetCol = null;
+                
+                // Max mistakes
+                this.maxMistakes = 3;
+                this.mistakeCount = 0;
+                
                 this.initElements();
                 this.initTheme();
                 this.bindEvents();
@@ -2225,7 +2266,9 @@
                     console.error('[selectCell] Invalid position:', pos);
                     return;
                 }
-                this.game.selectedCell = index;
+                
+                // Fix: use pos instead of undefined 'index'
+                this.game.selectedCell = pos;
                 this.updateUI();
             }
 
@@ -2311,6 +2354,11 @@
                 
                 if (!modal || !container) return;
                 
+                // Fix: Apply transparency from settings
+                const transparency = AppSystems.settings?.popupTransparency || 5;
+                const opacity = 1 - (transparency / 100);
+                container.style.opacity = opacity;
+                
                 // Position near the cell
                 const cell = this.gameBoard.querySelector(
                     `[data-row="${row}"][data-col="${col}"]`
@@ -2341,19 +2389,21 @@
                 
                 modal.classList.add('active');
                 
-                console.log('[Popup] Opened at:', row, col);
+                console.log('[Popup] Opened at:', row, col, 'opacity:', opacity);
             }
             
             // ========== TWO-TAP DETECTION ==========
             handleCellTap(row, col) {
-                if (this.game.fixed[row][col]) return;
+                const pos = row * 9 + col;
                 
-                // Check digit entry mode first
-                const mode = this.settings?.defaultEntryMode || 'cell-first';
+                // Fix #1: Correct fixed array access (was: this.game.fixed[row][col])
+                if (this.game.engine.fixed[pos]) return;
+                
+                // Fix #2: Use AppSystems.settings instead of this.settings
+                const mode = AppSystems.settings?.defaultEntryMode || 'cell-first';
                 
                 if (mode === 'sticky' && this.game.stickyDigit) {
-                    // Place sticky digit immediately
-                    const pos = row * 9 + col;
+                    // Fix #3: Use correct parameters (pos, digit) not (row, col, digit)
                     this.game.placeNumber(pos, this.game.stickyDigit);
                     this.updateBoard();
                     this.updateNumberPad();
@@ -2363,13 +2413,13 @@
                 
                 if (mode === 'last-used' && this.game.lastUsedDigit) {
                     // Pre-select last used
-                    this.selectCell(row, col);
+                    this.selectCell(pos);
                     this.inputNumber(this.game.lastUsedDigit);
                     return;
                 }
                 
                 // Check two-tap setting
-                if (!this.settings?.twoTapsToEdit) {
+                if (!AppSystems.settings?.twoTapsEdit) {
                     // Single tap mode
                     this.selectCellWithPopup(row, col);
                     return;
@@ -2388,7 +2438,6 @@
                     
                     // Reset
                     this.lastTapTime = 0;
-        this.DOUBLE_TAP_THRESHOLD = 300; // ms
                     this.lastTapCell = null;
                 } else {
                     // FIRST TAP - Just highlight
@@ -2410,10 +2459,11 @@
             
             selectCellWithPopup(row, col) {
                 // Check if using pop-up
-                if (this.settings?.digitEntryStyle === 'popup') {
+                if (AppSystems.settings?.digitEntryStyle === 'popup') {
                     this.showDigitPopup(row, col);
                 } else {
-                    this.selectCell(row, col);
+                    const pos = row * 9 + col;
+                    this.selectCell(pos);
                 }
             }
             
@@ -2442,9 +2492,10 @@
                     btn.addEventListener('click', (e) => {
                         const num = parseInt(e.target.dataset.num);
                         
-                        if (this.settings?.defaultEntryMode === 'sticky') {
+                        // Fix: Use AppSystems.settings
+                        if (AppSystems.settings?.defaultEntryMode === 'sticky') {
                             this.activateStickyDigit(num);
-                        } else if (this.settings?.defaultEntryMode === 'last-used') {
+                        } else if (AppSystems.settings?.defaultEntryMode === 'last-used') {
                             this.game.lastUsedDigit = num;
                         }
                     });
@@ -2488,7 +2539,8 @@
                 const numberPad = document.querySelector('.number-pad');
                 if (!numberPad) return;
                 
-                if (this.settings?.digitEntryStyle === 'popup') {
+                // Fix: Use AppSystems.settings
+                if (AppSystems.settings?.digitEntryStyle === 'popup') {
                     numberPad.style.display = 'none';
                 } else {
                     numberPad.style.display = 'grid';
@@ -2499,9 +2551,13 @@
                 const container = document.getElementById('digitPopupContainer');
                 if (!container) return;
                 
-                const opacity = this.settings?.popupTransparency || 0.95;
+                // Fix: Use AppSystems.settings - convert percentage to opacity
+                const transparency = AppSystems.settings?.popupTransparency || 5;
+                const opacity = 1 - (transparency / 100);
                 container.style.opacity = opacity;
                 
+                console.log('[Popup] Transparency applied:', transparency + '%', 'opacity:', opacity);
+            }
                 console.log('[Popup] Transparency set:', opacity);
             }
             
@@ -2509,9 +2565,9 @@
             updateMistakeCounter(count) {
                 const counter = document.getElementById('mistakeCounter');
                 if (counter) {
-                    counter.textContent = `❌ ${count}/${this.game.maxMistakes}`;
+                    counter.textContent = `❌ ${count}/${this.maxMistakes}`;
                     
-                    if (count >= this.game.maxMistakes) {
+                    if (count >= this.maxMistakes) {
                         counter.style.animation = 'incorrect-flash 0.6s ease';
                     }
                 }
@@ -2523,8 +2579,8 @@
                 
                 cell.classList.add('incorrect-flash');
                 
-                // Vibrate if enabled
-                if (this.settings?.hapticFeedback && navigator.vibrate) {
+                // Fix: Use AppSystems.settings
+                if (AppSystems.settings?.haptics && navigator.vibrate) {
                     navigator.vibrate([50, 30, 50]);
                 }
                 
@@ -2577,12 +2633,34 @@
                     ? this.game.engine.board[this.game.selectedCell] 
                     : 0;
                 
+                // Calculate crosshairs (row, col, block of selected cell)
+                const selectedRow = this.game.selectedCell !== null ? Math.floor(this.game.selectedCell / 9) : -1;
+                const selectedCol = this.game.selectedCell !== null ? this.game.selectedCell % 9 : -1;
+                const selectedBlock = this.game.selectedCell !== null 
+                    ? Math.floor(selectedRow / 3) * 3 + Math.floor(selectedCol / 3)
+                    : -1;
+                
                 cells.forEach((cell, index) => {
                     cell.className = 'cell';
                     cell.innerHTML = '';
+                    
+                    const row = Math.floor(index / 9);
+                    const col = index % 9;
+                    const block = Math.floor(row / 3) * 3 + Math.floor(col / 3);
 
+                    // Apply fixed/user class
                     if (this.game.engine.fixed[index]) {
                         cell.classList.add('fixed');
+                        
+                        // Fix: Check highlightInitial setting
+                        if (AppSystems.settings?.highlightInitial) {
+                            cell.classList.add('initial-highlight');
+                        }
+                        
+                        // Fix: Check boldInitial setting  
+                        if (AppSystems.settings?.boldInitial) {
+                            cell.classList.add('initial-bold');
+                        }
                     } else {
                         cell.classList.add('user');
                     }
@@ -2590,9 +2668,17 @@
                     if (index === this.game.selectedCell) {
                         cell.classList.add('selected');
                     }
+                    
+                    // Fix: Add crosshairs support
+                    if (AppSystems.settings?.showCrosshairs && this.game.selectedCell !== null) {
+                        if (row === selectedRow || col === selectedCol || block === selectedBlock) {
+                            cell.classList.add('crosshair');
+                        }
+                    }
 
-                    // Highlight same numbers ONLY when selectedNum is not 0
-                    if (selectedNum !== 0 && this.game.engine.board[index] === selectedNum) {
+                    // Fix: Check highlightDigits setting
+                    if (AppSystems.settings?.highlightDigits && selectedNum !== 0 && 
+                        this.game.engine.board[index] === selectedNum) {
                         cell.classList.add('highlighted');
                     }
 
@@ -2712,7 +2798,7 @@
         }
 
         // ============= INITIALIZE APP =============
-        const APP_VERSION = '9.4.1';
+        const APP_VERSION = '9.5';
         let gameState, uiController;
         
         // ============= GLOBAL POP-UP FUNCTIONS =============
