@@ -1,14 +1,13 @@
 {
-  "version": "9.3",
+  "version": "9.3.1",
   "releaseDate": "2026-03-18",
   "changelog": [
-    "COMPREHENSIVE SETTINGS: 3-category game settings system",
-    "Behavior settings: digit entry style, edit mode, sleep prevent",
-    "Display settings: timer, crosshairs, highlights, transparency",
-    "Helper settings: conflict detection, incorrect value warnings",
-    "18 customizable settings total",
-    "Pure mode: Disable all help for maximum challenge",
-    "Professional settings UI with categories and descriptions"
+    "GESTURE FIX: Modal scrolling now works correctly",
+    "Fixed: Pull-to-refresh disabled when modal/menu open",
+    "Fixed: Swipe gestures ignore scrolling inside modals",
+    "Fixed: Modal won't close accidentally during scroll",
+    "Improved: Modal scrolling with overscroll-behavior",
+    "Smart gesture detection based on context"
   ],
   "breaking_changes": false,
   "offline_compatible": true,
