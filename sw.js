@@ -1,5 +1,5 @@
-// Service Worker for Sudoku PWA - Dynamic Version
-const CACHE_NAME = 'sudoku-cache-v9.1';
+// Service Worker for Sudoku PWA - Offline-First Strategy
+const CACHE_NAME = 'sudoku-cache-v9.2';
 const urlsToCache = [
   './',
   './index.html',
@@ -9,7 +9,7 @@ const urlsToCache = [
 
 // Install event - cache resources
 self.addEventListener('install', (event) => {
-  console.log('[Service Worker] Installing...');
+  console.log('[Service Worker] Installing v9.2...');
   
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -26,8 +26,8 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean old caches
 self.addEventListener('activate', (event) => {
-  console.log('[Service Worker] Activating...');
-  const CURRENT_CACHE = 'sudoku-cache-v9.1';
+  console.log('[Service Worker] Activating v9.2...');
+  const CURRENT_CACHE = 'sudoku-cache-v9.2';
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
@@ -41,35 +41,44 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch event - network first, fallback to cache
+// Fetch event - CACHE FIRST, fallback to network
+// This ensures app works immediately even in full offline mode
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        // Check if valid response
-        if (!response || response.status !== 200 || response.type !== 'basic') {
-          return response;
+    caches.match(event.request)
+      .then((cachedResponse) => {
+        if (cachedResponse) {
+          // Found in cache - return immediately
+          console.log('[SW] Cache hit:', event.request.url.split('/').pop());
+          return cachedResponse;
         }
+        
+        // Not in cache - fetch from network
+        console.log('[SW] Cache miss, fetching:', event.request.url.split('/').pop());
+        return fetch(event.request)
+          .then((networkResponse) => {
+            // Check if valid response
+            if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+              return networkResponse;
+            }
 
-        // Clone and cache the response
-        const responseToCache = response.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
+            // Clone and cache the response for next time
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
 
-        return response;
-      })
-      .catch(() => {
-        // Network failed, try cache
-        return caches.match(event.request).then((response) => {
-          if (response) {
-            return response;
-          }
-          // If both fail
-          return new Response('Offline - Game data saved locally', {
-            headers: { 'Content-Type': 'text/plain' }
+            return networkResponse;
+          })
+          .catch((error) => {
+            // Network failed and not in cache
+            console.log('[SW] Network failed:', error.message);
+            return new Response('Offline - Resource not cached', {
+              status: 503,
+              statusText: 'Service Unavailable',
+              headers: { 'Content-Type': 'text/plain' }
+            });
           });
-        });
       })
   );
 });
@@ -81,4 +90,4 @@ self.addEventListener('message', (event) => {
   }
 });
 
-console.log('[Service Worker] Loaded successfully');
+console.log('[Service Worker] Loaded successfully - Cache-First Strategy');
