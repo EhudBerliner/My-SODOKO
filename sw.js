@@ -1,5 +1,5 @@
 // Service Worker for Sudoku PWA - Offline-First Strategy
-const CACHE_NAME = 'sudoku-cache-v9.5.1';
+const CACHE_NAME = 'sudoku-cache-v9.5.2';
 const urlsToCache = [
   './',
   './index.html',
@@ -9,7 +9,7 @@ const urlsToCache = [
 
 // Install event - cache resources
 self.addEventListener('install', (event) => {
-  console.log('[Service Worker] Installing v9.5...');
+  console.log('[Service Worker] Installing v9.5.1...');
   
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -26,8 +26,8 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean old caches
 self.addEventListener('activate', (event) => {
-  console.log('[Service Worker] Activating v9.5...');
-  const CURRENT_CACHE = 'sudoku-cache-v9.5.1';
+  console.log('[Service Worker] Activating v9.5.1...');
+  const CURRENT_CACHE = CACHE_NAME;
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
@@ -42,27 +42,20 @@ self.addEventListener('activate', (event) => {
 });
 
 // Fetch event - CACHE FIRST, fallback to network
-// This ensures app works immediately even in full offline mode
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request)
       .then((cachedResponse) => {
         if (cachedResponse) {
-          // Found in cache - return immediately
-          console.log('[SW] Cache hit:', event.request.url.split('/').pop());
           return cachedResponse;
         }
         
-        // Not in cache - fetch from network
-        console.log('[SW] Cache miss, fetching:', event.request.url.split('/').pop());
         return fetch(event.request)
           .then((networkResponse) => {
-            // Check if valid response
             if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
               return networkResponse;
             }
 
-            // Clone and cache the response for next time
             const responseToCache = networkResponse.clone();
             caches.open(CACHE_NAME).then((cache) => {
               cache.put(event.request, responseToCache);
@@ -71,7 +64,6 @@ self.addEventListener('fetch', (event) => {
             return networkResponse;
           })
           .catch((error) => {
-            // Network failed and not in cache
             console.log('[SW] Network failed:', error.message);
             return new Response('Offline - Resource not cached', {
               status: 503,
@@ -83,7 +75,6 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Listen for messages from the client
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
