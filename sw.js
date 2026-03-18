@@ -1,5 +1,5 @@
 // Service Worker for Sudoku PWA - Offline-First Strategy
-const CACHE_NAME = 'sudoku-cache-v9.4.0.1';
+const CACHE_NAME = 'sudoku-cache-v9.4.1.1';
 const urlsToCache = [
   './',
   './index.html',
@@ -9,7 +9,7 @@ const urlsToCache = [
 
 // Install event - cache resources
 self.addEventListener('install', (event) => {
-  console.log('[Service Worker] Installing v9.4.0...');
+  console.log('[Service Worker] Installing v9.4.1...');
   
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -26,8 +26,8 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean old caches
 self.addEventListener('activate', (event) => {
-  console.log('[Service Worker] Activating v9.4.0...');
-  const CURRENT_CACHE = 'sudoku-cache-v9.4.0.1';
+  console.log('[Service Worker] Activating v9.4.1...');
+  const CURRENT_CACHE = 'sudoku-cache-v9.4.1.1';
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

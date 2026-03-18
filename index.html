@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#4A90E2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Sudoku Pro - V9.4.0</title>
+    <title>Sudoku Pro - V9.4.1</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon-512.png">
     <link rel="apple-touch-icon" href="icon-512.png">
@@ -881,6 +881,17 @@
             animation: incorrect-flash 0.6s ease;
         }
 
+    
+        /* Crosshairs highlighting */
+        .cell.crosshair-row,
+        .cell.crosshair-col {
+            background: rgba(74, 144, 226, 0.08) !important;
+        }
+        
+        .cell.crosshair-row.crosshair-col {
+            background: rgba(74, 144, 226, 0.12) !important;
+        }
+
     </style>
 </head>
 <body data-theme="light">
@@ -888,7 +899,7 @@
         <!-- Header -->
         <div class="header">
             <div class="app-title" id="appTitle">Sudoku Pro</div>
-            <div class="version" id="versionBtn">Version 9.4.0</div>
+            <div class="version" id="versionBtn">Version 9.4.1</div>
         </div>
 
         <!-- Top Bar -->
@@ -1816,7 +1827,7 @@
                     this.engine.notes[pos].clear();
                     
                     // *** AUTO-ERASE PEERS INTEGRATION ***
-                    if (this.settings?.autoPencilErase && num > 0) {
+                    if ((AppSystems.settings || {}).autoPencilErase && num > 0) {
                         const row = Math.floor(pos / 9);
                         const col = pos % 9;
                         const peers = this.getPeers(row, col);
@@ -1871,7 +1882,7 @@
 
             // Help system master toggle check
             isHelpAllowed(feature) {
-                if (this.settings?.disableAllHelp) {
+                if ((AppSystems.settings || {}).disableAllHelp) {
                     console.log('[Help Blocked]', feature);
                     return false;
                 }
@@ -1912,7 +1923,7 @@
                 if (!this.settings?.flagIncorrect) return false;
                 if (!this.solution) return false;
                 
-                const isIncorrect = (this.solution[row][col] !== num);
+                const isIncorrect = (this.solution[row * 9 + col] !== num);
                 
                 if (isIncorrect) {
                     this.mistakes++;
@@ -2199,7 +2210,21 @@
                 }
             }
 
-            selectCell(index) {
+            selectCell(posOrRow, col = null) {
+                // Handle both formats: selectCell(pos) or selectCell(row, col)
+                let pos;
+                if (col !== null) {
+                    // Called with row, col
+                    pos = posOrRow * 9 + col;
+                } else {
+                    // Called with pos
+                    pos = posOrRow;
+                }
+                
+                if (pos < 0 || pos >= 81) {
+                    console.error('[selectCell] Invalid position:', pos);
+                    return;
+                }
                 this.game.selectedCell = index;
                 this.updateUI();
             }
@@ -2328,7 +2353,8 @@
                 
                 if (mode === 'sticky' && this.game.stickyDigit) {
                     // Place sticky digit immediately
-                    this.game.placeNumber(row, col, this.game.stickyDigit);
+                    const pos = row * 9 + col;
+                    this.game.placeNumber(pos, this.game.stickyDigit);
                     this.updateBoard();
                     this.updateNumberPad();
                     console.log('[Sticky] Placed:', this.game.stickyDigit, 'at', row, col);
@@ -2362,6 +2388,7 @@
                     
                     // Reset
                     this.lastTapTime = 0;
+        this.DOUBLE_TAP_THRESHOLD = 300; // ms
                     this.lastTapCell = null;
                 } else {
                     // FIRST TAP - Just highlight
@@ -2392,10 +2419,12 @@
             
             highlightCell(row, col) {
                 // Just highlight, don't allow editing
+                const pos = row * 9 + col;
+                
                 const cells = this.gameBoard.querySelectorAll('.cell');
                 cells.forEach(c => c.classList.remove('selected'));
                 
-                const cell = this.getCellElement(row, col);
+                const cell = this.gameBoard.querySelector(`[data-index="${pos}"]`);
                 if (cell) cell.classList.add('selected');
             }
             
@@ -2683,8 +2712,57 @@
         }
 
         // ============= INITIALIZE APP =============
-        const APP_VERSION = '9.4.0';
+        const APP_VERSION = '9.4.1';
         let gameState, uiController;
+        
+        // ============= GLOBAL POP-UP FUNCTIONS =============
+        window.popupDigitClick = function(num) {
+            if (!uiController || uiController.popupTargetRow === null) {
+                console.error('[Popup] No target cell');
+                return;
+            }
+            
+            const row = uiController.popupTargetRow;
+            const col = uiController.popupTargetCol;
+            const pos = row * 9 + col;
+            
+            if (num === 0) {
+                // Erase
+                gameState.engine.board[pos] = 0;
+                gameState.engine.notes[pos].clear();
+            } else {
+                // Place number
+                const result = gameState.placeNumber(pos, num);
+                
+                if (result.success) {
+                    // Check if incorrect (if setting enabled)
+                    const settings = AppSystems?.settings || {};
+                    if (settings.flagIncorrect && gameState.engine.solution) {
+                        const correct = gameState.engine.solution[pos];
+                        if (num !== correct) {
+                            gameState.mistakes = (gameState.mistakes || 0) + 1;
+                            uiController.showIncorrectFeedback(row, col);
+                            uiController.updateMistakeCounter(gameState.mistakes);
+                        }
+                    }
+                }
+            }
+            
+            uiController.updateUI();
+            window.closeDigitPopup();
+        };
+        
+        window.closeDigitPopup = function() {
+            const modal = document.getElementById('digitPopupModal');
+            if (modal) {
+                modal.classList.remove('active');
+            }
+            
+            if (uiController) {
+                uiController.popupTargetRow = null;
+                uiController.popupTargetCol = null;
+            }
+        };
 
         window.addEventListener('DOMContentLoaded', () => {
             gameState = new GameState();
