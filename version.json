@@ -1,23 +1,13 @@
 {
-  "version": "9.5",
+  "version": "9.5.1",
   "releaseDate": "2026-03-18",
   "changelog": [
-    "CRITICAL FIX: Fixed array access bugs preventing gameplay",
-    "Fixed: handleCellTap now accesses fixed array correctly",
-    "Fixed: Double-tap detection now works (DOUBLE_TAP_THRESHOLD initialized)",
-    "Fixed: Sticky digit mode uses correct parameters",
-    "Fixed: selectCell uses correct variable (pos instead of index)",
-    "Fixed: All settings now use AppSystems.settings correctly",
-    "Added: Crosshairs support (highlight row/col/block)",
-    "Added: highlightInitial setting now works",
-    "Added: boldInitial setting now works",
-    "Added: Popup transparency now applied correctly",
-    "Fixed: mistakeCounter uses this.maxMistakes correctly",
-    "Fixed: All settings references in SudokuEngine",
-    "Fixed: checkIncorrectWithLimit uses correct array access"
+    "HOTFIX: Fixed critical syntax error in UIController that prevented app load",
+    "Fixed: Unified mistake tracking between popup modal and bottom number pad",
+    "Fixed: Initialized mistakes variables in GameState to prevent undefined errors"
   ],
   "breaking_changes": false,
-  "fixes_count": 13,
+  "fixes_count": 3,
   "offline_compatible": true,
   "offline_first": true
 }
