@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#4A90E2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Sudoku Pro - V9.3.1</title>
+    <title>Sudoku Pro - V9.4.0</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon-512.png">
     <link rel="apple-touch-icon" href="icon-512.png">
@@ -783,6 +783,104 @@
                 font-size: 18px;
             }
         }
+
+        /* ========== DIGIT ENTRY POP-UP MODAL ========== */
+        .digit-popup-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3000;
+        }
+        
+        .digit-popup-modal.active {
+            display: block;
+        }
+        
+        .digit-popup-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(2px);
+        }
+        
+        .digit-popup-container {
+            position: absolute;
+            background: var(--bg-primary);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 2px solid var(--border-medium);
+            z-index: 3001;
+        }
+        
+        .digit-popup-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            width: 240px;
+        }
+        
+        .digit-popup-btn {
+            aspect-ratio: 1;
+            font-size: 28px;
+            font-weight: bold;
+            border: 2px solid var(--border-medium);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: inherit;
+        }
+        
+        .digit-popup-btn:active {
+            transform: scale(0.9);
+            background: var(--btn-primary);
+            color: white;
+        }
+        
+        .digit-popup-btn.digit-erase {
+            grid-column: span 3;
+            background: var(--btn-danger);
+            color: white;
+            border-color: var(--btn-danger);
+        }
+        
+        /* Tap pending animation for two-tap mode */
+        .cell.tap-pending {
+            box-shadow: 0 0 0 3px var(--btn-primary) inset;
+            animation: pulse-tap 0.3s ease;
+        }
+        
+        @keyframes pulse-tap {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* Sticky digit active state */
+        .num-btn.sticky-active {
+            background: var(--btn-primary);
+            color: white;
+            box-shadow: 0 0 0 3px var(--btn-primary);
+            transform: scale(1.1);
+        }
+        
+        /* Incorrect value flash */
+        @keyframes incorrect-flash {
+            0%, 100% { background: var(--bg-primary); }
+            50% { background: var(--cell-error); }
+        }
+        
+        .cell.incorrect-flash {
+            animation: incorrect-flash 0.6s ease;
+        }
+
     </style>
 </head>
 <body data-theme="light">
@@ -790,11 +888,12 @@
         <!-- Header -->
         <div class="header">
             <div class="app-title" id="appTitle">Sudoku Pro</div>
-            <div class="version" id="versionBtn">Version 9.3.1</div>
+            <div class="version" id="versionBtn">Version 9.4.0</div>
         </div>
 
         <!-- Top Bar -->
         <div class="top-bar">
+            <div id="mistakeCounter" style="color: var(--btn-danger); font-weight: bold; font-size: 14px;">❌ 0/3</div>
             <div class="timer" id="timer">00:00</div>
             <div class="top-buttons">
                 <button class="icon-btn" id="undoBtn" title="Undo">↶</button>
@@ -1544,6 +1643,15 @@
             }
 
             getConflicts(pos, num) {
+                // Check if help is allowed
+                if (!this.isHelpAllowed('conflicts')) {
+                    return new Set();
+                }
+                
+                if (!this.settings?.flagConflicts) {
+                    return new Set();
+                }
+                
                 const conflicts = new Set();
                 const row = Math.floor(pos / 9);
                 const col = pos % 9;
@@ -1706,6 +1814,22 @@
                     }
                     this.engine.board[pos] = num;
                     this.engine.notes[pos].clear();
+                    
+                    // *** AUTO-ERASE PEERS INTEGRATION ***
+                    if (this.settings?.autoPencilErase && num > 0) {
+                        const row = Math.floor(pos / 9);
+                        const col = pos % 9;
+                        const peers = this.getPeers(row, col);
+                        
+                        peers.forEach(([r, c]) => {
+                            const peerPos = r * 9 + c;
+                            if (this.engine.notes[peerPos]?.has(num)) {
+                                this.engine.notes[peerPos].delete(num);
+                                console.log(`[Auto-Erase] Removed ${num} from (${r},${c})`);
+                            }
+                        });
+                    }
+                    
                     this.saveSnapshot();
                     this.saveGame();
                     if (this.checkWin()) {
@@ -1716,6 +1840,12 @@
             }
 
             giveHint() {
+                // Check if help is allowed
+                if (!this.isHelpAllowed('hint')) {
+                    console.log('[Hint] Blocked by master help toggle');
+                    return false;
+                }
+                
                 if (this.hints <= 0 || this.selectedCell === null) return false;
                 if (this.engine.fixed[this.selectedCell]) return false;
                 const correctNum = this.engine.solution[this.selectedCell];
@@ -1738,6 +1868,62 @@
                 }
                 return true;
             }
+
+            // Help system master toggle check
+            isHelpAllowed(feature) {
+                if (this.settings?.disableAllHelp) {
+                    console.log('[Help Blocked]', feature);
+                    return false;
+                }
+                return true;
+            }
+            
+            // Get peer cells (same row, column, box)
+            getPeers(row, col) {
+                const peers = new Set();
+                
+                // Same row
+                for (let c = 0; c < 9; c++) {
+                    if (c !== col) peers.add(`${row},${c}`);
+                }
+                
+                // Same column
+                for (let r = 0; r < 9; r++) {
+                    if (r !== row) peers.add(`${r},${col}`);
+                }
+                
+                // Same 3x3 box
+                const boxRow = Math.floor(row / 3) * 3;
+                const boxCol = Math.floor(col / 3) * 3;
+                for (let r = boxRow; r < boxRow + 3; r++) {
+                    for (let c = boxCol; c < boxCol + 3; c++) {
+                        if (r !== row || c !== col) {
+                            peers.add(`${r},${c}`);
+                        }
+                    }
+                }
+                
+                return Array.from(peers).map(key => key.split(',').map(Number));
+            }
+            
+            // Check incorrect value with mistake tracking
+            checkIncorrectWithLimit(row, col, num) {
+                if (!this.isHelpAllowed('incorrect')) return false;
+                if (!this.settings?.flagIncorrect) return false;
+                if (!this.solution) return false;
+                
+                const isIncorrect = (this.solution[row][col] !== num);
+                
+                if (isIncorrect) {
+                    this.mistakes++;
+                    console.log(`[Mistake] Count: ${this.mistakes}/${this.maxMistakes}`);
+                    
+                    return true;
+                }
+                
+                return false;
+            }
+
 
             onWin() {
                 this.stopTimer();
@@ -1825,6 +2011,10 @@
                 this.initTheme();
                 this.bindEvents();
                 this.updateUI();
+                
+                // Initialize new features
+                this.initDigitFirstMode();
+                this.applyDigitEntryStyle();
             }
 
             initElements() {
@@ -1864,7 +2054,8 @@
                     cell.dataset.col = col;
                     cell.dataset.block = block;
                     
-                    cell.addEventListener('click', () => this.selectCell(i));
+                    // Use handleCellTap for all new features
+                    cell.addEventListener('click', () => this.handleCellTap(row, col));
                     this.gameBoard.appendChild(cell);
                 }
             }
@@ -2085,6 +2276,238 @@
                 this.updateUI();
             }
 
+            // ========== POP-UP DIGIT ENTRY ==========
+            showDigitPopup(row, col) {
+                this.popupTargetRow = row;
+                this.popupTargetCol = col;
+                
+                const modal = document.getElementById('digitPopupModal');
+                const container = document.getElementById('digitPopupContainer');
+                
+                if (!modal || !container) return;
+                
+                // Position near the cell
+                const cell = this.gameBoard.querySelector(
+                    `[data-row="${row}"][data-col="${col}"]`
+                );
+                
+                if (!cell) return;
+                
+                const rect = cell.getBoundingClientRect();
+                
+                // Center popup near cell
+                const popupWidth = 272; // 240 + 32 padding
+                const popupHeight = 300;
+                
+                let left = rect.left + (rect.width / 2) - (popupWidth / 2);
+                let top = rect.top - popupHeight - 10;
+                
+                // Keep on screen
+                if (left < 10) left = 10;
+                if (left + popupWidth > window.innerWidth - 10) {
+                    left = window.innerWidth - popupWidth - 10;
+                }
+                if (top < 10) {
+                    top = rect.bottom + 10; // Show below instead
+                }
+                
+                container.style.left = left + 'px';
+                container.style.top = top + 'px';
+                
+                modal.classList.add('active');
+                
+                console.log('[Popup] Opened at:', row, col);
+            }
+            
+            // ========== TWO-TAP DETECTION ==========
+            handleCellTap(row, col) {
+                if (this.game.fixed[row][col]) return;
+                
+                // Check digit entry mode first
+                const mode = this.settings?.defaultEntryMode || 'cell-first';
+                
+                if (mode === 'sticky' && this.game.stickyDigit) {
+                    // Place sticky digit immediately
+                    this.game.placeNumber(row, col, this.game.stickyDigit);
+                    this.updateBoard();
+                    this.updateNumberPad();
+                    console.log('[Sticky] Placed:', this.game.stickyDigit, 'at', row, col);
+                    return;
+                }
+                
+                if (mode === 'last-used' && this.game.lastUsedDigit) {
+                    // Pre-select last used
+                    this.selectCell(row, col);
+                    this.inputNumber(this.game.lastUsedDigit);
+                    return;
+                }
+                
+                // Check two-tap setting
+                if (!this.settings?.twoTapsToEdit) {
+                    // Single tap mode
+                    this.selectCellWithPopup(row, col);
+                    return;
+                }
+                
+                // Two tap mode
+                const now = Date.now();
+                const cellKey = `${row},${col}`;
+                const isSameCell = (cellKey === this.lastTapCell);
+                const timeSinceLast = now - this.lastTapTime;
+                
+                if (isSameCell && timeSinceLast < this.DOUBLE_TAP_THRESHOLD) {
+                    // DOUBLE TAP - Edit cell
+                    console.log('[Double Tap] Edit cell:', row, col);
+                    this.selectCellWithPopup(row, col);
+                    
+                    // Reset
+                    this.lastTapTime = 0;
+                    this.lastTapCell = null;
+                } else {
+                    // FIRST TAP - Just highlight
+                    console.log('[First Tap] Highlight cell:', row, col);
+                    
+                    this.highlightCell(row, col);
+                    
+                    this.lastTapTime = now;
+                    this.lastTapCell = cellKey;
+                    
+                    // Show visual feedback
+                    const cell = this.getCellElement(row, col);
+                    if (cell) {
+                        cell.classList.add('tap-pending');
+                        setTimeout(() => cell.classList.remove('tap-pending'), 300);
+                    }
+                }
+            }
+            
+            selectCellWithPopup(row, col) {
+                // Check if using pop-up
+                if (this.settings?.digitEntryStyle === 'popup') {
+                    this.showDigitPopup(row, col);
+                } else {
+                    this.selectCell(row, col);
+                }
+            }
+            
+            highlightCell(row, col) {
+                // Just highlight, don't allow editing
+                const cells = this.gameBoard.querySelectorAll('.cell');
+                cells.forEach(c => c.classList.remove('selected'));
+                
+                const cell = this.getCellElement(row, col);
+                if (cell) cell.classList.add('selected');
+            }
+            
+            getCellElement(row, col) {
+                return this.gameBoard.querySelector(
+                    `[data-row="${row}"][data-col="${col}"]`
+                );
+            }
+            
+            // ========== STICKY DIGIT MODE ==========
+            initDigitFirstMode() {
+                document.querySelectorAll('.num-btn').forEach(btn => {
+                    const originalClick = btn.onclick;
+                    
+                    btn.addEventListener('click', (e) => {
+                        const num = parseInt(e.target.dataset.num);
+                        
+                        if (this.settings?.defaultEntryMode === 'sticky') {
+                            this.activateStickyDigit(num);
+                        } else if (this.settings?.defaultEntryMode === 'last-used') {
+                            this.game.lastUsedDigit = num;
+                        }
+                    });
+                });
+            }
+            
+            activateStickyDigit(num) {
+                this.game.stickyDigit = num;
+                
+                // Visual feedback on number pad
+                document.querySelectorAll('.num-btn').forEach(btn => {
+                    btn.classList.remove('sticky-active');
+                });
+                
+                const activeBtn = document.querySelector(`.num-btn[data-num="${num}"]`);
+                if (activeBtn) {
+                    activeBtn.classList.add('sticky-active');
+                }
+                
+                console.log('[Sticky Mode] Digit selected:', num);
+                this.showToast(`Sticky: ${num} - Tap cells to place`, 'info');
+            }
+            
+            clearStickyDigit() {
+                this.game.stickyDigit = null;
+                document.querySelectorAll('.num-btn').forEach(btn => {
+                    btn.classList.remove('sticky-active');
+                });
+            }
+            
+            // ========== SETTINGS SYNC ==========
+            refreshDisplay() {
+                this.updateBoard();
+                this.updateNumberPad();
+                this.applyDigitEntryStyle();
+                this.applyPopupTransparency();
+                console.log('[UI] Display refreshed with new settings');
+            }
+            
+            applyDigitEntryStyle() {
+                const numberPad = document.querySelector('.number-pad');
+                if (!numberPad) return;
+                
+                if (this.settings?.digitEntryStyle === 'popup') {
+                    numberPad.style.display = 'none';
+                } else {
+                    numberPad.style.display = 'grid';
+                }
+            }
+            
+            applyPopupTransparency() {
+                const container = document.getElementById('digitPopupContainer');
+                if (!container) return;
+                
+                const opacity = this.settings?.popupTransparency || 0.95;
+                container.style.opacity = opacity;
+                
+                console.log('[Popup] Transparency set:', opacity);
+            }
+            
+            // ========== MISTAKES COUNTER ==========
+            updateMistakeCounter(count) {
+                const counter = document.getElementById('mistakeCounter');
+                if (counter) {
+                    counter.textContent = `❌ ${count}/${this.game.maxMistakes}`;
+                    
+                    if (count >= this.game.maxMistakes) {
+                        counter.style.animation = 'incorrect-flash 0.6s ease';
+                    }
+                }
+            }
+            
+            showIncorrectFeedback(row, col) {
+                const cell = this.getCellElement(row, col);
+                if (!cell) return;
+                
+                cell.classList.add('incorrect-flash');
+                
+                // Vibrate if enabled
+                if (this.settings?.hapticFeedback && navigator.vibrate) {
+                    navigator.vibrate([50, 30, 50]);
+                }
+                
+                setTimeout(() => {
+                    cell.classList.remove('incorrect-flash');
+                }, 1000);
+                
+                // Update counter
+                this.updateMistakeCounter(this.game.mistakes);
+            }
+
+
             updateDifficultyTitle(difficulty) {
                 const difficultyNames = {
                     easy: 'Easy',
@@ -2260,7 +2683,7 @@
         }
 
         // ============= INITIALIZE APP =============
-        const APP_VERSION = '9.3.1';
+        const APP_VERSION = '9.4.0';
         let gameState, uiController;
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -2279,6 +2702,18 @@
 
             // Boot all systems
             AppSystems.init();
+            
+            // *** WAKE LOCK RE-ACQUISITION ***
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    // Re-acquire wake lock when page becomes visible
+                    if (AppSystems.settings.preventSleep && 'wakeLock' in navigator) {
+                        navigator.wakeLock.request('screen')
+                            .then(() => console.log('[WakeLock] Re-acquired after visibility change'))
+                            .catch(e => console.log('[WakeLock] Re-acquisition failed:', e.message));
+                    }
+                }
+            });
         });
 
         // ============= APP SYSTEMS V9.0 =============
@@ -2765,9 +3200,10 @@
                     });
                 }
                 
-                // Force UI update if game is running
+                // *** NEW: Immediate UI refresh ***
                 if (window.uiController) {
-                    uiController.updateUI();
+                    uiController.refreshDisplay();
+                    console.log('[Settings] Applied with immediate UI refresh');
                 }
             },
 
@@ -2857,5 +3293,27 @@
         }
 
     </script>
+
+    <!-- Digit Entry Pop-up Modal -->
+    <div id="digitPopupModal" class="digit-popup-modal">
+        <div class="digit-popup-backdrop" onclick="closeDigitPopup()"></div>
+        <div class="digit-popup-container" id="digitPopupContainer">
+            <div class="digit-popup-grid">
+                <button class="digit-popup-btn" onclick="popupDigitClick(1)">1</button>
+                <button class="digit-popup-btn" onclick="popupDigitClick(2)">2</button>
+                <button class="digit-popup-btn" onclick="popupDigitClick(3)">3</button>
+                <button class="digit-popup-btn" onclick="popupDigitClick(4)">4</button>
+                <button class="digit-popup-btn" onclick="popupDigitClick(5)">5</button>
+                <button class="digit-popup-btn" onclick="popupDigitClick(6)">6</button>
+                <button class="digit-popup-btn" onclick="popupDigitClick(7)">7</button>
+                <button class="digit-popup-btn" onclick="popupDigitClick(8)">8</button>
+                <button class="digit-popup-btn" onclick="popupDigitClick(9)">9</button>
+                <button class="digit-popup-btn digit-erase" onclick="popupDigitClick(0)">
+                    <span style="font-size: 24px;">✕</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
