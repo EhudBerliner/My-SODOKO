@@ -1,16 +1,27 @@
 {
-  "version": "9.3.1",
+  "version": "9.4.0",
   "releaseDate": "2026-03-18",
   "changelog": [
-    "GESTURE FIX: Modal scrolling now works correctly",
-    "Fixed: Pull-to-refresh disabled when modal/menu open",
-    "Fixed: Swipe gestures ignore scrolling inside modals",
-    "Fixed: Modal won't close accidentally during scroll",
-    "Improved: Modal scrolling with overscroll-behavior",
-    "Smart gesture detection based on context"
+    "COMPREHENSIVE FIX: All 13 settings-engine disconnects resolved",
+    "Fixed: Digit entry style - Pop-up modal now implemented",
+    "Fixed: Sticky mode - Digit-first entry works",
+    "Fixed: Two taps to edit - Double-tap detection added",
+    "Fixed: Show digit counts - Count/9 displayed on pad",
+    "Fixed: Auto pencil erase - Removes from peer notes",
+    "Fixed: Show crosshairs - Row/column highlighting works",
+    "Fixed: Highlight digits - Now conditional on setting",
+    "Fixed: Initial digits styling - Bold/background conditional",
+    "Fixed: Pop-up transparency - Actually applied",
+    "Fixed: Disable all help - Master toggle blocks helpers",
+    "Fixed: Flag conflicts - Conditional on setting",
+    "Fixed: Flag incorrect - Compares with solution",
+    "Fixed: Settings sync - Real-time UI updates",
+    "Development audit: 100% issues resolved"
   ],
   "breaking_changes": false,
   "offline_compatible": true,
   "offline_first": true,
-  "settings_count": 18
+  "settings_count": 18,
+  "bugs_fixed": 13,
+  "audit_status": "all_issues_resolved"
 }
