@@ -11,22 +11,30 @@
     <link rel="icon" type="image/png" href="icon-512.png">
     <link rel="apple-touch-icon" href="icon-512.png">
     <style>
+        /* משתני צבעים לפי האפיון המלא */
         :root {
             --bg-primary: #ffffff;
             --bg-secondary: #f8f9fa;
             --bg-tertiary: #e9ecef;
+            
             --text-primary: #212529;
             --text-secondary: #6c757d;
-            --border-light: #212529;
-            --border-medium: #495057;
-            --border-heavy: #212529;
-            --cell-fixed: #212529;
-            --cell-fixed-bg: #e2e8f0;
-            --cell-user: #2d3748;
-            --cell-selected: #B9DCFE;
-            --cell-highlighted: #B9DCFE;
-            --cell-conflict: #fee2e2;
-            --cell-error: #ef4444;
+            
+            --border-light: #E0E0E0;
+            --border-heavy: #333333;
+            
+            --cell-bg-normal: #FFFFFF;
+            --cell-bg-fixed: #F5F5F5;
+            --cell-bg-crosshair: rgba(74, 144, 226, 0.1);
+            --cell-bg-highlighted: #FFC107;
+            --cell-bg-error: #F44336;
+            --cell-bg-selected: #4A90E2;
+            --cell-bg-selected-error: #D32F2F;
+            
+            --cell-text-dark: #333333;
+            --cell-text-light: #FFFFFF;
+            --cell-text-notes: #777777;
+            
             --btn-primary: #4A90E2;
             --btn-success: #10b981;
             --btn-danger: #ef4444;
@@ -37,19 +45,24 @@
             --bg-primary: #1a1a1a;
             --bg-secondary: #2d2d2d;
             --bg-tertiary: #404040;
+            
             --text-primary: #e5e5e5;
             --text-secondary: #a0a0a0;
-            --border-light: #808080;
-            --border-medium: #606060;
-            --border-heavy: #808080;
-            --cell-fixed: #60a5fa;
-            --cell-fixed-bg: #1e3a5f;
-            --cell-user: #e5e5e5;
-            --cell-selected: #B9DCFE;
-            --cell-highlighted: #B9DCFE;
-            --cell-conflict: #4a1a1a;
-            --cell-error: #dc2626;
-            --shadow: rgba(0, 0, 0, 0.3);
+            
+            --border-light: #606060;
+            --border-heavy: #1a1a1a;
+            
+            --cell-bg-normal: #2d2d2d;
+            --cell-bg-fixed: #1e1e1e;
+            --cell-bg-crosshair: rgba(74, 144, 226, 0.15);
+            --cell-bg-highlighted: #B08D00;
+            --cell-bg-error: #B71C1C;
+            --cell-bg-selected: #2171C7;
+            --cell-bg-selected-error: #8E0000;
+            
+            --cell-text-dark: #E0E0E0;
+            --cell-text-light: #FFFFFF;
+            --cell-text-notes: #A0A0A0;
         }
 
         * {
@@ -72,46 +85,22 @@
             padding-bottom: env(safe-area-inset-bottom);
         }
 
+        /* ================= UI COMPONENTS ================= */
         .offline-banner {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: #ef4444;
-            color: white;
-            text-align: center;
-            padding: 8px 16px;
-            font-size: 13px;
-            font-weight: 600;
-            z-index: 9000;
-            transform: translateY(-100%);
-            transition: transform 0.3s ease;
+            position: fixed; top: 0; left: 0; right: 0;
+            background: #ef4444; color: white; text-align: center;
+            padding: 8px 16px; font-size: 13px; font-weight: 600;
+            z-index: 9000; transform: translateY(-100%); transition: transform 0.3s ease;
         }
         .offline-banner.visible { transform: translateY(0); }
 
         .toast-container {
-            position: fixed;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 8000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            pointer-events: none;
+            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+            z-index: 8000; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none;
         }
         .toast {
-            padding: 10px 20px;
-            border-radius: 24px;
-            font-size: 14px;
-            font-weight: 600;
-            color: white;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.3s ease;
-            white-space: nowrap;
-            pointer-events: none;
+            padding: 10px 20px; border-radius: 24px; font-size: 14px; font-weight: 600;
+            color: white; opacity: 0; transform: translateY(20px); transition: all 0.3s ease; white-space: nowrap; pointer-events: none;
         }
         .toast.show { opacity: 1; transform: translateY(0); }
         .toast.success { background: #10b981; }
@@ -120,19 +109,9 @@
         .toast.warning { background: #f59e0b; }
 
         .install-banner {
-            position: fixed;
-            bottom: -120px;
-            left: 0;
-            right: 0;
-            background: var(--bg-primary);
-            border-top: 2px solid var(--btn-primary);
-            padding: 16px;
-            z-index: 7000;
-            transition: bottom 0.4s ease;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 -4px 20px var(--shadow);
+            position: fixed; bottom: -120px; left: 0; right: 0;
+            background: var(--bg-primary); border-top: 2px solid var(--btn-primary);
+            padding: 16px; z-index: 7000; transition: bottom 0.4s ease; display: flex; align-items: center; gap: 12px; box-shadow: 0 -4px 20px var(--shadow);
         }
         .install-banner.visible { bottom: 0; }
         .install-banner img { width: 48px; height: 48px; border-radius: 12px; }
@@ -145,596 +124,208 @@
         .install-btn.secondary { background: var(--bg-tertiary); color: var(--text-secondary); }
 
         .ptr-indicator {
-            position: fixed;
-            top: env(safe-area-inset-top, 0px);
-            left: 50%;
-            transform: translateX(-50%) translateY(-60px);
-            width: 40px;
-            height: 40px;
-            background: var(--btn-primary);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 20px;
-            z-index: 6000;
-            transition: transform 0.2s ease;
-            box-shadow: 0 4px 12px var(--shadow);
+            position: fixed; top: env(safe-area-inset-top, 0px); left: 50%; transform: translateX(-50%) translateY(-60px);
+            width: 40px; height: 40px; background: var(--btn-primary); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;
+            z-index: 6000; transition: transform 0.2s ease; box-shadow: 0 4px 12px var(--shadow);
         }
         .ptr-indicator.visible { transform: translateX(-50%) translateY(8px); }
 
         .update-prompt {
-            position: fixed;
-            top: 60px;
-            left: 50%;
-            transform: translateX(-50%) translateY(-120px);
-            background: var(--bg-primary);
-            border: 2px solid var(--btn-primary);
-            border-radius: 12px;
-            padding: 12px 20px;
-            z-index: 8500;
-            transition: transform 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 4px 20px var(--shadow);
-            white-space: nowrap;
+            position: fixed; top: 60px; left: 50%; transform: translateX(-50%) translateY(-120px);
+            background: var(--bg-primary); border: 2px solid var(--btn-primary); border-radius: 12px;
+            padding: 12px 20px; z-index: 8500; transition: transform 0.3s ease; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 20px var(--shadow); white-space: nowrap;
         }
         .update-prompt.visible { transform: translateX(-50%) translateY(0); }
         .update-prompt span { font-size: 13px; font-weight: 600; color: var(--text-primary); }
         .update-now-btn { padding: 6px 14px; background: var(--btn-primary); color: white; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; }
 
-        .settings-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 14px 0;
-            border-bottom: 1px solid var(--bg-tertiary);
-        }
-        .settings-row:last-child { border-bottom: none; }
-        .settings-label { font-size: 15px; color: var(--text-primary); }
-        .settings-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
-        
-        .settings-category {
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 2px solid var(--bg-tertiary);
-        }
-        .settings-category:last-of-type { border-bottom: none; }
-        .settings-category-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--btn-primary);
-            margin-bottom: 12px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid var(--bg-tertiary);
-        }
-        
-        .settings-select {
-            padding: 6px 12px;
-            border: 1px solid var(--border-light);
-            border-radius: 6px;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            font-size: 13px;
-            cursor: pointer;
-            min-width: 150px;
-        }
-        .settings-select:focus {
-            outline: 2px solid var(--btn-primary);
-            outline-offset: 1px;
-        }
-        
-        .settings-slider {
-            -webkit-appearance: none;
-            appearance: none;
-            height: 6px;
-            border-radius: 3px;
-            background: var(--bg-tertiary);
-            outline: none;
-            margin: 0 12px;
-        }
-        .settings-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: var(--btn-primary);
-            cursor: pointer;
-        }
-        .settings-value {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-primary);
-            min-width: 35px;
-            text-align: right;
-        }
-        
-        .toggle { position: relative; width: 48px; height: 26px; }
-        .toggle input { opacity: 0; width: 0; height: 0; }
-        .toggle-slider {
-            position: absolute; inset: 0;
-            background: var(--bg-tertiary);
-            border-radius: 26px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        .toggle-slider::before {
-            content: '';
-            position: absolute;
-            width: 20px; height: 20px;
-            left: 3px; top: 3px;
-            background: white;
-            border-radius: 50%;
-            transition: transform 0.3s;
-        }
-        .toggle input:checked + .toggle-slider { background: var(--btn-primary); }
-        .toggle input:checked + .toggle-slider::before { transform: translateX(22px); }
-
-        .reset-option {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            background: var(--bg-secondary);
-            border-radius: 10px;
-            margin-bottom: 8px;
-            cursor: pointer;
-        }
-        .reset-option input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--btn-primary); cursor: pointer; }
-        .reset-option-label { font-size: 14px; color: var(--text-primary); }
-        .reset-option-sub { font-size: 11px; color: var(--text-secondary); }
-
         .container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 8px;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
+            max-width: 600px; margin: 0 auto; padding: 8px; height: 100%; display: flex; flex-direction: column;
         }
-
-        .header {
-            text-align: center;
-            margin-bottom: 8px;
-        }
-
-        .app-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--btn-primary);
-            margin-bottom: 2px;
-        }
-
-        .version {
-            font-size: 11px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            user-select: none;
-            transition: color 0.2s;
-        }
-
-        .version:hover {
-            color: var(--btn-primary);
-        }
+        .header { text-align: center; margin-bottom: 8px; }
+        .app-title { font-size: 20px; font-weight: 700; color: var(--btn-primary); margin-bottom: 2px; }
+        .version { font-size: 11px; color: var(--text-secondary); cursor: pointer; user-select: none; transition: color 0.2s; }
+        .version:hover { color: var(--btn-primary); }
 
         .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 12px;
-            background: var(--bg-secondary);
-            border-radius: 8px;
-            margin-bottom: 8px;
-            box-shadow: 0 2px 4px var(--shadow);
+            display: flex; justify-content: space-between; align-items: center; padding: 8px 12px;
+            background: var(--bg-secondary); border-radius: 8px; margin-bottom: 8px; box-shadow: 0 2px 4px var(--shadow);
         }
-
-        .timer {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--btn-primary);
-            font-variant-numeric: tabular-nums;
-        }
-
-        .top-buttons {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
+        .timer { font-size: 20px; font-weight: 700; color: var(--btn-primary); font-variant-numeric: tabular-nums; }
+        .top-buttons { display: flex; gap: 8px; align-items: center; }
         .icon-btn {
-            width: 40px;
-            height: 40px;
-            border: none;
-            border-radius: 8px;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            font-size: 18px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 4px var(--shadow);
-            transition: all 0.2s;
+            width: 40px; height: 40px; border: none; border-radius: 8px; background: var(--bg-primary);
+            color: var(--text-primary); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px var(--shadow); transition: all 0.2s;
         }
+        .icon-btn:active { transform: scale(0.95); }
+        .icon-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        .icon-btn:active {
-            transform: scale(0.95);
-        }
-
-        .icon-btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-
+        /* ================= GAME BOARD & CELLS (V9.5.1 DESIGN SYSTEM) ================= */
         .game-board-container {
-            flex: 0 0 auto;
-            display: flex;
-            justify-content: center;
-            margin-bottom: 8px;
+            flex: 0 0 auto; display: flex; justify-content: center; margin-bottom: 8px;
         }
-
         .game-board {
-            display: grid;
-            grid-template-columns: repeat(9, 1fr);
-            gap: 0;
-            background: var(--bg-primary);
-            border: 3px solid var(--border-heavy);
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 12px var(--shadow);
-            aspect-ratio: 1;
-            width: 100%;
-            max-width: 500px;
+            display: grid; grid-template-columns: repeat(9, 1fr); gap: 0;
+            background: var(--border-heavy); border: 3px solid var(--border-heavy);
+            border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px var(--shadow);
+            aspect-ratio: 1; width: 100%; max-width: 500px;
         }
 
         .cell {
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--bg-primary);
-            border: 0.5px solid var(--border-light);
-            font-size: clamp(20px, 5vw, 32px);
-            font-weight: 700;
-            cursor: pointer;
-            transition: background-color 0.15s;
-            position: relative;
-            user-select: none;
-            box-sizing: border-box;
+            aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+            background-color: var(--cell-bg-normal); color: var(--cell-text-dark);
+            border: 0.5px solid var(--border-light); font-size: clamp(20px, 5vw, 32px);
+            cursor: pointer; position: relative; user-select: none; box-sizing: border-box;
+            transition: background-color 0.15s ease, color 0.15s ease; 
         }
 
+        /* Block Borders */
         .cell:nth-child(9n+3), 
-        .cell:nth-child(9n+6) {
-            border-right: 3px solid var(--border-heavy) !important;
-        }
-        
+        .cell:nth-child(9n+6) { border-right: 3px solid var(--border-heavy) !important; }
         .cell:nth-child(n+19):nth-child(-n+27),
-        .cell:nth-child(n+46):nth-child(-n+54) {
-            border-bottom: 3px solid var(--border-heavy) !important;
+        .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 3px solid var(--border-heavy) !important; }
+
+        /* Priority 7: Fixed */
+        .cell.fixed {
+            background-color: var(--cell-bg-fixed);
+            font-weight: 700;
+            color: var(--cell-text-dark);
         }
 
-        .cell.fixed {
-            color: var(--cell-fixed);
-            background-color: var(--cell-fixed-bg);
+        /* Priority 5/6: Crosshair */
+        .cell.crosshair { background-color: var(--cell-bg-crosshair) !important; }
+
+        /* Priority 4: Highlighted (Same Digit) */
+        .cell.highlighted {
+            background-color: var(--cell-bg-highlighted) !important;
+            color: var(--cell-text-dark) !important;
+        }
+
+        /* Priority 3: Error */
+        .cell.error {
+            background-color: var(--cell-bg-error) !important;
+            color: var(--cell-text-light) !important;
             font-weight: 700;
         }
-        
-        .cell.initial-highlight {
-            background-color: #dbeafe !important;
-        }
-        
-        [data-theme="dark"] .cell.initial-highlight {
-            background-color: #1e3a8a !important;
-        }
-        
-        .cell.initial-bold {
-            font-weight: 900 !important;
-        }
 
-        .cell.user {
-            color: var(--cell-user);
-        }
-        
-        .cell.crosshair {
-            background-color: #f0f9ff !important;
-        }
-        
-        [data-theme="dark"] .cell.crosshair {
-            background-color: #1e293b !important;
-        }
-
+        /* Priority 2: Selected */
         .cell.selected {
-            background: var(--cell-selected) !important;
-            outline: 3px solid var(--border-light);
+            background-color: var(--cell-bg-selected) !important;
+            color: var(--cell-text-light) !important;
+            outline: 3px solid var(--cell-bg-selected);
             outline-offset: -3px;
             z-index: 10;
         }
 
-        .cell.highlighted {
-            background: var(--cell-highlighted) !important;
+        /* Priority 1: Selected + Error */
+        .cell.selected.error {
+            background-color: var(--cell-bg-selected-error) !important;
+            color: var(--cell-text-light) !important;
+            outline-color: var(--cell-bg-selected-error);
         }
 
-        .cell.conflict {
-            background: var(--cell-conflict) !important;
-            color: var(--cell-error) !important;
-            animation: shake 0.3s;
-            box-shadow: inset 0 0 0 3px var(--cell-error) !important;
-            z-index: 100;
-        }
-
+        /* Notes styling */
         .cell .notes {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-            gap: 1px;
-            width: 100%;
-            height: 100%;
-            padding: 2px;
+            display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);
+            gap: 1px; width: 100%; height: 100%; padding: 2px;
         }
-
         .cell .notes span {
-            font-size: clamp(8px, 1.5vw, 11px);
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 500;
+            font-size: clamp(8px, 1.5vw, 11px); color: var(--cell-text-notes);
+            display: flex; align-items: center; justify-content: center; font-weight: 500;
         }
 
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-4px); }
-            75% { transform: translateX(4px); }
-        }
-
+        /* ================= NUMBER PAD & MODALS ================= */
         .number-pad {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            margin-bottom: 8px;
+            display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px;
         }
-
-        .number-row {
-            display: grid;
-            gap: 6px;
-        }
-
-        .number-row.first {
-            grid-template-columns: repeat(6, 1fr);
-        }
-
-        .number-row.second {
-            grid-template-columns: repeat(6, 1fr);
-        }
-
+        .number-row { display: grid; gap: 6px; }
+        .number-row.first { grid-template-columns: repeat(6, 1fr); }
+        .number-row.second { grid-template-columns: repeat(6, 1fr); }
         .num-btn {
-            aspect-ratio: 1;
-            border: none;
-            border-radius: 8px;
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            font-size: 34px;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 2px 4px var(--shadow);
-            transition: all 0.2s;
-            position: relative;
+            aspect-ratio: 1; border: none; border-radius: 8px; background: var(--bg-secondary);
+            color: var(--text-primary); font-size: 34px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 4px var(--shadow); transition: all 0.2s; position: relative;
         }
-
-        .num-btn:active:not(:disabled) {
-            transform: scale(0.95);
-            background: var(--btn-primary);
-            color: white;
-        }
-
-        .num-btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-
-        .num-btn.delete {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            font-size: 22px;
-        }
-
-        .num-btn.notes {
-            background: var(--bg-tertiary);
-            font-size: 22px;
-        }
-
-        .num-btn.notes.active {
-            background: var(--btn-success);
-            color: white;
-        }
-
-        .num-btn.placeholder {
-            opacity: 0;
-            pointer-events: none;
-        }
+        .num-btn:active:not(:disabled) { transform: scale(0.95); background: var(--btn-primary); color: white; }
+        .num-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .num-btn.delete { background: var(--bg-tertiary); color: var(--text-primary); font-size: 22px; }
+        .num-btn.notes { background: var(--bg-tertiary); font-size: 22px; }
+        .num-btn.notes.active { background: var(--btn-success); color: white; }
+        .num-btn.placeholder { opacity: 0; pointer-events: none; }
+        .num-btn.sticky-active { background: var(--btn-primary); color: white; box-shadow: 0 0 0 3px var(--btn-primary); transform: scale(1.1); }
 
         .menu-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            display: none;
-            z-index: 1000;
-            backdrop-filter: blur(4px);
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7); display: none; z-index: 1000; backdrop-filter: blur(4px);
         }
-
-        .menu-overlay.active {
-            display: block;
-        }
-
+        .menu-overlay.active { display: block; }
         .menu-panel {
-            position: fixed;
-            top: 0;
-            right: -300px;
-            width: 280px;
-            height: 100%;
-            background: var(--bg-primary);
-            box-shadow: -4px 0 12px var(--shadow);
-            transition: right 0.3s ease;
-            z-index: 1001;
-            overflow-y: auto;
+            position: fixed; top: 0; right: -300px; width: 280px; height: 100%;
+            background: var(--bg-primary); box-shadow: -4px 0 12px var(--shadow); transition: right 0.3s ease; z-index: 1001; overflow-y: auto;
         }
-
-        .menu-panel.active {
-            right: 0;
-        }
-
-        .menu-header {
-            padding: 20px;
-            background: var(--btn-primary);
-            color: white;
-            font-size: 20px;
-            font-weight: 700;
-        }
-
-        .menu-items {
-            padding: 8px;
-        }
-
+        .menu-panel.active { right: 0; }
+        .menu-header { padding: 20px; background: var(--btn-primary); color: white; font-size: 20px; font-weight: 700; }
+        .menu-items { padding: 8px; }
         .menu-item {
-            padding: 16px;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            background: var(--bg-secondary);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 16px;
-            transition: all 0.2s;
+            padding: 16px; border-radius: 8px; margin-bottom: 8px; background: var(--bg-secondary);
+            cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 16px; transition: all 0.2s;
         }
-
-        .menu-item:active {
-            background: var(--bg-tertiary);
-            transform: scale(0.98);
-        }
-
-        .menu-item-icon {
-            font-size: 24px;
-            width: 32px;
-            text-align: center;
-        }
+        .menu-item:active { background: var(--bg-tertiary); transform: scale(0.98); }
+        .menu-item-icon { font-size: 24px; width: 32px; text-align: center; }
 
         .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(4px);
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(4px);
         }
-
-        .modal.active {
-            display: flex;
-        }
-
+        .modal.active { display: flex; }
         .modal-content {
-            background: var(--bg-primary);
-            padding: 24px;
-            border-radius: 16px;
-            max-width: 90%;
-            width: 350px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            max-height: 85vh;
-            overflow-y: auto;
-            overflow-x: hidden;
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior: contain;
+            background: var(--bg-primary); padding: 24px; border-radius: 16px; max-width: 90%; width: 350px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); max-height: 85vh; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
         }
-
-        .modal-content h2 {
-            font-size: 24px;
-            margin-bottom: 16px;
-            color: var(--btn-primary);
-            text-align: center;
-        }
-
-        .modal-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 20px;
-        }
-
+        .modal-content h2 { font-size: 24px; margin-bottom: 16px; color: var(--btn-primary); text-align: center; }
+        .modal-buttons { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
         .modal-btn {
-            padding: 14px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
+            padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s;
         }
-
         .modal-btn.primary { background: var(--btn-primary); color: white; }
         .modal-btn.success { background: var(--btn-success); color: white; }
         .modal-btn.danger { background: var(--btn-danger); color: white; }
         .modal-btn.secondary { background: var(--bg-tertiary); color: var(--text-primary); }
 
-        .difficulty-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin: 16px 0;
-        }
-
+        .difficulty-grid { display: flex; flex-direction: column; gap: 12px; margin: 16px 0; }
         .difficulty-btn {
-            padding: 12px 12px;
-            border: 2px solid var(--border-light);
-            border-radius: 12px;
-            background: var(--bg-secondary);
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-            font-weight: 600;
+            padding: 12px 12px; border: 2px solid var(--border-light); border-radius: 12px;
+            background: var(--bg-secondary); cursor: pointer; transition: all 0.2s; text-align: center; font-weight: 600;
         }
+        .difficulty-btn:active { transform: scale(0.95); background: var(--btn-primary); color: white; }
 
-        .difficulty-btn:active {
-            transform: scale(0.95);
-            background: var(--btn-primary);
-            color: white;
-        }
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 16px 0; }
+        .stat-card { background: var(--bg-secondary); padding: 16px; border-radius: 12px; text-align: center; }
+        .stat-value { font-size: 28px; font-weight: 700; color: var(--btn-primary); margin-bottom: 8px; }
+        .stat-label { font-size: 13px; color: var(--text-secondary); }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin: 16px 0;
-        }
+        .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--bg-tertiary); }
+        .settings-row:last-child { border-bottom: none; }
+        .settings-label { font-size: 15px; color: var(--text-primary); }
+        .settings-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        .settings-category { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid var(--bg-tertiary); }
+        .settings-category:last-of-type { border-bottom: none; }
+        .settings-category-title { font-size: 16px; font-weight: 700; color: var(--btn-primary); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--bg-tertiary); }
+        .settings-select { padding: 6px 12px; border: 1px solid var(--border-light); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 13px; cursor: pointer; min-width: 150px; }
+        .settings-slider { -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px; background: var(--bg-tertiary); outline: none; margin: 0 12px; }
+        .settings-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--btn-primary); cursor: pointer; }
+        .settings-value { font-size: 13px; font-weight: 600; color: var(--text-primary); min-width: 35px; text-align: right; }
+        .toggle { position: relative; width: 48px; height: 26px; }
+        .toggle input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; inset: 0; background: var(--bg-tertiary); border-radius: 26px; cursor: pointer; transition: background 0.3s; }
+        .toggle-slider::before { content: ''; position: absolute; width: 20px; height: 20px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: transform 0.3s; }
+        .toggle input:checked + .toggle-slider { background: var(--btn-primary); }
+        .toggle input:checked + .toggle-slider::before { transform: translateX(22px); }
 
-        .stat-card {
-            background: var(--bg-secondary);
-            padding: 16px;
-            border-radius: 12px;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--btn-primary);
-            margin-bottom: 8px;
-        }
-
-        .stat-label {
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
+        .reset-option { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-secondary); border-radius: 10px; margin-bottom: 8px; cursor: pointer; }
+        .reset-option input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--btn-primary); cursor: pointer; }
+        .reset-option-label { font-size: 14px; color: var(--text-primary); }
+        .reset-option-sub { font-size: 11px; color: var(--text-secondary); }
 
         @media (max-width: 480px) {
             .container { padding: 6px; }
@@ -743,105 +334,18 @@
             .timer { font-size: 18px; }
         }
 
-        .digit-popup-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 3000;
-        }
-        
+        .digit-popup-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 3000; }
         .digit-popup-modal.active { display: block; }
+        .digit-popup-backdrop { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(2px); }
+        .digit-popup-container { position: absolute; background: var(--bg-primary); border-radius: 16px; padding: 16px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); border: 2px solid var(--border-medium); z-index: 3001; }
+        .digit-popup-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 240px; }
+        .digit-popup-btn { aspect-ratio: 1; font-size: 28px; font-weight: bold; border: 2px solid var(--border-medium); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); cursor: pointer; transition: all 0.15s; font-family: inherit; }
+        .digit-popup-btn:active { transform: scale(0.9); background: var(--btn-primary); color: white; }
+        .digit-popup-btn.digit-erase { grid-column: span 3; background: var(--btn-danger); color: white; border-color: var(--btn-danger); }
         
-        .digit-popup-backdrop {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(2px);
-        }
-        
-        .digit-popup-container {
-            position: absolute;
-            background: var(--bg-primary);
-            border-radius: 16px;
-            padding: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            border: 2px solid var(--border-medium);
-            z-index: 3001;
-        }
-        
-        .digit-popup-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            width: 240px;
-        }
-        
-        .digit-popup-btn {
-            aspect-ratio: 1;
-            font-size: 28px;
-            font-weight: bold;
-            border: 2px solid var(--border-medium);
-            border-radius: 8px;
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            cursor: pointer;
-            transition: all 0.15s;
-            font-family: inherit;
-        }
-        
-        .digit-popup-btn:active {
-            transform: scale(0.9);
-            background: var(--btn-primary);
-            color: white;
-        }
-        
-        .digit-popup-btn.digit-erase {
-            grid-column: span 3;
-            background: var(--btn-danger);
-            color: white;
-            border-color: var(--btn-danger);
-        }
-        
-        .cell.tap-pending {
-            box-shadow: 0 0 0 3px var(--btn-primary) inset;
-            animation: pulse-tap 0.3s ease;
-        }
-        
-        @keyframes pulse-tap {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        
-        .num-btn.sticky-active {
-            background: var(--btn-primary);
-            color: white;
-            box-shadow: 0 0 0 3px var(--btn-primary);
-            transform: scale(1.1);
-        }
-        
-        @keyframes incorrect-flash {
-            0%, 100% { background: var(--bg-primary); }
-            50% { background: var(--cell-error); }
-        }
-        
-        .cell.incorrect-flash {
-            animation: incorrect-flash 0.6s ease;
-        }
+        .cell.tap-pending { box-shadow: 0 0 0 3px var(--btn-primary) inset; animation: pulse-tap 0.3s ease; }
+        @keyframes pulse-tap { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
 
-        .cell.crosshair-row,
-        .cell.crosshair-col {
-            background: rgba(74, 144, 226, 0.08) !important;
-        }
-        
-        .cell.crosshair-row.crosshair-col {
-            background: rgba(74, 144, 226, 0.12) !important;
-        }
     </style>
 </head>
 <body data-theme="light">
@@ -1208,7 +712,7 @@
                 <div class="settings-row">
                     <div>
                         <div class="settings-label">Animations</div>
-                        <div class="settings-sub">Cell shake, transitions</div>
+                        <div class="settings-sub">Cell transitions</div>
                     </div>
                     <label class="toggle">
                         <input type="checkbox" id="settingAnimations" checked>
@@ -1363,7 +867,6 @@
                     expert: 64      
                 };
                 
-                console.log(`🎯 Generating ${difficulty.toUpperCase()} puzzle with V8.0 Pro Engine...`);
                 const startTime = performance.now();
                 
                 const complete = this.generateComplete();
@@ -1380,14 +883,9 @@
                 let attempts = 0;
                 const maxAttempts = 250; 
                 
-                console.log(`📐 Phase 1: Symmetric pair removal (target: ${target} cells)`);
-                
                 for (let pair of symmetricPairs) {
                     if (removed >= target) break;
-                    if (attempts >= maxAttempts) {
-                        console.warn(`⚠️ Max attempts reached at ${removed} cells`);
-                        break;
-                    }
+                    if (attempts >= maxAttempts) break;
                     
                     attempts++;
                     
@@ -1417,13 +915,9 @@
                 }
                 
                 if (removed < target) {
-                    console.log(`📝 Phase 2: Strategic single cell removal (${target - removed} remaining)`);
-                    
                     const remainingCells = [];
                     for (let i = 0; i < 81; i++) {
-                        if (this.board[i] !== 0) {
-                            remainingCells.push(i);
-                        }
+                        if (this.board[i] !== 0) remainingCells.push(i);
                     }
                     
                     this.shuffleArray(remainingCells);
@@ -1431,10 +925,7 @@
                     attempts = 0;
                     for (let pos of remainingCells) {
                         if (removed >= target) break;
-                        if (attempts >= maxAttempts * 2) {
-                            console.warn(`⚠️ Phase 2 max attempts reached`);
-                            break;
-                        }
+                        if (attempts >= maxAttempts * 2) break;
                         
                         attempts++;
                         const backup = this.board[pos];
@@ -1451,12 +942,6 @@
                 }
 
                 this.notes = Array(81).fill(null).map(() => new Set());
-                
-                const endTime = performance.now();
-                const duration = ((endTime - startTime) / 1000).toFixed(2);
-                
-                console.log(`\n✅ PUZZLE GENERATED SUCCESSFULLY in ${duration}s!`);
-                
                 return {
                     board: [...this.board],
                     solution: [...this.solution],
@@ -1467,12 +952,9 @@
             createSymmetricPairs() {
                 const pairs = [];
                 const used = new Set();
-                
                 for (let i = 0; i < 81; i++) {
                     if (used.has(i)) continue;
-                    
                     const symmetric = 80 - i; 
-                    
                     if (i === symmetric) {
                         pairs.push([i, i]);
                         used.add(i);
@@ -1482,34 +964,7 @@
                         used.add(symmetric);
                     }
                 }
-                
                 return pairs;
-            }
-
-            getSymmetryPercent() {
-                let symmetricPairs = 0;
-                let totalPairs = 0;
-                
-                for (let i = 0; i < 41; i++) { 
-                    const symmetric = 80 - i;
-                    totalPairs++;
-                    
-                    const isEmpty1 = this.board[i] === 0;
-                    const isEmpty2 = this.board[symmetric] === 0;
-                    
-                    if (isEmpty1 === isEmpty2) {
-                        symmetricPairs++;
-                    }
-                }
-                
-                return symmetricPairs / totalPairs;
-            }
-
-            shuffleArray(array) {
-                for (let i = array.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [array[i], array[j]] = [array[j], array[i]];
-                }
             }
 
             hasUniqueSolution() {
@@ -1538,13 +993,8 @@
             }
 
             getConflicts(pos, num) {
-                if (!this.isHelpAllowed('conflicts')) {
-                    return new Set();
-                }
-                
-                if (!AppSystems.settings?.flagConflicts) {
-                    return new Set();
-                }
+                if (!this.isHelpAllowed('conflicts')) return new Set();
+                if (!AppSystems.settings?.flagConflicts) return new Set();
                 
                 const conflicts = new Set();
                 const row = Math.floor(pos / 9);
@@ -1552,16 +1002,12 @@
 
                 for (let c = 0; c < 9; c++) {
                     const checkPos = row * 9 + c;
-                    if (checkPos !== pos && this.board[checkPos] === num) {
-                        conflicts.add(checkPos);
-                    }
+                    if (checkPos !== pos && this.board[checkPos] === num) conflicts.add(checkPos);
                 }
 
                 for (let r = 0; r < 9; r++) {
                     const checkPos = r * 9 + col;
-                    if (checkPos !== pos && this.board[checkPos] === num) {
-                        conflicts.add(checkPos);
-                    }
+                    if (checkPos !== pos && this.board[checkPos] === num) conflicts.add(checkPos);
                 }
 
                 const blockRow = Math.floor(row / 3) * 3;
@@ -1569,12 +1015,9 @@
                 for (let r = blockRow; r < blockRow + 3; r++) {
                     for (let c = blockCol; c < blockCol + 3; c++) {
                         const checkPos = r * 9 + c;
-                        if (checkPos !== pos && this.board[checkPos] === num) {
-                            conflicts.add(checkPos);
-                        }
+                        if (checkPos !== pos && this.board[checkPos] === num) conflicts.add(checkPos);
                     }
                 }
-
                 return conflicts;
             }
 
@@ -1587,10 +1030,7 @@
             }
             
             isHelpAllowed(feature) {
-                if ((AppSystems.settings || {}).disableAllHelp) {
-                    return false;
-                }
-                return true;
+                return !(AppSystems.settings || {}).disableAllHelp;
             }
         }
 
@@ -1614,10 +1054,7 @@
             loadStats() {
                 const stored = localStorage.getItem('sudoku_stats');
                 return stored ? JSON.parse(stored) : {
-                    totalWins: 0,
-                    gamesPlayed: 0,
-                    bestTime: null,
-                    totalHints: 0
+                    totalWins: 0, gamesPlayed: 0, bestTime: null, totalHints: 0
                 };
             }
 
@@ -1715,6 +1152,7 @@
                     if (conflicts.size > 0) {
                         return { success: false, conflicts: Array.from(conflicts) };
                     }
+                    
                     this.engine.board[pos] = num;
                     this.engine.notes[pos].clear();
                     
@@ -1733,56 +1171,42 @@
                     
                     this.saveSnapshot();
                     this.saveGame();
-                    if (this.checkWin()) {
-                        this.onWin();
-                    }
+                    if (this.checkWin()) this.onWin();
                     return { success: true };
                 }
             }
 
             giveHint() {
-                if (!this.engine.isHelpAllowed('hint')) {
-                    return false;
-                }
-                
+                if (!this.engine.isHelpAllowed('hint')) return false;
                 if (this.hints <= 0 || this.selectedCell === null) return false;
                 if (this.engine.fixed[this.selectedCell]) return false;
+                
                 const correctNum = this.engine.solution[this.selectedCell];
                 this.engine.board[this.selectedCell] = correctNum;
                 this.engine.notes[this.selectedCell].clear();
                 this.hints--;
                 this.saveSnapshot();
                 this.saveGame();
-                if (this.checkWin()) {
-                    this.onWin();
-                }
+                if (this.checkWin()) this.onWin();
                 return true;
             }
 
             checkWin() {
                 for (let i = 0; i < 81; i++) {
-                    if (this.engine.board[i] !== this.engine.solution[i]) {
-                        return false;
-                    }
+                    if (this.engine.board[i] !== this.engine.solution[i]) return false;
                 }
                 return true;
             }
             
             getPeers(row, col) {
                 const peers = new Set();
-                for (let c = 0; c < 9; c++) {
-                    if (c !== col) peers.add(`${row},${c}`);
-                }
-                for (let r = 0; r < 9; r++) {
-                    if (r !== row) peers.add(`${r},${col}`);
-                }
+                for (let c = 0; c < 9; c++) if (c !== col) peers.add(`${row},${c}`);
+                for (let r = 0; r < 9; r++) if (r !== row) peers.add(`${r},${col}`);
                 const boxRow = Math.floor(row / 3) * 3;
                 const boxCol = Math.floor(col / 3) * 3;
                 for (let r = boxRow; r < boxRow + 3; r++) {
                     for (let c = boxCol; c < boxCol + 3; c++) {
-                        if (r !== row || c !== col) {
-                            peers.add(`${r},${c}`);
-                        }
+                        if (r !== row || c !== col) peers.add(`${r},${c}`);
                     }
                 }
                 return Array.from(peers).map(key => key.split(',').map(Number));
@@ -1791,8 +1215,7 @@
             onWin() {
                 this.stopTimer();
                 this.stats.totalWins++;
-                const usedHints = 3 - this.hints;
-                this.stats.totalHints += usedHints;
+                this.stats.totalHints += (3 - this.hints);
                 if (!this.stats.bestTime || this.timer < this.stats.bestTime) {
                     this.stats.bestTime = this.timer;
                 }
@@ -1876,7 +1299,6 @@
                 this.DOUBLE_TAP_THRESHOLD = 300; 
                 this.lastTapTime = 0;
                 this.lastTapCell = null;
-                
                 this.popupTargetRow = null;
                 this.popupTargetCol = null;
                 
@@ -1920,11 +1342,10 @@
                     const col = i % 9;
                     const blockRow = Math.floor(row / 3);
                     const blockCol = Math.floor(col / 3);
-                    const block = blockRow * 3 + blockCol;
                     
                     cell.dataset.row = row;
                     cell.dataset.col = col;
-                    cell.dataset.block = block;
+                    cell.dataset.block = blockRow * 3 + blockCol;
                     
                     cell.addEventListener('click', () => this.handleCellTap(row, col));
                     this.gameBoard.appendChild(cell);
@@ -1936,6 +1357,21 @@
                 this.menuBtn.addEventListener('click', () => this.toggleMenu());
                 this.noteBtn.addEventListener('click', () => this.toggleNoteMode());
                 this.menuOverlay.addEventListener('click', () => this.toggleMenu());
+
+                // ביטול בחירה בלחיצה מחוץ ללוח (דרישה 2)
+                document.addEventListener('click', (e) => {
+                    const isBoardClick = e.target.closest('.game-board-container');
+                    const isPadClick = e.target.closest('.number-pad');
+                    const isModalClick = e.target.closest('.modal') || e.target.closest('.digit-popup-modal');
+                    const isMenuClick = e.target.closest('.top-bar');
+
+                    if (!isBoardClick && !isPadClick && !isModalClick && !isMenuClick) {
+                        if (this.game.selectedCell !== null) {
+                            this.game.selectedCell = null;
+                            this.updateUI();
+                        }
+                    }
+                });
 
                 document.getElementById('versionBtn').addEventListener('click', () => {
                     this.showReinstallModal();
@@ -2011,12 +1447,7 @@
 
                 document.getElementById('resetStats').addEventListener('click', () => {
                     if (confirm('Are you sure you want to reset all statistics?')) {
-                        this.game.stats = {
-                            totalWins: 0,
-                            gamesPlayed: 0,
-                            bestTime: null,
-                            totalHints: 0
-                        };
+                        this.game.stats = { totalWins: 0, gamesPlayed: 0, bestTime: null, totalHints: 0 };
                         this.game.saveStats();
                         this.showStats();
                     }
@@ -2071,67 +1502,37 @@
             }
 
             selectCell(posOrRow, col = null) {
-                let pos;
-                if (col !== null) {
-                    pos = posOrRow * 9 + col;
-                } else {
-                    pos = posOrRow;
+                let pos = col !== null ? (posOrRow * 9 + col) : posOrRow;
+                if (pos >= 0 && pos < 81) {
+                    this.game.selectedCell = pos;
+                    this.updateUI();
                 }
-                
-                if (pos < 0 || pos >= 81) {
-                    return;
-                }
-                
-                this.game.selectedCell = pos;
-                this.updateUI();
             }
 
+            // הזנה מרכזית אחודה המשמשת את כל אמצעי הקלט
             inputNumber(num) {
                 if (this.game.selectedCell === null) return;
                 AppSystems.haptic('tap');
                 
                 const pos = this.game.selectedCell;
-                const row = Math.floor(pos / 9);
-                const col = pos % 9;
-                
                 const result = this.game.placeNumber(pos, num);
                 
                 if (result.success && num !== 0 && !this.game.noteMode) {
+                    // בדיקת שגיאות
                     if (AppSystems.settings?.flagIncorrect && this.game.engine.solution) {
                         const correct = this.game.engine.solution[pos];
                         if (num !== correct) {
                             this.game.mistakes++;
-                            this.showIncorrectFeedback(row, col);
+                            AppSystems.haptic('error');
                         }
                     }
-                }
-                
-                this.updateUI();
-                if (!result.success && result.conflicts) {
+                } else if (!result.success && result.conflicts) {
+                    // ערך מתנגש
                     AppSystems.haptic('error');
-                    this.showConflicts(result.conflicts);
-                }
-            }
-
-            showConflicts(conflicts) {
-                const cells = this.gameBoard.querySelectorAll('.cell');
-                
-                if (this.game.selectedCell !== null) {
-                    cells[this.game.selectedCell].classList.add('conflict');
                 }
                 
-                conflicts.forEach(pos => {
-                    cells[pos].classList.add('conflict');
-                });
-
-                setTimeout(() => {
-                    if (this.game.selectedCell !== null) {
-                        cells[this.game.selectedCell].classList.remove('conflict');
-                    }
-                    conflicts.forEach(pos => {
-                        cells[pos].classList.remove('conflict');
-                    });
-                }, 600);
+                // updateUI יטפל בצביעת השגיאות בצורה קבועה ויעדכן את מונה הטעויות
+                this.updateUI();
             }
 
             toggleNoteMode() {
@@ -2140,30 +1541,20 @@
             }
 
             giveHint() {
-                if (this.game.giveHint()) {
-                    this.updateUI();
-                }
+                if (this.game.giveHint()) this.updateUI();
             }
 
             undo() {
-                if (this.game.undo()) {
-                    this.updateUI();
-                }
+                if (this.game.undo()) this.updateUI();
             }
 
             redo() {
-                if (this.game.redo()) {
-                    this.updateUI();
-                }
+                if (this.game.redo()) this.updateUI();
             }
 
             showDifficultyModal() {
                 const resumeSection = document.getElementById('resumeSection');
-                if (this.game.hasSavedGame()) {
-                    resumeSection.style.display = 'block';
-                } else {
-                    resumeSection.style.display = 'none';
-                }
+                resumeSection.style.display = this.game.hasSavedGame() ? 'block' : 'none';
                 this.difficultyModal.classList.add('active');
             }
 
@@ -2180,21 +1571,15 @@
                 
                 const modal = document.getElementById('digitPopupModal');
                 const container = document.getElementById('digitPopupContainer');
-                
                 if (!modal || !container) return;
                 
                 const transparency = AppSystems.settings?.popupTransparency || 5;
-                const opacity = 1 - (transparency / 100);
-                container.style.opacity = opacity;
+                container.style.opacity = 1 - (transparency / 100);
                 
-                const cell = this.gameBoard.querySelector(
-                    `[data-row="${row}"][data-col="${col}"]`
-                );
-                
+                const cell = this.gameBoard.querySelector(`[data-row="${row}"][data-col="${col}"]`);
                 if (!cell) return;
                 
                 const rect = cell.getBoundingClientRect();
-                
                 const popupWidth = 272; 
                 const popupHeight = 300;
                 
@@ -2202,23 +1587,21 @@
                 let top = rect.top - popupHeight - 10;
                 
                 if (left < 10) left = 10;
-                if (left + popupWidth > window.innerWidth - 10) {
-                    left = window.innerWidth - popupWidth - 10;
-                }
-                if (top < 10) {
-                    top = rect.bottom + 10; 
-                }
+                if (left + popupWidth > window.innerWidth - 10) left = window.innerWidth - popupWidth - 10;
+                if (top < 10) top = rect.bottom + 10; 
                 
                 container.style.left = left + 'px';
                 container.style.top = top + 'px';
-                
                 modal.classList.add('active');
             }
             
             handleCellTap(row, col) {
                 const pos = row * 9 + col;
                 
-                if (this.game.engine.fixed[pos]) return;
+                if (this.game.engine.fixed[pos]) {
+                    this.selectCell(pos); // סעיף 1: תאים קבועים ניתנים לבחירה
+                    return;
+                }
                 
                 const mode = AppSystems.settings?.defaultEntryMode || 'cell-first';
                 
@@ -2227,7 +1610,6 @@
                     this.inputNumber(this.game.stickyDigit);
                     return;
                 }
-                
                 if (mode === 'last-used' && this.game.lastUsedDigit) {
                     this.selectCell(pos);
                     this.inputNumber(this.game.lastUsedDigit);
@@ -2246,12 +1628,10 @@
                 
                 if (isSameCell && timeSinceLast < this.DOUBLE_TAP_THRESHOLD) {
                     this.selectCellWithPopup(row, col);
-                    
                     this.lastTapTime = 0;
                     this.lastTapCell = null;
                 } else {
-                    this.highlightCell(row, col);
-                    
+                    this.selectCell(pos); // בוחר תא במקום רק להאיר
                     this.lastTapTime = now;
                     this.lastTapCell = cellKey;
                     
@@ -2268,34 +1648,18 @@
                     this.selectCell(row * 9 + col);
                     this.showDigitPopup(row, col);
                 } else {
-                    const pos = row * 9 + col;
-                    this.selectCell(pos);
+                    this.selectCell(row * 9 + col);
                 }
             }
             
-            highlightCell(row, col) {
-                const pos = row * 9 + col;
-                
-                const cells = this.gameBoard.querySelectorAll('.cell');
-                cells.forEach(c => c.classList.remove('selected'));
-                
-                const cell = this.gameBoard.querySelector(`[data-index="${pos}"]`);
-                if (cell) cell.classList.add('selected');
-                
-                this.game.selectedCell = pos;
-            }
-            
             getCellElement(row, col) {
-                return this.gameBoard.querySelector(
-                    `[data-row="${row}"][data-col="${col}"]`
-                );
+                return this.gameBoard.querySelector(`[data-row="${row}"][data-col="${col}"]`);
             }
             
             initDigitFirstMode() {
                 document.querySelectorAll('.num-btn').forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         const num = parseInt(e.target.dataset.num);
-                        
                         if (AppSystems.settings?.defaultEntryMode === 'sticky') {
                             this.activateStickyDigit(num);
                         } else if (AppSystems.settings?.defaultEntryMode === 'last-used') {
@@ -2307,24 +1671,11 @@
             
             activateStickyDigit(num) {
                 this.game.stickyDigit = num;
-                
-                document.querySelectorAll('.num-btn').forEach(btn => {
-                    btn.classList.remove('sticky-active');
-                });
+                document.querySelectorAll('.num-btn').forEach(btn => btn.classList.remove('sticky-active'));
                 
                 const activeBtn = document.querySelector(`.num-btn[data-num="${num}"]`);
-                if (activeBtn) {
-                    activeBtn.classList.add('sticky-active');
-                }
-                
+                if (activeBtn) activeBtn.classList.add('sticky-active');
                 this.showToast(`Sticky: ${num} - Tap cells to place`, 'info');
-            }
-            
-            clearStickyDigit() {
-                this.game.stickyDigit = null;
-                document.querySelectorAll('.num-btn').forEach(btn => {
-                    btn.classList.remove('sticky-active');
-                });
             }
             
             refreshDisplay() {
@@ -2337,71 +1688,34 @@
             applyDigitEntryStyle() {
                 const numberPad = document.querySelector('.number-pad');
                 if (!numberPad) return;
-                
-                if (AppSystems.settings?.digitEntryStyle === 'popup') {
-                    numberPad.style.display = 'none';
-                } else {
-                    numberPad.style.display = 'grid';
-                }
+                numberPad.style.display = AppSystems.settings?.digitEntryStyle === 'popup' ? 'none' : 'grid';
             }
             
             applyPopupTransparency() {
                 const container = document.getElementById('digitPopupContainer');
                 if (!container) return;
-                
                 const transparency = AppSystems.settings?.popupTransparency || 5;
-                const opacity = 1 - (transparency / 100);
-                container.style.opacity = opacity;
+                container.style.opacity = 1 - (transparency / 100);
             }
             
-            updateMistakeCounter(count) {
+            updateMistakeCounter() {
                 const counter = document.getElementById('mistakeCounter');
                 if (counter) {
-                    counter.textContent = `❌ ${count}/${this.game.maxMistakes}`;
-                    
-                    if (count >= this.game.maxMistakes) {
-                        counter.style.animation = 'incorrect-flash 0.6s ease';
-                    }
+                    counter.textContent = `❌ ${this.game.mistakes}/${this.game.maxMistakes}`;
                 }
-            }
-            
-            showIncorrectFeedback(row, col) {
-                const cell = this.getCellElement(row, col);
-                if (!cell) return;
-                
-                cell.classList.add('incorrect-flash');
-                
-                if (AppSystems.settings?.haptics && navigator.vibrate) {
-                    navigator.vibrate([50, 30, 50]);
-                }
-                
-                setTimeout(() => {
-                    cell.classList.remove('incorrect-flash');
-                }, 1000);
             }
 
             updateDifficultyTitle(difficulty) {
-                const difficultyNames = {
-                    easy: 'Easy',
-                    medium: 'Medium',
-                    hard: 'Hard',
-                    expert: 'Expert 🔥'
-                };
-                const titleElement = document.getElementById('appTitle');
-                titleElement.textContent = `Sudoku Pro - ${difficultyNames[difficulty] || 'Medium'}`;
+                const names = { easy: 'Easy', medium: 'Medium', hard: 'Hard', expert: 'Expert 🔥' };
+                document.getElementById('appTitle').textContent = `Sudoku Pro - ${names[difficulty] || 'Medium'}`;
             }
 
             showStats() {
                 const stats = this.game.stats;
                 document.getElementById('totalWins').textContent = stats.totalWins;
                 document.getElementById('gamesPlayed').textContent = stats.gamesPlayed;
-                document.getElementById('bestTime').textContent = stats.bestTime 
-                    ? this.game.formatTime(stats.bestTime) 
-                    : '--:--';
-                const avgHints = stats.totalWins > 0 
-                    ? (stats.totalHints / stats.totalWins).toFixed(1)
-                    : '0';
-                document.getElementById('avgHints').textContent = avgHints;
+                document.getElementById('bestTime').textContent = stats.bestTime ? this.game.formatTime(stats.bestTime) : '--:--';
+                document.getElementById('avgHints').textContent = stats.totalWins > 0 ? (stats.totalHints / stats.totalWins).toFixed(1) : '0';
                 this.statsModal.classList.add('active');
             }
 
@@ -2409,7 +1723,7 @@
                 this.updateBoard();
                 this.updateControls();
                 this.updateNumberPad();
-                this.updateMistakeCounter(this.game.mistakes);
+                this.updateMistakeCounter();
             }
 
             updateBoard() {
@@ -2417,16 +1731,39 @@
                 
                 const selectedNum = (this.game.selectedCell !== null && 
                                     this.game.engine.board[this.game.selectedCell] !== 0)
-                    ? this.game.engine.board[this.game.selectedCell] 
-                    : 0;
+                    ? this.game.engine.board[this.game.selectedCell] : 0;
                 
                 const selectedRow = this.game.selectedCell !== null ? Math.floor(this.game.selectedCell / 9) : -1;
                 const selectedCol = this.game.selectedCell !== null ? this.game.selectedCell % 9 : -1;
                 const selectedBlock = this.game.selectedCell !== null 
-                    ? Math.floor(selectedRow / 3) * 3 + Math.floor(selectedCol / 3)
-                    : -1;
+                    ? Math.floor(selectedRow / 3) * 3 + Math.floor(selectedCol / 3) : -1;
                 
+                // סריקה מוקדמת של שגיאות לפי סעיף 8
+                const errorCells = new Set();
+                if (AppSystems.settings?.flagConflicts || AppSystems.settings?.flagIncorrect) {
+                    for (let i = 0; i < 81; i++) {
+                        const val = this.game.engine.board[i];
+                        if (val === 0) continue;
+                        
+                        if (AppSystems.settings?.flagIncorrect && this.game.engine.solution) {
+                            if (val !== this.game.engine.solution[i]) {
+                                errorCells.add(i);
+                                continue;
+                            }
+                        }
+                        
+                        if (AppSystems.settings?.flagConflicts) {
+                            const conflicts = this.game.engine.getConflicts(i, val);
+                            if (conflicts.size > 0) {
+                                errorCells.add(i);
+                                conflicts.forEach(c => errorCells.add(c));
+                            }
+                        }
+                    }
+                }
+
                 cells.forEach((cell, index) => {
+                    // 1. איפוס מוחלט של מצב התא
                     cell.className = 'cell';
                     cell.innerHTML = '';
                     
@@ -2434,35 +1771,7 @@
                     const col = index % 9;
                     const block = Math.floor(row / 3) * 3 + Math.floor(col / 3);
 
-                    if (this.game.engine.fixed[index]) {
-                        cell.classList.add('fixed');
-                        
-                        if (AppSystems.settings?.highlightInitial) {
-                            cell.classList.add('initial-highlight');
-                        }
-                        
-                        if (AppSystems.settings?.boldInitial) {
-                            cell.classList.add('initial-bold');
-                        }
-                    } else {
-                        cell.classList.add('user');
-                    }
-
-                    if (index === this.game.selectedCell) {
-                        cell.classList.add('selected');
-                    }
-                    
-                    if (AppSystems.settings?.showCrosshairs && this.game.selectedCell !== null) {
-                        if (row === selectedRow || col === selectedCol || block === selectedBlock) {
-                            cell.classList.add('crosshair');
-                        }
-                    }
-
-                    if (AppSystems.settings?.highlightDigits && selectedNum !== 0 && 
-                        this.game.engine.board[index] === selectedNum) {
-                        cell.classList.add('highlighted');
-                    }
-
+                    // 2. הזנת תוכן
                     if (this.game.engine.board[index] !== 0) {
                         cell.textContent = this.game.engine.board[index];
                     } else if (this.game.engine.notes[index].size > 0) {
@@ -2475,6 +1784,30 @@
                         }
                         cell.appendChild(notesDiv);
                     }
+
+                    // 3. החלת מחלקות לעיצוב (ה-CSS יטפל בסדר העדיפויות באופן אוטומטי)
+                    if (this.game.engine.fixed[index]) {
+                        cell.classList.add('fixed');
+                    }
+
+                    if (AppSystems.settings?.showCrosshairs && this.game.selectedCell !== null) {
+                        if (row === selectedRow || col === selectedCol || block === selectedBlock) {
+                            cell.classList.add('crosshair');
+                        }
+                    }
+
+                    if (AppSystems.settings?.highlightDigits && selectedNum !== 0 && 
+                        this.game.engine.board[index] === selectedNum) {
+                        cell.classList.add('highlighted');
+                    }
+
+                    if (errorCells.has(index)) {
+                        cell.classList.add('error');
+                    }
+
+                    if (index === this.game.selectedCell) {
+                        cell.classList.add('selected');
+                    }
                 });
             }
 
@@ -2482,77 +1815,43 @@
                 for (let num = 1; num <= 9; num++) {
                     const count = this.game.engine.countNumber(num);
                     const btn = document.querySelector(`.num-btn[data-num="${num}"]`);
-                    if (btn) {
-                        if (count >= 9) {
-                            btn.disabled = true;
-                        } else {
-                            btn.disabled = false;
-                        }
-                    }
+                    if (btn) btn.disabled = count >= 9;
                 }
             }
 
             updateControls() {
-                if (this.game.noteMode) {
-                    this.noteBtn.classList.add('active');
-                } else {
-                    this.noteBtn.classList.remove('active');
-                }
-
+                this.noteBtn.classList.toggle('active', this.game.noteMode);
                 this.undoBtn.disabled = this.game.historyIndex <= 0;
             }
 
             showVictory() {
                 const usedHints = 3 - this.game.hints;
-                document.getElementById('victoryTime').textContent = 
-                    `Time: ${this.game.formatTime(this.game.timer)} | Hints: ${usedHints}`;
+                document.getElementById('victoryTime').textContent = `Time: ${this.game.formatTime(this.game.timer)} | Hints: ${usedHints}`;
                 this.victoryModal.classList.add('active');
             }
 
-            showReinstallModal() {
-                document.getElementById('reinstallModal').classList.add('active');
-            }
+            showReinstallModal() { document.getElementById('reinstallModal').classList.add('active'); }
 
             async performReinstall() {
                 document.getElementById('reinstallModal').classList.remove('active');
-                
                 try {
-                    localStorage.clear();
-                    sessionStorage.clear();
-                    
+                    localStorage.clear(); sessionStorage.clear();
                     if ('serviceWorker' in navigator) {
                         const registrations = await navigator.serviceWorker.getRegistrations();
-                        for (let registration of registrations) {
-                            await registration.unregister();
-                        }
+                        for (let reg of registrations) await reg.unregister();
                     }
-                    
                     if ('caches' in window) {
                         const cacheNames = await caches.keys();
-                        for (let cacheName of cacheNames) {
-                            await caches.delete(cacheName);
-                        }
+                        for (let cacheName of cacheNames) await caches.delete(cacheName);
                     }
-                    
                     if ('indexedDB' in window) {
                         const dbs = await indexedDB.databases();
-                        for (let db of dbs) {
-                            if (db.name) {
-                                indexedDB.deleteDatabase(db.name);
-                            }
-                        }
+                        for (let db of dbs) if (db.name) indexedDB.deleteDatabase(db.name);
                     }
-                    
-                    document.cookie.split(";").forEach(function(c) { 
-                        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
-                    });
-                    
+                    document.cookie.split(";").forEach(c => document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"));
                     alert('✅ App completely removed!\n\nAll data, cache, and storage cleared.\nPage will reload.');
-                    
                     window.location.href = window.location.href.split('?')[0] + '?t=' + new Date().getTime();
-                } catch (error) {
-                    alert('⚠️ Removal error: ' + error.message + '\n\nSome data may still remain.');
-                }
+                } catch (error) { alert('⚠️ Removal error: ' + error.message); }
             }
         }
 
@@ -2560,23 +1859,16 @@
         let gameState, uiController;
         
         window.popupDigitClick = function(num) {
-            if (!uiController || uiController.popupTargetRow === null) {
-                return;
-            }
-            
+            if (!uiController || uiController.popupTargetRow === null) return;
             const pos = uiController.popupTargetRow * 9 + uiController.popupTargetCol;
             uiController.selectCell(pos);
             uiController.inputNumber(num);
-            
             window.closeDigitPopup();
         };
         
         window.closeDigitPopup = function() {
             const modal = document.getElementById('digitPopupModal');
-            if (modal) {
-                modal.classList.remove('active');
-            }
-            
+            if (modal) modal.classList.remove('active');
             if (uiController) {
                 uiController.popupTargetRow = null;
                 uiController.popupTargetCol = null;
@@ -2600,8 +1892,7 @@
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'visible') {
                     if (AppSystems.settings.preventSleep && 'wakeLock' in navigator) {
-                        navigator.wakeLock.request('screen')
-                            .catch(e => console.log('[WakeLock] Re-acquisition failed:', e.message));
+                        navigator.wakeLock.request('screen').catch(e => console.log('[WakeLock] Re-acquisition failed:', e.message));
                     }
                 }
             });
@@ -2609,29 +1900,13 @@
 
         // ============= APP SYSTEMS V9.0 =============
         const AppSystems = {
-
             settings: {
-                haptics: true,
-                animations: true,
-                network: true,
-                
-                digitEntryStyle: 'fixed', 
-                defaultEntryMode: 'cell-first', 
-                twoTapsEdit: false,
-                preventDefault: true,
-                showDigitCounts: true,
-                autoPencil: true,
-                
-                showTimer: true,
-                showCrosshairs: true,
-                highlightDigits: true,
-                highlightInitial: true,
-                boldInitial: true,
-                popupTransparency: 5,  
-                
-                disableAllHelp: false,
-                flagConflicts: true,
-                flagIncorrect: false
+                haptics: true, animations: true, network: true,
+                digitEntryStyle: 'fixed', defaultEntryMode: 'cell-first', twoTapsEdit: false,
+                preventDefault: true, showDigitCounts: true, autoPencil: true,
+                showTimer: true, showCrosshairs: true, highlightDigits: true,
+                highlightInitial: true, boldInitial: true, popupTransparency: 5,  
+                disableAllHelp: false, flagConflicts: true, flagIncorrect: false
             },
 
             init() {
@@ -2650,63 +1925,37 @@
             showToast(message, type = 'info', duration = 3000) {
                 const container = document.getElementById('toastContainer');
                 const toast = document.createElement('div');
-                toast.className = `toast ${type}`;
-                toast.textContent = message;
+                toast.className = `toast ${type}`; toast.textContent = message;
                 container.appendChild(toast);
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(() => toast.classList.add('show'));
-                });
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    setTimeout(() => toast.remove(), 300);
-                }, duration);
+                requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('show')));
+                setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, duration);
             },
 
             haptic(type = 'light') {
                 if (!this.settings.haptics || !navigator.vibrate) return;
-                const patterns = {
-                    light:  [10],
-                    error:  [50, 30, 50],
-                    win:    [50, 30, 50, 30, 100],
-                    tap:    [8]
-                };
+                const patterns = { light: [10], error: [50, 30, 50], win: [50, 30, 50, 30, 100], tap: [8] };
                 navigator.vibrate(patterns[type] || [10]);
             },
 
             initVersionManager() {
                 const storedVersion = localStorage.getItem('app_version');
                 if (storedVersion && storedVersion !== APP_VERSION) {
-                    this.clearCacheSilent().then(() => {
-                        localStorage.setItem('app_version', APP_VERSION);
-                    });
+                    this.clearCacheSilent().then(() => localStorage.setItem('app_version', APP_VERSION));
                 } else {
                     localStorage.setItem('app_version', APP_VERSION);
                 }
-
                 this.checkRemoteVersion();
-
-                document.getElementById('versionBtn').addEventListener('click', () => {
-                    document.getElementById('reinstallModal').classList.add('active');
-                });
+                document.getElementById('versionBtn').addEventListener('click', () => document.getElementById('reinstallModal').classList.add('active'));
             },
 
             async checkRemoteVersion() {
-                if (!navigator.onLine) {
-                    return;
-                }
-                
+                if (!navigator.onLine) return;
                 try {
-                    const res = await fetch('./version.json?t=' + Date.now(), { 
-                        cache: 'no-store',
-                        signal: AbortSignal.timeout(3000)
-                    });
+                    const res = await fetch('./version.json?t=' + Date.now(), { cache: 'no-store', signal: AbortSignal.timeout(3000) });
                     if (!res.ok) return;
                     const data = await res.json();
-                    if (data.version && data.version !== APP_VERSION) {
-                        this.showUpdatePrompt();
-                    }
-                } catch (e) {
-                }
+                    if (data.version && data.version !== APP_VERSION) this.showUpdatePrompt();
+                } catch (e) {}
             },
 
             showUpdatePrompt() {
@@ -2729,9 +1978,7 @@
                 if (!('serviceWorker' in navigator)) return;
                 try {
                     const reg = await navigator.serviceWorker.register('./sw.js');
-
                     setInterval(() => reg.update(), 300_000);
-
                     reg.addEventListener('updatefound', () => {
                         const newWorker = reg.installing;
                         newWorker.addEventListener('statechange', () => {
@@ -2744,13 +1991,11 @@
                             }
                         });
                     });
-                } catch (err) {
-                }
+                } catch (err) {}
             },
 
             initNetworkMonitor() {
                 const banner = document.getElementById('offlineBanner');
-
                 const updateStatus = (online) => {
                     if (!this.settings.network) return;
                     if (!online) {
@@ -2761,36 +2006,25 @@
                         this.showToast('✅ Internet connection restored', 'success');
                     }
                 };
-
                 window.addEventListener('online',  () => updateStatus(true));
                 window.addEventListener('offline', () => updateStatus(false));
                 if (!navigator.onLine) updateStatus(false);
-
                 if ('connection' in navigator) {
                     const conn = navigator.connection;
                     const check = () => {
-                        if (conn.saveData || conn.effectiveType === '2g') {
-                            this.showToast('🐌 Slow connection detected', 'warning', 5000);
-                        }
+                        if (conn.saveData || conn.effectiveType === '2g') this.showToast('🐌 Slow connection detected', 'warning', 5000);
                     };
-                    check();
-                    conn.addEventListener('change', check);
+                    check(); conn.addEventListener('change', check);
                 }
             },
 
             initInstallPrompt() {
                 const banner  = document.getElementById('installBanner');
-                const already = localStorage.getItem('pwa_install_dismissed');
-                if (already) return;
-
+                if (localStorage.getItem('pwa_install_dismissed')) return;
                 let deferredPrompt = null;
-
                 window.addEventListener('beforeinstallprompt', (e) => {
-                    e.preventDefault();
-                    deferredPrompt = e;
-                    setTimeout(() => banner.classList.add('visible'), 2000);
+                    e.preventDefault(); deferredPrompt = e; setTimeout(() => banner.classList.add('visible'), 2000);
                 });
-
                 document.getElementById('installAcceptBtn').addEventListener('click', async () => {
                     banner.classList.remove('visible');
                     if (deferredPrompt) {
@@ -2800,64 +2034,33 @@
                         deferredPrompt = null;
                     }
                 });
-
                 document.getElementById('installDismissBtn').addEventListener('click', () => {
-                    banner.classList.remove('visible');
-                    localStorage.setItem('pwa_install_dismissed', '1');
+                    banner.classList.remove('visible'); localStorage.setItem('pwa_install_dismissed', '1');
                 });
-
                 window.addEventListener('appinstalled', () => {
-                    banner.classList.remove('visible');
-                    this.showToast('🎉 App installed successfully!', 'success', 4000);
+                    banner.classList.remove('visible'); this.showToast('🎉 App installed successfully!', 'success', 4000);
                 });
             },
 
             initPullToRefresh() {
                 const indicator = document.getElementById('ptrIndicator');
                 let startY = 0, pulling = false;
-
                 document.addEventListener('touchstart', (e) => {
-                    const modalOpen = document.querySelector('.modal.active') !== null;
-                    const menuOpen = document.getElementById('menuPanel')?.classList.contains('active');
-                    
-                    if (modalOpen || menuOpen) {
-                        startY = 0;
-                        return;
-                    }
-                    
-                    if (window.scrollY === 0) {
-                        startY = e.touches[0].clientY;
-                    }
+                    if (document.querySelector('.modal.active') || document.getElementById('menuPanel')?.classList.contains('active')) { startY = 0; return; }
+                    if (window.scrollY === 0) startY = e.touches[0].clientY;
                 }, { passive: true });
-
                 document.addEventListener('touchmove', (e) => {
                     if (!startY) return;
-                    
-                    const modalOpen = document.querySelector('.modal.active') !== null;
-                    const menuOpen = document.getElementById('menuPanel')?.classList.contains('active');
-                    
-                    if (modalOpen || menuOpen) {
-                        startY = 0;
-                        pulling = false;
-                        indicator.classList.remove('visible');
-                        return;
+                    if (document.querySelector('.modal.active') || document.getElementById('menuPanel')?.classList.contains('active')) {
+                        startY = 0; pulling = false; indicator.classList.remove('visible'); return;
                     }
-                    
                     const dy = e.touches[0].clientY - startY;
-                    if (dy > 60) {
-                        pulling = true;
-                        indicator.classList.add('visible');
-                        indicator.style.fontSize = '22px';
-                    }
+                    if (dy > 60) { pulling = true; indicator.classList.add('visible'); indicator.style.fontSize = '22px'; }
                 }, { passive: true });
-
                 document.addEventListener('touchend', () => {
                     if (pulling) {
                         indicator.style.fontSize = '28px';
-                        setTimeout(() => {
-                            indicator.classList.remove('visible');
-                            location.reload();
-                        }, 500);
+                        setTimeout(() => { indicator.classList.remove('visible'); location.reload(); }, 500);
                     }
                     startY = 0; pulling = false;
                 });
@@ -2865,44 +2068,23 @@
 
             initSwipeGestures() {
                 let startX = 0, startY = 0, startTarget = null;
-
-                document.addEventListener('touchstart', (e) => {
-                    startX = e.touches[0].clientX;
-                    startY = e.touches[0].clientY;
-                    startTarget = e.target;
-                }, { passive: true });
-
+                document.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; startTarget = e.target; }, { passive: true });
                 document.addEventListener('touchend', (e) => {
-                    const dx = e.changedTouches[0].clientX - startX;
-                    const dy = e.changedTouches[0].clientY - startY;
+                    const dx = e.changedTouches[0].clientX - startX, dy = e.changedTouches[0].clientY - startY;
                     const absDx = Math.abs(dx), absDy = Math.abs(dy);
-
                     if (Math.max(absDx, absDy) < 50) return; 
-
                     const modalContent = startTarget?.closest('.modal-content');
-                    const isInsideModal = modalContent !== null;
-                    
                     if (absDx > absDy) {
-                        if (isInsideModal) return; 
-                        
+                        if (modalContent !== null) return; 
                         const panel = document.getElementById('menuPanel');
-                        if (dx < 0 && panel.classList.contains('active')) {
-                            uiController.toggleMenu();
-                        } else if (dx > 0 && !panel.classList.contains('active')) {
-                            uiController.toggleMenu();
-                        }
+                        if (dx < 0 && panel.classList.contains('active')) uiController.toggleMenu();
+                        else if (dx > 0 && !panel.classList.contains('active')) uiController.toggleMenu();
                     } else if (dy < -50) {
-                        if (!isInsideModal) return;
-                        if (modalContent.scrollTop > 0) return; 
-                        
+                        if (modalContent === null || modalContent.scrollTop > 0) return; 
                         const modalRect = modalContent.getBoundingClientRect();
-                        const relativeY = startY - modalRect.top;
-                        
-                        if (relativeY < 100) {
+                        if (startY - modalRect.top < 100) {
                             const activeModal = startTarget.closest('.modal.active');
-                            if (activeModal) {
-                                activeModal.classList.remove('active');
-                            }
+                            if (activeModal) activeModal.classList.remove('active');
                         }
                     }
                 });
@@ -2910,21 +2092,15 @@
 
             loadSettings() {
                 const saved = localStorage.getItem('app_settings');
-                if (saved) {
-                    try { Object.assign(this.settings, JSON.parse(saved)); } catch(e) {}
-                }
+                if (saved) { try { Object.assign(this.settings, JSON.parse(saved)); } catch(e) {} }
             },
 
-            saveSettingsToStorage() {
-                localStorage.setItem('app_settings', JSON.stringify(this.settings));
-            },
+            saveSettingsToStorage() { localStorage.setItem('app_settings', JSON.stringify(this.settings)); },
 
             initSettingsUI() {
                 const transparencySlider = document.getElementById('settingPopupTransparency');
                 const transparencyValue = document.getElementById('popupTransparencyValue');
-                transparencySlider.addEventListener('input', (e) => {
-                    transparencyValue.textContent = e.target.value + '%';
-                });
+                transparencySlider.addEventListener('input', (e) => transparencyValue.textContent = e.target.value + '%');
                 
                 const disableAllHelp = document.getElementById('settingDisableAllHelp');
                 const flagConflicts = document.getElementById('settingFlagConflicts');
@@ -2932,34 +2108,22 @@
                 
                 disableAllHelp.addEventListener('change', (e) => {
                     if (e.target.checked) {
-                        flagConflicts.checked = false;
-                        flagIncorrect.checked = false;
-                        flagConflicts.disabled = true;
-                        flagIncorrect.disabled = true;
+                        flagConflicts.checked = false; flagIncorrect.checked = false;
+                        flagConflicts.disabled = true; flagIncorrect.disabled = true;
                     } else {
-                        flagConflicts.disabled = false;
-                        flagIncorrect.disabled = false;
+                        flagConflicts.disabled = false; flagIncorrect.disabled = false;
                     }
                 });
                 
                 document.getElementById('settingsMenu').addEventListener('click', () => {
-                    uiController.toggleMenu();
-                    this.syncSettingsToUI();
-                    document.getElementById('settingsModal').classList.add('active');
+                    uiController.toggleMenu(); this.syncSettingsToUI(); document.getElementById('settingsModal').classList.add('active');
                 });
-
                 document.getElementById('saveSettings').addEventListener('click', () => {
-                    this.syncSettingsFromUI();
-                    this.saveSettingsToStorage();
-                    this.applySettings();
+                    this.syncSettingsFromUI(); this.saveSettingsToStorage(); this.applySettings();
                     document.getElementById('settingsModal').classList.remove('active');
-                    this.showToast('✅ Settings saved', 'success');
-                    this.haptic('light');
+                    this.showToast('✅ Settings saved', 'success'); this.haptic('light');
                 });
-
-                document.getElementById('closeSettings').addEventListener('click', () => {
-                    document.getElementById('settingsModal').classList.remove('active');
-                });
+                document.getElementById('closeSettings').addEventListener('click', () => document.getElementById('settingsModal').classList.remove('active'));
             },
             
             syncSettingsToUI() {
@@ -2969,7 +2133,6 @@
                 document.getElementById('settingPreventSleep').checked = this.settings.preventSleep;
                 document.getElementById('settingShowDigitCounts').checked = this.settings.showDigitCounts;
                 document.getElementById('settingAutoPencil').checked = this.settings.autoPencil;
-                
                 document.getElementById('settingShowTimer').checked = this.settings.showTimer;
                 document.getElementById('settingShowCrosshairs').checked = this.settings.showCrosshairs;
                 document.getElementById('settingHighlightDigits').checked = this.settings.highlightDigits;
@@ -2980,7 +2143,6 @@
                 document.getElementById('settingHaptics').checked = this.settings.haptics;
                 document.getElementById('settingAnimations').checked = this.settings.animations;
                 document.getElementById('settingNetwork').checked = this.settings.network;
-                
                 document.getElementById('settingDisableAllHelp').checked = this.settings.disableAllHelp;
                 document.getElementById('settingFlagConflicts').checked = this.settings.flagConflicts;
                 document.getElementById('settingFlagIncorrect').checked = this.settings.flagIncorrect;
@@ -3001,7 +2163,6 @@
                 this.settings.preventSleep = document.getElementById('settingPreventSleep').checked;
                 this.settings.showDigitCounts = document.getElementById('settingShowDigitCounts').checked;
                 this.settings.autoPencil = document.getElementById('settingAutoPencil').checked;
-                
                 this.settings.showTimer = document.getElementById('settingShowTimer').checked;
                 this.settings.showCrosshairs = document.getElementById('settingShowCrosshairs').checked;
                 this.settings.highlightDigits = document.getElementById('settingHighlightDigits').checked;
@@ -3011,7 +2172,6 @@
                 this.settings.haptics = document.getElementById('settingHaptics').checked;
                 this.settings.animations = document.getElementById('settingAnimations').checked;
                 this.settings.network = document.getElementById('settingNetwork').checked;
-                
                 this.settings.disableAllHelp = document.getElementById('settingDisableAllHelp').checked;
                 this.settings.flagConflicts = document.getElementById('settingFlagConflicts').checked;
                 this.settings.flagIncorrect = document.getElementById('settingFlagIncorrect').checked;
@@ -3019,97 +2179,57 @@
             
             applySettings() {
                 const timerEl = document.getElementById('timer');
-                if (timerEl) {
-                    timerEl.style.display = this.settings.showTimer ? 'block' : 'none';
-                }
-                
-                if (this.settings.preventSleep && 'wakeLock' in navigator) {
-                    navigator.wakeLock.request('screen').catch(e => {
-                    });
-                }
-                
-                if (window.uiController) {
-                    uiController.refreshDisplay();
-                }
+                if (timerEl) timerEl.style.display = this.settings.showTimer ? 'block' : 'none';
+                if (this.settings.preventSleep && 'wakeLock' in navigator) navigator.wakeLock.request('screen').catch(e => {});
+                if (window.uiController) uiController.refreshDisplay();
             },
 
             initResetUI() {
                 document.getElementById('openSelectiveReset').addEventListener('click', () => {
-                    document.getElementById('reinstallModal').classList.remove('active');
-                    document.getElementById('resetModal').classList.add('active');
+                    document.getElementById('reinstallModal').classList.remove('active'); document.getElementById('resetModal').classList.add('active');
                 });
-
-                document.getElementById('cancelReset').addEventListener('click', () => {
-                    document.getElementById('resetModal').classList.remove('active');
-                });
-
+                document.getElementById('cancelReset').addEventListener('click', () => document.getElementById('resetModal').classList.remove('active'));
                 document.getElementById('confirmSelectiveReset').addEventListener('click', async () => {
-                    const delGame     = document.getElementById('resetSavedGame').checked;
-                    const delStats    = document.getElementById('resetStats').checked;
-                    const delSettings = document.getElementById('resetSettings').checked;
-                    const delCache    = document.getElementById('resetCache').checked;
-
-                    if (delGame)     localStorage.removeItem('sudoku_current_game');
-                    if (delStats)    localStorage.removeItem('sudoku_stats');
-                    if (delSettings) { localStorage.removeItem('app_settings'); localStorage.removeItem('sudoku_theme'); }
-                    if (delCache)    await this.clearCacheSilent();
-
+                    if (document.getElementById('resetSavedGame').checked) localStorage.removeItem('sudoku_current_game');
+                    if (document.getElementById('resetStats').checked) localStorage.removeItem('sudoku_stats');
+                    if (document.getElementById('resetSettings').checked) { localStorage.removeItem('app_settings'); localStorage.removeItem('sudoku_theme'); }
+                    if (document.getElementById('resetCache').checked) await this.clearCacheSilent();
                     document.getElementById('resetModal').classList.remove('active');
-                    this.showToast('✅ Selected data removed', 'success');
-                    setTimeout(() => location.reload(), 1200);
+                    this.showToast('✅ Selected data removed', 'success'); setTimeout(() => location.reload(), 1200);
                 });
-
-                document.getElementById('cancelReinstall').addEventListener('click', () => {
-                    document.getElementById('reinstallModal').classList.remove('active');
-                });
-
-                document.getElementById('confirmReinstall').addEventListener('click', () => {
-                    this.performFullRemoval();
-                });
+                document.getElementById('cancelReinstall').addEventListener('click', () => document.getElementById('reinstallModal').classList.remove('active'));
+                document.getElementById('confirmReinstall').addEventListener('click', () => this.performFullRemoval());
             },
 
             async performFullRemoval() {
                 document.getElementById('reinstallModal').classList.remove('active');
                 try {
-                    localStorage.clear();
-                    sessionStorage.clear();
+                    localStorage.clear(); sessionStorage.clear();
                     if ('serviceWorker' in navigator) {
                         const regs = await navigator.serviceWorker.getRegistrations();
                         await Promise.all(regs.map(r => r.unregister()));
                     }
                     await this.clearCacheSilent();
                     if ('indexedDB' in window && indexedDB.databases) {
-                        const dbs = await indexedDB.databases();
-                        dbs.forEach(db => db.name && indexedDB.deleteDatabase(db.name));
+                        const dbs = await indexedDB.databases(); dbs.forEach(db => db.name && indexedDB.deleteDatabase(db.name));
                     }
-                    document.cookie.split(';').forEach(c => {
-                        document.cookie = c.replace(/^ +/, '').replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/');
-                    });
+                    document.cookie.split(';').forEach(c => document.cookie = c.replace(/^ +/, '').replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/'));
                     this.showToast('✅ App completely removed', 'success');
                     setTimeout(() => { window.location.href = window.location.href.split('?')[0] + '?t=' + Date.now(); }, 1500);
-                } catch (err) {
-                    this.showToast('⚠️ Error: ' + err.message, 'error');
-                }
+                } catch (err) { this.showToast('⚠️ Error: ' + err.message, 'error'); }
             },
 
             applyUrlParams() {
                 const params = new URLSearchParams(location.search);
                 const diff = params.get('difficulty');
-                const view = params.get('view');
-                if (diff && ['easy','medium','hard','expert'].includes(diff)) {
-                    setTimeout(() => uiController.startNewGame(diff), 200);
-                }
-                if (view === 'stats') {
-                    setTimeout(() => uiController.showStats(), 200);
-                }
+                if (diff && ['easy','medium','hard','expert'].includes(diff)) setTimeout(() => uiController.startNewGame(diff), 200);
+                if (params.get('view') === 'stats') setTimeout(() => uiController.showStats(), 200);
             }
         };
 
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-            });
+            window.addEventListener('load', () => {});
         }
-
     </script>
 </body>
 </html>
