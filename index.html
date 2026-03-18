@@ -6,11 +6,10 @@
     <meta name="theme-color" content="#4A90E2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Sudoku Pro - V9.5</title>
+    <title>Sudoku Pro - V9.5.1</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon-512.png">
     <link rel="apple-touch-icon" href="icon-512.png">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
         :root {
             --bg-primary: #ffffff;
@@ -69,12 +68,10 @@
             height: 100vh;
             height: -webkit-fill-available;
             overflow: hidden;
-            /* Safe area for notch devices (req 5.5) */
             padding-top: env(safe-area-inset-top);
             padding-bottom: env(safe-area-inset-bottom);
         }
 
-        /* ===== OFFLINE BANNER (req 4.3) ===== */
         .offline-banner {
             position: fixed;
             top: 0;
@@ -92,7 +89,6 @@
         }
         .offline-banner.visible { transform: translateY(0); }
 
-        /* ===== TOAST SYSTEM (req 6.1) ===== */
         .toast-container {
             position: fixed;
             bottom: 80px;
@@ -123,7 +119,6 @@
         .toast.info    { background: #4A90E2; }
         .toast.warning { background: #f59e0b; }
 
-        /* ===== INSTALL BANNER (req 3.3) ===== */
         .install-banner {
             position: fixed;
             bottom: -120px;
@@ -149,7 +144,6 @@
         .install-btn.primary { background: var(--btn-primary); color: white; }
         .install-btn.secondary { background: var(--bg-tertiary); color: var(--text-secondary); }
 
-        /* ===== PULL TO REFRESH (req 5.2) ===== */
         .ptr-indicator {
             position: fixed;
             top: env(safe-area-inset-top, 0px);
@@ -170,7 +164,6 @@
         }
         .ptr-indicator.visible { transform: translateX(-50%) translateY(8px); }
 
-        /* ===== UPDATE PROMPT (req 1.4) ===== */
         .update-prompt {
             position: fixed;
             top: 60px;
@@ -192,7 +185,6 @@
         .update-prompt span { font-size: 13px; font-weight: 600; color: var(--text-primary); }
         .update-now-btn { padding: 6px 14px; background: var(--btn-primary); color: white; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; }
 
-        /* ===== SETTINGS MODAL (req 7.3) ===== */
         .settings-row {
             display: flex;
             align-items: center;
@@ -204,7 +196,6 @@
         .settings-label { font-size: 15px; color: var(--text-primary); }
         .settings-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
         
-        /* Settings categories */
         .settings-category {
             margin-bottom: 24px;
             padding-bottom: 16px;
@@ -220,7 +211,6 @@
             border-bottom: 1px solid var(--bg-tertiary);
         }
         
-        /* Select dropdown */
         .settings-select {
             padding: 6px 12px;
             border: 1px solid var(--border-light);
@@ -236,7 +226,6 @@
             outline-offset: 1px;
         }
         
-        /* Range slider */
         .settings-slider {
             -webkit-appearance: none;
             appearance: none;
@@ -255,14 +244,6 @@
             background: var(--btn-primary);
             cursor: pointer;
         }
-        .settings-slider::-moz-range-thumb {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: var(--btn-primary);
-            cursor: pointer;
-            border: none;
-        }
         .settings-value {
             font-size: 13px;
             font-weight: 600;
@@ -271,7 +252,6 @@
             text-align: right;
         }
         
-        /* Toggle switch */
         .toggle { position: relative; width: 48px; height: 26px; }
         .toggle input { opacity: 0; width: 0; height: 0; }
         .toggle-slider {
@@ -293,7 +273,6 @@
         .toggle input:checked + .toggle-slider { background: var(--btn-primary); }
         .toggle input:checked + .toggle-slider::before { transform: translateX(22px); }
 
-        /* ===== SELECTIVE RESET MODAL (req 2.3) ===== */
         .reset-option {
             display: flex;
             align-items: center;
@@ -317,7 +296,6 @@
             flex-direction: column;
         }
 
-        /* Header */
         .header {
             text-align: center;
             margin-bottom: 8px;
@@ -342,7 +320,6 @@
             color: var(--btn-primary);
         }
 
-        /* Top Bar */
         .top-bar {
             display: flex;
             justify-content: space-between;
@@ -392,7 +369,6 @@
             cursor: not-allowed;
         }
 
-        /* Game Board */
         .game-board-container {
             flex: 0 0 auto;
             display: flex;
@@ -427,6 +403,7 @@
             transition: background-color 0.15s;
             position: relative;
             user-select: none;
+            box-sizing: border-box;
         }
 
         .cell:nth-child(9n+3), 
@@ -438,10 +415,6 @@
         .cell:nth-child(n+46):nth-child(-n+54) {
             border-bottom: 3px solid var(--border-heavy) !important;
         }
-        
-        .cell {
-            box-sizing: border-box;
-        }
 
         .cell.fixed {
             color: var(--cell-fixed);
@@ -449,7 +422,6 @@
             font-weight: 700;
         }
         
-        /* Initial cell highlighting (when setting enabled) */
         .cell.initial-highlight {
             background-color: #dbeafe !important;
         }
@@ -458,7 +430,6 @@
             background-color: #1e3a8a !important;
         }
         
-        /* Initial cell bold (when setting enabled) */
         .cell.initial-bold {
             font-weight: 900 !important;
         }
@@ -467,7 +438,6 @@
             color: var(--cell-user);
         }
         
-        /* Crosshairs - highlight row/col/block */
         .cell.crosshair {
             background-color: #f0f9ff !important;
         }
@@ -485,7 +455,6 @@
 
         .cell.highlighted {
             background: var(--cell-highlighted) !important;
-            /* box-shadow: inset 0 0 0 2px var(--btn-primary); */ 
         }
 
         .cell.conflict {
@@ -521,7 +490,6 @@
             75% { transform: translateX(4px); }
         }
 
-        /* Number Pad */
         .number-pad {
             display: flex;
             flex-direction: column;
@@ -588,7 +556,6 @@
             pointer-events: none;
         }
 
-        /* Hamburger Menu */
         .menu-overlay {
             position: fixed;
             top: 0;
@@ -658,7 +625,6 @@
             text-align: center;
         }
 
-        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -687,9 +653,7 @@
             max-height: 85vh;
             overflow-y: auto;
             overflow-x: hidden;
-            /* Smooth scrolling on touch devices */
             -webkit-overflow-scrolling: touch;
-            /* Prevent bounce/overscroll */
             overscroll-behavior: contain;
         }
 
@@ -717,29 +681,14 @@
             transition: all 0.2s;
         }
 
-        .modal-btn.primary {
-            background: var(--btn-primary);
-            color: white;
-        }
-
-        .modal-btn.success {
-            background: var(--btn-success);
-            color: white;
-        }
-
-        .modal-btn.danger {
-            background: var(--btn-danger);
-            color: white;
-        }
-
-        .modal-btn.secondary {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-        }
+        .modal-btn.primary { background: var(--btn-primary); color: white; }
+        .modal-btn.success { background: var(--btn-success); color: white; }
+        .modal-btn.danger { background: var(--btn-danger); color: white; }
+        .modal-btn.secondary { background: var(--bg-tertiary); color: var(--text-primary); }
 
         .difficulty-grid {
             display: flex;
-            flex-direction: column; /* מסדר את האלמנטים בטור */
+            flex-direction: column;
             gap: 12px;
             margin: 16px 0;
         }
@@ -788,26 +737,12 @@
         }
 
         @media (max-width: 480px) {
-            .container {
-                padding: 6px;
-            }
-
-            .num-btn {
-                font-size: 30px;
-            }
-
-            .icon-btn {
-                width: 36px;
-                height: 36px;
-                font-size: 16px;
-            }
-
-            .timer {
-                font-size: 18px;
-            }
+            .container { padding: 6px; }
+            .num-btn { font-size: 30px; }
+            .icon-btn { width: 36px; height: 36px; font-size: 16px; }
+            .timer { font-size: 18px; }
         }
 
-        /* ========== DIGIT ENTRY POP-UP MODAL ========== */
         .digit-popup-modal {
             display: none;
             position: fixed;
@@ -818,9 +753,7 @@
             z-index: 3000;
         }
         
-        .digit-popup-modal.active {
-            display: block;
-        }
+        .digit-popup-modal.active { display: block; }
         
         .digit-popup-backdrop {
             position: absolute;
@@ -875,7 +808,6 @@
             border-color: var(--btn-danger);
         }
         
-        /* Tap pending animation for two-tap mode */
         .cell.tap-pending {
             box-shadow: 0 0 0 3px var(--btn-primary) inset;
             animation: pulse-tap 0.3s ease;
@@ -886,7 +818,6 @@
             50% { transform: scale(1.05); }
         }
         
-        /* Sticky digit active state */
         .num-btn.sticky-active {
             background: var(--btn-primary);
             color: white;
@@ -894,7 +825,6 @@
             transform: scale(1.1);
         }
         
-        /* Incorrect value flash */
         @keyframes incorrect-flash {
             0%, 100% { background: var(--bg-primary); }
             50% { background: var(--cell-error); }
@@ -904,8 +834,6 @@
             animation: incorrect-flash 0.6s ease;
         }
 
-    
-        /* Crosshairs highlighting */
         .cell.crosshair-row,
         .cell.crosshair-col {
             background: rgba(74, 144, 226, 0.08) !important;
@@ -914,18 +842,15 @@
         .cell.crosshair-row.crosshair-col {
             background: rgba(74, 144, 226, 0.12) !important;
         }
-
     </style>
 </head>
 <body data-theme="light">
     <div class="container">
-        <!-- Header -->
         <div class="header">
             <div class="app-title" id="appTitle">Sudoku Pro</div>
-            <div class="version" id="versionBtn">Version 9.5</div>
+            <div class="version" id="versionBtn">Version 9.5.1</div>
         </div>
 
-        <!-- Top Bar -->
         <div class="top-bar">
             <div id="mistakeCounter" style="color: var(--btn-danger); font-weight: bold; font-size: 14px;">❌ 0/3</div>
             <div class="timer" id="timer">00:00</div>
@@ -935,12 +860,10 @@
             </div>
         </div>
 
-        <!-- Game Board -->
         <div class="game-board-container">
             <div class="game-board" id="gameBoard"></div>
         </div>
 
-        <!-- Number Pad -->
         <div class="number-pad">
             <div class="number-row first">
                 <button class="num-btn" data-num="1">1</button>
@@ -961,22 +884,17 @@
         </div>
     </div>
 
-    <!-- Offline Banner (req 4.3) -->
     <div class="offline-banner" id="offlineBanner">⚠️ No internet connection</div>
 
-    <!-- Pull to Refresh Indicator (req 5.2) -->
     <div class="ptr-indicator" id="ptrIndicator">↻</div>
 
-    <!-- Update Prompt (req 1.4) -->
     <div class="update-prompt" id="updatePrompt">
         <span>🆕 New version available!</span>
         <button class="update-now-btn" id="updateNowBtn">Update Now</button>
     </div>
 
-    <!-- Toast Container (req 6.1) -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Install Banner (req 3.3) -->
     <div class="install-banner" id="installBanner">
         <img src="icon-512.png" alt="Sudoku Pro" onerror="this.style.display='none'">
         <div class="install-banner-text">
@@ -989,7 +907,6 @@
         </div>
     </div>
 
-    <!-- Hamburger Menu -->
     <div class="menu-overlay" id="menuOverlay"></div>
     <div class="menu-panel" id="menuPanel">
         <div class="menu-header">Menu</div>
@@ -1021,7 +938,6 @@
         </div>
     </div>
 
-    <!-- Difficulty Modal -->
     <div class="modal" id="difficultyModal">
         <div class="modal-content">
             <h2>Select Difficulty</h2>
@@ -1038,7 +954,6 @@
         </div>
     </div>
 
-    <!-- Victory Modal -->
     <div class="modal" id="victoryModal">
         <div class="modal-content">
             <h2>🎉 Congratulations! 🎉</h2>
@@ -1050,7 +965,6 @@
         </div>
     </div>
 
-    <!-- Stats Modal -->
     <div class="modal" id="statsModal">
         <div class="modal-content">
             <h2>📊 Statistics</h2>
@@ -1079,7 +993,6 @@
         </div>
     </div>
 
-    <!-- Selective Reset Modal (req 2.3) -->
     <div class="modal" id="resetModal">
         <div class="modal-content">
             <h2>⚙️ Reset Options</h2>
@@ -1119,7 +1032,6 @@
         </div>
     </div>
 
-    <!-- Full Removal Modal (req 2.1/2.2) -->
     <div class="modal" id="reinstallModal">
         <div class="modal-content">
             <h2>🗑️ Complete App Removal</h2>
@@ -1139,12 +1051,10 @@
         </div>
     </div>
 
-    <!-- Settings Modal (req 7.3) - Comprehensive Game Settings -->
     <div class="modal" id="settingsModal">
         <div class="modal-content" style="max-width: 500px; max-height: 80vh; overflow-y: auto;">
             <h2>⚙️ Game Settings</h2>
             
-            <!-- BEHAVIOR Category -->
             <div class="settings-category">
                 <h3 class="settings-category-title">🎮 Behavior</h3>
                 
@@ -1216,7 +1126,6 @@
                 </div>
             </div>
             
-            <!-- DISPLAY Category -->
             <div class="settings-category">
                 <h3 class="settings-category-title">👁️ Display</h3>
                 
@@ -1319,7 +1228,6 @@
                 </div>
             </div>
             
-            <!-- HELPER Category -->
             <div class="settings-category">
                 <h3 class="settings-category-title">🛟 Helper</h3>
                 
@@ -1448,20 +1356,16 @@
             }
 
             generatePuzzle(difficulty = 'medium') {
-                // ========== V8.0 PROFESSIONAL PUZZLE GENERATOR ==========
-                // 4 difficulty levels with symmetry and unique solution verification
-                
                 const cellsToRemove = { 
-                    easy: 38,       // ~43 clues - beginner friendly
-                    medium: 48,     // ~33 clues - intermediate
-                    hard: 58,       // ~23 clues - advanced
-                    expert: 64      // ~17 clues - MAXIMUM difficulty!
+                    easy: 38,       
+                    medium: 48,     
+                    hard: 58,       
+                    expert: 64      
                 };
                 
                 console.log(`🎯 Generating ${difficulty.toUpperCase()} puzzle with V8.0 Pro Engine...`);
                 const startTime = performance.now();
                 
-                // Step 1: Generate complete solution
                 const complete = this.generateComplete();
                 this.solution = [...complete];
                 this.board = [...complete];
@@ -1469,15 +1373,13 @@
 
                 const target = cellsToRemove[difficulty] || 48;
                 
-                // Step 2: Create symmetric pairs (180° rotation)
                 const symmetricPairs = this.createSymmetricPairs();
                 this.shuffleArray(symmetricPairs);
                 
                 let removed = 0;
                 let attempts = 0;
-                const maxAttempts = 250; // Increased for expert level
+                const maxAttempts = 250; 
                 
-                // ========== PHASE 1: SYMMETRIC REMOVAL ==========
                 console.log(`📐 Phase 1: Symmetric pair removal (target: ${target} cells)`);
                 
                 for (let pair of symmetricPairs) {
@@ -1489,17 +1391,14 @@
                     
                     attempts++;
                     
-                    // Backup both positions
                     const backup1 = this.board[pair[0]];
                     const backup2 = this.board[pair[1]];
                     
-                    // Try removing both cells (or one if it's the center)
                     this.board[pair[0]] = 0;
-                    if (pair[0] !== pair[1]) { // Not center cell
+                    if (pair[0] !== pair[1]) { 
                         this.board[pair[1]] = 0;
                     }
                     
-                    // Verify unique solution
                     if (this.hasUniqueSolution()) {
                         this.fixed[pair[0]] = false;
                         if (pair[0] !== pair[1]) {
@@ -1508,13 +1407,8 @@
                         } else {
                             removed += 1;
                         }
-                        attempts = 0; // Reset on success
-                        
-                        if (removed % 10 === 0) {
-                            console.log(`   Progress: ${removed}/${target} cells removed`);
-                        }
+                        attempts = 0; 
                     } else {
-                        // Restore if multiple solutions exist
                         this.board[pair[0]] = backup1;
                         if (pair[0] !== pair[1]) {
                             this.board[pair[1]] = backup2;
@@ -1522,13 +1416,9 @@
                     }
                 }
                 
-                console.log(`   ✓ Symmetric phase complete: ${removed}/${target} cells`);
-                
-                // ========== PHASE 2: SINGLE CELL REMOVAL ==========
                 if (removed < target) {
                     console.log(`📝 Phase 2: Strategic single cell removal (${target - removed} remaining)`);
                     
-                    // Collect remaining filled cells
                     const remainingCells = [];
                     for (let i = 0; i < 81; i++) {
                         if (this.board[i] !== 0) {
@@ -1536,7 +1426,6 @@
                         }
                     }
                     
-                    // Prioritize cells that create logical bottlenecks
                     this.shuffleArray(remainingCells);
                     
                     attempts = 0;
@@ -1555,66 +1444,39 @@
                             this.fixed[pos] = false;
                             removed++;
                             attempts = 0;
-                            
-                            if ((removed - (target - (target - removed))) % 5 === 0) {
-                                console.log(`   Progress: ${removed}/${target} cells`);
-                            }
                         } else {
                             this.board[pos] = backup;
                         }
                     }
-                    
-                    console.log(`   ✓ Single cell phase complete: ${removed}/${target} cells`);
                 }
 
                 this.notes = Array(81).fill(null).map(() => new Set());
                 
-                // ========== GENERATION SUMMARY ==========
                 const endTime = performance.now();
                 const duration = ((endTime - startTime) / 1000).toFixed(2);
-                const symmetryPercent = this.getSymmetryPercent();
                 
-                console.log(`\n✅ PUZZLE GENERATED SUCCESSFULLY!`);
-                console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-                console.log(`   🎲 Difficulty: ${difficulty.toUpperCase()}`);
-                console.log(`   📊 Cells removed: ${removed}/${target}`);
-                console.log(`   🎯 Clues given: ${81 - removed}`);
-                console.log(`   🔄 Symmetry: ${symmetryPercent >= 0.95 ? 'PERFECT ✓' : Math.round(symmetryPercent * 100) + '%'}`);
-                console.log(`   ⏱️ Generation time: ${duration}s`);
-                console.log(`   ✔️ Unique solution: VERIFIED`);
-                console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
+                console.log(`\n✅ PUZZLE GENERATED SUCCESSFULLY in ${duration}s!`);
                 
                 return {
                     board: [...this.board],
                     solution: [...this.solution],
-                    fixed: [...this.fixed],
-                    metadata: {
-                        difficulty,
-                        cellsRemoved: removed,
-                        cluesGiven: 81 - removed,
-                        symmetry: symmetryPercent,
-                        generationTime: duration
-                    }
+                    fixed: [...this.fixed]
                 };
             }
 
             createSymmetricPairs() {
-                // Create 180-degree rotational symmetry pairs
-                // Each position (i) pairs with position (80-i)
                 const pairs = [];
                 const used = new Set();
                 
                 for (let i = 0; i < 81; i++) {
                     if (used.has(i)) continue;
                     
-                    const symmetric = 80 - i; // 180° rotation
+                    const symmetric = 80 - i; 
                     
                     if (i === symmetric) {
-                        // Center cell (position 40) - pairs with itself
                         pairs.push([i, i]);
                         used.add(i);
                     } else if (!used.has(symmetric)) {
-                        // Regular pair
                         pairs.push([i, symmetric]);
                         used.add(i);
                         used.add(symmetric);
@@ -1625,11 +1487,10 @@
             }
 
             getSymmetryPercent() {
-                // Calculate symmetry percentage (0-1)
                 let symmetricPairs = 0;
                 let totalPairs = 0;
                 
-                for (let i = 0; i < 41; i++) { // Check only half + center
+                for (let i = 0; i < 41; i++) { 
                     const symmetric = 80 - i;
                     totalPairs++;
                     
@@ -1677,12 +1538,10 @@
             }
 
             getConflicts(pos, num) {
-                // Check if help is allowed
                 if (!this.isHelpAllowed('conflicts')) {
                     return new Set();
                 }
                 
-                // Fix: Use AppSystems.settings instead of this.settings
                 if (!AppSystems.settings?.flagConflicts) {
                     return new Set();
                 }
@@ -1726,6 +1585,13 @@
                 }
                 return count;
             }
+            
+            isHelpAllowed(feature) {
+                if ((AppSystems.settings || {}).disableAllHelp) {
+                    return false;
+                }
+                return true;
+            }
         }
 
         // ============= GAME STATE MANAGER =============
@@ -1740,6 +1606,8 @@
                 this.hints = 3;
                 this.history = [];
                 this.historyIndex = -1;
+                this.mistakes = 0;
+                this.maxMistakes = 3;
                 this.stats = this.loadStats();
             }
 
@@ -1768,6 +1636,7 @@
                 this.noteMode = false;
                 this.timer = 0;
                 this.hints = 3;
+                this.mistakes = 0;
                 this.history = [];
                 this.historyIndex = -1;
                 this.saveSnapshot();
@@ -1820,7 +1689,6 @@
             placeNumber(pos, num) {
                 if (this.engine.fixed[pos]) return { success: false };
 
-                // Check if number is already at max count (9)
                 if (num !== 0 && this.engine.countNumber(num) >= 9) {
                     return { success: false, maxed: true };
                 }
@@ -1850,7 +1718,6 @@
                     this.engine.board[pos] = num;
                     this.engine.notes[pos].clear();
                     
-                    // *** AUTO-ERASE PEERS INTEGRATION ***
                     if ((AppSystems.settings || {}).autoPencilErase && num > 0) {
                         const row = Math.floor(pos / 9);
                         const col = pos % 9;
@@ -1860,7 +1727,6 @@
                             const peerPos = r * 9 + c;
                             if (this.engine.notes[peerPos]?.has(num)) {
                                 this.engine.notes[peerPos].delete(num);
-                                console.log(`[Auto-Erase] Removed ${num} from (${r},${c})`);
                             }
                         });
                     }
@@ -1875,9 +1741,7 @@
             }
 
             giveHint() {
-                // Check if help is allowed
-                if (!this.isHelpAllowed('hint')) {
-                    console.log('[Hint] Blocked by master help toggle');
+                if (!this.engine.isHelpAllowed('hint')) {
                     return false;
                 }
                 
@@ -1903,31 +1767,15 @@
                 }
                 return true;
             }
-
-            // Help system master toggle check
-            isHelpAllowed(feature) {
-                if ((AppSystems.settings || {}).disableAllHelp) {
-                    console.log('[Help Blocked]', feature);
-                    return false;
-                }
-                return true;
-            }
             
-            // Get peer cells (same row, column, box)
             getPeers(row, col) {
                 const peers = new Set();
-                
-                // Same row
                 for (let c = 0; c < 9; c++) {
                     if (c !== col) peers.add(`${row},${c}`);
                 }
-                
-                // Same column
                 for (let r = 0; r < 9; r++) {
                     if (r !== row) peers.add(`${r},${col}`);
                 }
-                
-                // Same 3x3 box
                 const boxRow = Math.floor(row / 3) * 3;
                 const boxCol = Math.floor(col / 3) * 3;
                 for (let r = boxRow; r < boxRow + 3; r++) {
@@ -1937,31 +1785,8 @@
                         }
                     }
                 }
-                
                 return Array.from(peers).map(key => key.split(',').map(Number));
             }
-            
-            // Check incorrect value with mistake tracking
-            checkIncorrectWithLimit(row, col, num) {
-                if (!this.isHelpAllowed('incorrect')) return false;
-                
-                // Fix: Use AppSystems.settings instead of this.settings
-                if (!AppSystems.settings?.flagIncorrect) return false;
-                if (!this.solution) return false;
-                
-                const pos = row * 9 + col;
-                const isIncorrect = (this.solution[pos] !== num);
-                
-                if (isIncorrect) {
-                    this.mistakes++;
-                    console.log(`[Mistake] Count: ${this.mistakes}/${this.maxMistakes}`);
-                    
-                    return true;
-                }
-                
-                return false;
-            }
-
 
             onWin() {
                 this.stopTimer();
@@ -2006,7 +1831,8 @@
                     timer: this.timer,
                     hints: this.hints,
                     history: this.history,
-                    historyIndex: this.historyIndex
+                    historyIndex: this.historyIndex,
+                    mistakes: this.mistakes
                 };
                 localStorage.setItem('sudoku_current_game', JSON.stringify(gameData));
             }
@@ -2025,6 +1851,7 @@
                     this.hints = gameData.hints || 3;
                     this.history = gameData.history || [];
                     this.historyIndex = gameData.historyIndex || -1;
+                    this.mistakes = gameData.mistakes || 0;
                     this.startTimer();
                     return true;
                 } catch (e) {
@@ -2046,25 +1873,18 @@
             constructor(gameState) {
                 this.game = gameState;
                 
-                // Double-tap settings
-                this.DOUBLE_TAP_THRESHOLD = 300; // ms
+                this.DOUBLE_TAP_THRESHOLD = 300; 
                 this.lastTapTime = 0;
                 this.lastTapCell = null;
                 
-                // Pop-up targets
                 this.popupTargetRow = null;
                 this.popupTargetCol = null;
-                
-                // Max mistakes
-                this.maxMistakes = 3;
-                this.mistakeCount = 0;
                 
                 this.initElements();
                 this.initTheme();
                 this.bindEvents();
                 this.updateUI();
                 
-                // Initialize new features
                 this.initDigitFirstMode();
                 this.applyDigitEntryStyle();
             }
@@ -2106,7 +1926,6 @@
                     cell.dataset.col = col;
                     cell.dataset.block = block;
                     
-                    // Use handleCellTap for all new features
                     cell.addEventListener('click', () => this.handleCellTap(row, col));
                     this.gameBoard.appendChild(cell);
                 }
@@ -2252,22 +2071,17 @@
             }
 
             selectCell(posOrRow, col = null) {
-                // Handle both formats: selectCell(pos) or selectCell(row, col)
                 let pos;
                 if (col !== null) {
-                    // Called with row, col
                     pos = posOrRow * 9 + col;
                 } else {
-                    // Called with pos
                     pos = posOrRow;
                 }
                 
                 if (pos < 0 || pos >= 81) {
-                    console.error('[selectCell] Invalid position:', pos);
                     return;
                 }
                 
-                // Fix: use pos instead of undefined 'index'
                 this.game.selectedCell = pos;
                 this.updateUI();
             }
@@ -2275,7 +2089,23 @@
             inputNumber(num) {
                 if (this.game.selectedCell === null) return;
                 AppSystems.haptic('tap');
-                const result = this.game.placeNumber(this.game.selectedCell, num);
+                
+                const pos = this.game.selectedCell;
+                const row = Math.floor(pos / 9);
+                const col = pos % 9;
+                
+                const result = this.game.placeNumber(pos, num);
+                
+                if (result.success && num !== 0 && !this.game.noteMode) {
+                    if (AppSystems.settings?.flagIncorrect && this.game.engine.solution) {
+                        const correct = this.game.engine.solution[pos];
+                        if (num !== correct) {
+                            this.game.mistakes++;
+                            this.showIncorrectFeedback(row, col);
+                        }
+                    }
+                }
+                
                 this.updateUI();
                 if (!result.success && result.conflicts) {
                     AppSystems.haptic('error');
@@ -2344,7 +2174,6 @@
                 this.updateUI();
             }
 
-            // ========== POP-UP DIGIT ENTRY ==========
             showDigitPopup(row, col) {
                 this.popupTargetRow = row;
                 this.popupTargetCol = col;
@@ -2354,12 +2183,10 @@
                 
                 if (!modal || !container) return;
                 
-                // Fix: Apply transparency from settings
                 const transparency = AppSystems.settings?.popupTransparency || 5;
                 const opacity = 1 - (transparency / 100);
                 container.style.opacity = opacity;
                 
-                // Position near the cell
                 const cell = this.gameBoard.querySelector(
                     `[data-row="${row}"][data-col="${col}"]`
                 );
@@ -2368,87 +2195,66 @@
                 
                 const rect = cell.getBoundingClientRect();
                 
-                // Center popup near cell
-                const popupWidth = 272; // 240 + 32 padding
+                const popupWidth = 272; 
                 const popupHeight = 300;
                 
                 let left = rect.left + (rect.width / 2) - (popupWidth / 2);
                 let top = rect.top - popupHeight - 10;
                 
-                // Keep on screen
                 if (left < 10) left = 10;
                 if (left + popupWidth > window.innerWidth - 10) {
                     left = window.innerWidth - popupWidth - 10;
                 }
                 if (top < 10) {
-                    top = rect.bottom + 10; // Show below instead
+                    top = rect.bottom + 10; 
                 }
                 
                 container.style.left = left + 'px';
                 container.style.top = top + 'px';
                 
                 modal.classList.add('active');
-                
-                console.log('[Popup] Opened at:', row, col, 'opacity:', opacity);
             }
             
-            // ========== TWO-TAP DETECTION ==========
             handleCellTap(row, col) {
                 const pos = row * 9 + col;
                 
-                // Fix #1: Correct fixed array access (was: this.game.fixed[row][col])
                 if (this.game.engine.fixed[pos]) return;
                 
-                // Fix #2: Use AppSystems.settings instead of this.settings
                 const mode = AppSystems.settings?.defaultEntryMode || 'cell-first';
                 
                 if (mode === 'sticky' && this.game.stickyDigit) {
-                    // Fix #3: Use correct parameters (pos, digit) not (row, col, digit)
-                    this.game.placeNumber(pos, this.game.stickyDigit);
-                    this.updateBoard();
-                    this.updateNumberPad();
-                    console.log('[Sticky] Placed:', this.game.stickyDigit, 'at', row, col);
+                    this.selectCell(pos);
+                    this.inputNumber(this.game.stickyDigit);
                     return;
                 }
                 
                 if (mode === 'last-used' && this.game.lastUsedDigit) {
-                    // Pre-select last used
                     this.selectCell(pos);
                     this.inputNumber(this.game.lastUsedDigit);
                     return;
                 }
                 
-                // Check two-tap setting
                 if (!AppSystems.settings?.twoTapsEdit) {
-                    // Single tap mode
                     this.selectCellWithPopup(row, col);
                     return;
                 }
                 
-                // Two tap mode
                 const now = Date.now();
                 const cellKey = `${row},${col}`;
                 const isSameCell = (cellKey === this.lastTapCell);
                 const timeSinceLast = now - this.lastTapTime;
                 
                 if (isSameCell && timeSinceLast < this.DOUBLE_TAP_THRESHOLD) {
-                    // DOUBLE TAP - Edit cell
-                    console.log('[Double Tap] Edit cell:', row, col);
                     this.selectCellWithPopup(row, col);
                     
-                    // Reset
                     this.lastTapTime = 0;
                     this.lastTapCell = null;
                 } else {
-                    // FIRST TAP - Just highlight
-                    console.log('[First Tap] Highlight cell:', row, col);
-                    
                     this.highlightCell(row, col);
                     
                     this.lastTapTime = now;
                     this.lastTapCell = cellKey;
                     
-                    // Show visual feedback
                     const cell = this.getCellElement(row, col);
                     if (cell) {
                         cell.classList.add('tap-pending');
@@ -2458,8 +2264,8 @@
             }
             
             selectCellWithPopup(row, col) {
-                // Check if using pop-up
                 if (AppSystems.settings?.digitEntryStyle === 'popup') {
+                    this.selectCell(row * 9 + col);
                     this.showDigitPopup(row, col);
                 } else {
                     const pos = row * 9 + col;
@@ -2468,7 +2274,6 @@
             }
             
             highlightCell(row, col) {
-                // Just highlight, don't allow editing
                 const pos = row * 9 + col;
                 
                 const cells = this.gameBoard.querySelectorAll('.cell');
@@ -2476,6 +2281,8 @@
                 
                 const cell = this.gameBoard.querySelector(`[data-index="${pos}"]`);
                 if (cell) cell.classList.add('selected');
+                
+                this.game.selectedCell = pos;
             }
             
             getCellElement(row, col) {
@@ -2484,15 +2291,11 @@
                 );
             }
             
-            // ========== STICKY DIGIT MODE ==========
             initDigitFirstMode() {
                 document.querySelectorAll('.num-btn').forEach(btn => {
-                    const originalClick = btn.onclick;
-                    
                     btn.addEventListener('click', (e) => {
                         const num = parseInt(e.target.dataset.num);
                         
-                        // Fix: Use AppSystems.settings
                         if (AppSystems.settings?.defaultEntryMode === 'sticky') {
                             this.activateStickyDigit(num);
                         } else if (AppSystems.settings?.defaultEntryMode === 'last-used') {
@@ -2505,7 +2308,6 @@
             activateStickyDigit(num) {
                 this.game.stickyDigit = num;
                 
-                // Visual feedback on number pad
                 document.querySelectorAll('.num-btn').forEach(btn => {
                     btn.classList.remove('sticky-active');
                 });
@@ -2515,7 +2317,6 @@
                     activeBtn.classList.add('sticky-active');
                 }
                 
-                console.log('[Sticky Mode] Digit selected:', num);
                 this.showToast(`Sticky: ${num} - Tap cells to place`, 'info');
             }
             
@@ -2526,20 +2327,17 @@
                 });
             }
             
-            // ========== SETTINGS SYNC ==========
             refreshDisplay() {
                 this.updateBoard();
                 this.updateNumberPad();
                 this.applyDigitEntryStyle();
                 this.applyPopupTransparency();
-                console.log('[UI] Display refreshed with new settings');
             }
             
             applyDigitEntryStyle() {
                 const numberPad = document.querySelector('.number-pad');
                 if (!numberPad) return;
                 
-                // Fix: Use AppSystems.settings
                 if (AppSystems.settings?.digitEntryStyle === 'popup') {
                     numberPad.style.display = 'none';
                 } else {
@@ -2551,23 +2349,17 @@
                 const container = document.getElementById('digitPopupContainer');
                 if (!container) return;
                 
-                // Fix: Use AppSystems.settings - convert percentage to opacity
                 const transparency = AppSystems.settings?.popupTransparency || 5;
                 const opacity = 1 - (transparency / 100);
                 container.style.opacity = opacity;
-                
-                console.log('[Popup] Transparency applied:', transparency + '%', 'opacity:', opacity);
-            }
-                console.log('[Popup] Transparency set:', opacity);
             }
             
-            // ========== MISTAKES COUNTER ==========
             updateMistakeCounter(count) {
                 const counter = document.getElementById('mistakeCounter');
                 if (counter) {
-                    counter.textContent = `❌ ${count}/${this.maxMistakes}`;
+                    counter.textContent = `❌ ${count}/${this.game.maxMistakes}`;
                     
-                    if (count >= this.maxMistakes) {
+                    if (count >= this.game.maxMistakes) {
                         counter.style.animation = 'incorrect-flash 0.6s ease';
                     }
                 }
@@ -2579,7 +2371,6 @@
                 
                 cell.classList.add('incorrect-flash');
                 
-                // Fix: Use AppSystems.settings
                 if (AppSystems.settings?.haptics && navigator.vibrate) {
                     navigator.vibrate([50, 30, 50]);
                 }
@@ -2587,11 +2378,7 @@
                 setTimeout(() => {
                     cell.classList.remove('incorrect-flash');
                 }, 1000);
-                
-                // Update counter
-                this.updateMistakeCounter(this.game.mistakes);
             }
-
 
             updateDifficultyTitle(difficulty) {
                 const difficultyNames = {
@@ -2622,18 +2409,17 @@
                 this.updateBoard();
                 this.updateControls();
                 this.updateNumberPad();
+                this.updateMistakeCounter(this.game.mistakes);
             }
 
             updateBoard() {
                 const cells = this.gameBoard.querySelectorAll('.cell');
                 
-                // Get selected number ONLY if a cell is selected that has a number
                 const selectedNum = (this.game.selectedCell !== null && 
                                     this.game.engine.board[this.game.selectedCell] !== 0)
                     ? this.game.engine.board[this.game.selectedCell] 
                     : 0;
                 
-                // Calculate crosshairs (row, col, block of selected cell)
                 const selectedRow = this.game.selectedCell !== null ? Math.floor(this.game.selectedCell / 9) : -1;
                 const selectedCol = this.game.selectedCell !== null ? this.game.selectedCell % 9 : -1;
                 const selectedBlock = this.game.selectedCell !== null 
@@ -2648,16 +2434,13 @@
                     const col = index % 9;
                     const block = Math.floor(row / 3) * 3 + Math.floor(col / 3);
 
-                    // Apply fixed/user class
                     if (this.game.engine.fixed[index]) {
                         cell.classList.add('fixed');
                         
-                        // Fix: Check highlightInitial setting
                         if (AppSystems.settings?.highlightInitial) {
                             cell.classList.add('initial-highlight');
                         }
                         
-                        // Fix: Check boldInitial setting  
                         if (AppSystems.settings?.boldInitial) {
                             cell.classList.add('initial-bold');
                         }
@@ -2669,14 +2452,12 @@
                         cell.classList.add('selected');
                     }
                     
-                    // Fix: Add crosshairs support
                     if (AppSystems.settings?.showCrosshairs && this.game.selectedCell !== null) {
                         if (row === selectedRow || col === selectedCol || block === selectedBlock) {
                             cell.classList.add('crosshair');
                         }
                     }
 
-                    // Fix: Check highlightDigits setting
                     if (AppSystems.settings?.highlightDigits && selectedNum !== 0 && 
                         this.game.engine.board[index] === selectedNum) {
                         cell.classList.add('highlighted');
@@ -2698,7 +2479,6 @@
             }
 
             updateNumberPad() {
-                // Disable buttons when number count reaches 9
                 for (let num = 1; num <= 9; num++) {
                     const count = this.game.engine.countNumber(num);
                     const btn = document.querySelector(`.num-btn[data-num="${num}"]`);
@@ -2737,104 +2517,57 @@
                 document.getElementById('reinstallModal').classList.remove('active');
                 
                 try {
-                    console.log('🗑️ Starting complete app removal...');
-                    
-                    // Step 1: Clear all localStorage
-                    console.log('   Clearing localStorage...');
                     localStorage.clear();
-                    
-                    // Step 2: Clear all sessionStorage
-                    console.log('   Clearing sessionStorage...');
                     sessionStorage.clear();
                     
-                    // Step 3: Unregister all service workers
                     if ('serviceWorker' in navigator) {
-                        console.log('   Unregistering service workers...');
                         const registrations = await navigator.serviceWorker.getRegistrations();
                         for (let registration of registrations) {
                             await registration.unregister();
-                            console.log('   ✓ Service worker unregistered');
                         }
                     }
                     
-                    // Step 4: Clear all caches
                     if ('caches' in window) {
-                        console.log('   Clearing all caches...');
                         const cacheNames = await caches.keys();
                         for (let cacheName of cacheNames) {
                             await caches.delete(cacheName);
-                            console.log(`   ✓ Cache deleted: ${cacheName}`);
                         }
                     }
                     
-                    // Step 5: Clear IndexedDB (if exists)
                     if ('indexedDB' in window) {
-                        console.log('   Clearing IndexedDB...');
                         const dbs = await indexedDB.databases();
                         for (let db of dbs) {
                             if (db.name) {
                                 indexedDB.deleteDatabase(db.name);
-                                console.log(`   ✓ Database deleted: ${db.name}`);
                             }
                         }
                     }
                     
-                    // Step 6: Clear cookies for this domain
-                    console.log('   Clearing cookies...');
                     document.cookie.split(";").forEach(function(c) { 
                         document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
                     });
                     
-                    console.log('✅ Complete app removal finished!');
                     alert('✅ App completely removed!\n\nAll data, cache, and storage cleared.\nPage will reload.');
                     
-                    // Force hard reload
                     window.location.href = window.location.href.split('?')[0] + '?t=' + new Date().getTime();
                 } catch (error) {
-                    console.error('❌ Removal error:', error);
                     alert('⚠️ Removal error: ' + error.message + '\n\nSome data may still remain.');
                 }
             }
         }
 
-        // ============= INITIALIZE APP =============
-        const APP_VERSION = '9.5';
+        const APP_VERSION = '9.5.1';
         let gameState, uiController;
         
-        // ============= GLOBAL POP-UP FUNCTIONS =============
         window.popupDigitClick = function(num) {
             if (!uiController || uiController.popupTargetRow === null) {
-                console.error('[Popup] No target cell');
                 return;
             }
             
-            const row = uiController.popupTargetRow;
-            const col = uiController.popupTargetCol;
-            const pos = row * 9 + col;
+            const pos = uiController.popupTargetRow * 9 + uiController.popupTargetCol;
+            uiController.selectCell(pos);
+            uiController.inputNumber(num);
             
-            if (num === 0) {
-                // Erase
-                gameState.engine.board[pos] = 0;
-                gameState.engine.notes[pos].clear();
-            } else {
-                // Place number
-                const result = gameState.placeNumber(pos, num);
-                
-                if (result.success) {
-                    // Check if incorrect (if setting enabled)
-                    const settings = AppSystems?.settings || {};
-                    if (settings.flagIncorrect && gameState.engine.solution) {
-                        const correct = gameState.engine.solution[pos];
-                        if (num !== correct) {
-                            gameState.mistakes = (gameState.mistakes || 0) + 1;
-                            uiController.showIncorrectFeedback(row, col);
-                            uiController.updateMistakeCounter(gameState.mistakes);
-                        }
-                    }
-                }
-            }
-            
-            uiController.updateUI();
             window.closeDigitPopup();
         };
         
@@ -2858,22 +2591,16 @@
             gameState.onWin = function() {
                 originalOnWin();
                 uiController.showVictory();
-                // Haptic: win pattern (req 5.4)
                 AppSystems.haptic('win');
             };
 
             uiController.showDifficultyModal();
-
-            // Boot all systems
             AppSystems.init();
             
-            // *** WAKE LOCK RE-ACQUISITION ***
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'visible') {
-                    // Re-acquire wake lock when page becomes visible
                     if (AppSystems.settings.preventSleep && 'wakeLock' in navigator) {
                         navigator.wakeLock.request('screen')
-                            .then(() => console.log('[WakeLock] Re-acquired after visibility change'))
                             .catch(e => console.log('[WakeLock] Re-acquisition failed:', e.message));
                     }
                 }
@@ -2884,48 +2611,42 @@
         const AppSystems = {
 
             settings: {
-                // PWA settings (existing)
                 haptics: true,
                 animations: true,
                 network: true,
                 
-                // BEHAVIOR settings
-                digitEntryStyle: 'fixed',  // 'fixed' or 'popup'
-                defaultEntryMode: 'cell-first',  // 'digit-first', 'cell-first', 'last-used'
+                digitEntryStyle: 'fixed', 
+                defaultEntryMode: 'cell-first', 
                 twoTapsEdit: false,
                 preventDefault: true,
                 showDigitCounts: true,
                 autoPencil: true,
                 
-                // DISPLAY settings
                 showTimer: true,
                 showCrosshairs: true,
                 highlightDigits: true,
                 highlightInitial: true,
                 boldInitial: true,
-                popupTransparency: 5,  // 0-50%
+                popupTransparency: 5,  
                 
-                // HELPER settings
                 disableAllHelp: false,
                 flagConflicts: true,
                 flagIncorrect: false
             },
 
-            // ---- INIT ----
             init() {
                 this.loadSettings();
-                this.initVersionManager();   // req 1.1-1.4
-                this.initNetworkMonitor();   // req 4.2-4.3, 4.4
-                this.initInstallPrompt();    // req 3.2-3.4
-                this.initPullToRefresh();    // req 5.2
-                this.initSwipeGestures();    // req 5.3
-                this.initSettingsUI();       // req 7.3
-                this.initResetUI();          // req 2.1-2.3
-                this.registerSW();           // req 4.1, 1.3-1.4
+                this.initVersionManager();   
+                this.initNetworkMonitor();   
+                this.initInstallPrompt();    
+                this.initPullToRefresh();    
+                this.initSwipeGestures();    
+                this.initSettingsUI();       
+                this.initResetUI();          
+                this.registerSW();           
                 this.applyUrlParams();
             },
 
-            // ---- TOAST SYSTEM (req 6.1) ----
             showToast(message, type = 'info', duration = 3000) {
                 const container = document.getElementById('toastContainer');
                 const toast = document.createElement('div');
@@ -2941,7 +2662,6 @@
                 }, duration);
             },
 
-            // ---- HAPTIC FEEDBACK (req 5.4) ----
             haptic(type = 'light') {
                 if (!this.settings.haptics || !navigator.vibrate) return;
                 const patterns = {
@@ -2953,12 +2673,9 @@
                 navigator.vibrate(patterns[type] || [10]);
             },
 
-            // ---- VERSION MANAGER (req 1.1-1.4) ----
             initVersionManager() {
-                // 1.3 Auto-update: compare stored vs code version
                 const storedVersion = localStorage.getItem('app_version');
                 if (storedVersion && storedVersion !== APP_VERSION) {
-                    console.log(`[Version] Upgrade ${storedVersion} → ${APP_VERSION}, clearing cache...`);
                     this.clearCacheSilent().then(() => {
                         localStorage.setItem('app_version', APP_VERSION);
                     });
@@ -2966,37 +2683,29 @@
                     localStorage.setItem('app_version', APP_VERSION);
                 }
 
-                // 1.2 Check version.json from server
                 this.checkRemoteVersion();
 
-                // 1.1 Version display click → full removal modal
                 document.getElementById('versionBtn').addEventListener('click', () => {
                     document.getElementById('reinstallModal').classList.add('active');
                 });
             },
 
             async checkRemoteVersion() {
-                // 1.2 Fetch version.json to detect newer version
-                // OFFLINE SAFE: Only check if online, fail silently otherwise
                 if (!navigator.onLine) {
-                    console.log('[Version] Offline - skipping remote version check');
                     return;
                 }
                 
                 try {
                     const res = await fetch('./version.json?t=' + Date.now(), { 
                         cache: 'no-store',
-                        signal: AbortSignal.timeout(3000) // 3s timeout
+                        signal: AbortSignal.timeout(3000)
                     });
                     if (!res.ok) return;
                     const data = await res.json();
                     if (data.version && data.version !== APP_VERSION) {
-                        console.log(`[Version] Server has ${data.version}, current ${APP_VERSION}`);
                         this.showUpdatePrompt();
                     }
                 } catch (e) {
-                    // version.json not found or network error – silently ignore
-                    console.log('[Version] Remote check failed (offline or file missing)');
                 }
             },
 
@@ -3016,21 +2725,17 @@
                 }
             },
 
-            // ---- SW REGISTRATION + update polling (req 4.1, 1.4) ----
             async registerSW() {
                 if (!('serviceWorker' in navigator)) return;
                 try {
                     const reg = await navigator.serviceWorker.register('./sw.js');
-                    console.log('[SW] Registered');
 
-                    // 1.4 Poll for SW updates every 300 s
                     setInterval(() => reg.update(), 300_000);
 
                     reg.addEventListener('updatefound', () => {
                         const newWorker = reg.installing;
                         newWorker.addEventListener('statechange', () => {
                             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                // New SW ready → show prompt
                                 this.showUpdatePrompt();
                                 document.getElementById('updateNowBtn').onclick = () => {
                                     newWorker.postMessage({ type: 'SKIP_WAITING' });
@@ -3040,11 +2745,9 @@
                         });
                     });
                 } catch (err) {
-                    console.warn('[SW] Registration failed:', err);
                 }
             },
 
-            // ---- NETWORK MONITOR (req 4.2-4.4) ----
             initNetworkMonitor() {
                 const banner = document.getElementById('offlineBanner');
 
@@ -3063,7 +2766,6 @@
                 window.addEventListener('offline', () => updateStatus(false));
                 if (!navigator.onLine) updateStatus(false);
 
-                // 4.4 Data saver / slow connection
                 if ('connection' in navigator) {
                     const conn = navigator.connection;
                     const check = () => {
@@ -3076,7 +2778,6 @@
                 }
             },
 
-            // ---- PWA INSTALL PROMPT (req 3.2-3.4) ----
             initInstallPrompt() {
                 const banner  = document.getElementById('installBanner');
                 const already = localStorage.getItem('pwa_install_dismissed');
@@ -3084,14 +2785,12 @@
 
                 let deferredPrompt = null;
 
-                // 3.2 Capture beforeinstallprompt
                 window.addEventListener('beforeinstallprompt', (e) => {
                     e.preventDefault();
                     deferredPrompt = e;
                     setTimeout(() => banner.classList.add('visible'), 2000);
                 });
 
-                // 3.3 Accept
                 document.getElementById('installAcceptBtn').addEventListener('click', async () => {
                     banner.classList.remove('visible');
                     if (deferredPrompt) {
@@ -3102,26 +2801,22 @@
                     }
                 });
 
-                // 3.3 Dismiss
                 document.getElementById('installDismissBtn').addEventListener('click', () => {
                     banner.classList.remove('visible');
                     localStorage.setItem('pwa_install_dismissed', '1');
                 });
 
-                // 3.4 Installed event
                 window.addEventListener('appinstalled', () => {
                     banner.classList.remove('visible');
                     this.showToast('🎉 App installed successfully!', 'success', 4000);
                 });
             },
 
-            // ---- PULL TO REFRESH (req 5.2) ----
             initPullToRefresh() {
                 const indicator = document.getElementById('ptrIndicator');
                 let startY = 0, pulling = false;
 
                 document.addEventListener('touchstart', (e) => {
-                    // Don't activate PTR if modal or menu is open
                     const modalOpen = document.querySelector('.modal.active') !== null;
                     const menuOpen = document.getElementById('menuPanel')?.classList.contains('active');
                     
@@ -3138,7 +2833,6 @@
                 document.addEventListener('touchmove', (e) => {
                     if (!startY) return;
                     
-                    // Double-check no modal/menu opened during drag
                     const modalOpen = document.querySelector('.modal.active') !== null;
                     const menuOpen = document.getElementById('menuPanel')?.classList.contains('active');
                     
@@ -3169,7 +2863,6 @@
                 });
             },
 
-            // ---- SWIPE GESTURES (req 5.3) ----
             initSwipeGestures() {
                 let startX = 0, startY = 0, startTarget = null;
 
@@ -3184,38 +2877,28 @@
                     const dy = e.changedTouches[0].clientY - startY;
                     const absDx = Math.abs(dx), absDy = Math.abs(dy);
 
-                    if (Math.max(absDx, absDy) < 50) return; // too short
+                    if (Math.max(absDx, absDy) < 50) return; 
 
-                    // Check if swipe started inside a scrollable modal
                     const modalContent = startTarget?.closest('.modal-content');
                     const isInsideModal = modalContent !== null;
                     
                     if (absDx > absDy) {
-                        // Horizontal swipe - only for menu, not modals
-                        if (isInsideModal) return; // Ignore horizontal swipes in modals
+                        if (isInsideModal) return; 
                         
                         const panel = document.getElementById('menuPanel');
                         if (dx < 0 && panel.classList.contains('active')) {
-                            // swipe left → close menu
                             uiController.toggleMenu();
                         } else if (dx > 0 && !panel.classList.contains('active')) {
-                            // swipe right → open menu
                             uiController.toggleMenu();
                         }
                     } else if (dy < -50) {
-                        // Swipe up → close modal ONLY if swipe started from modal header/top area
-                        // This prevents accidental closes when scrolling modal content
                         if (!isInsideModal) return;
+                        if (modalContent.scrollTop > 0) return; 
                         
-                        // Check if modal is scrollable and has scroll position
-                        if (modalContent.scrollTop > 0) return; // Don't close if user is scrolling content
-                        
-                        // Only close if swipe started near top of modal (within 100px of modal top)
                         const modalRect = modalContent.getBoundingClientRect();
                         const relativeY = startY - modalRect.top;
                         
                         if (relativeY < 100) {
-                            // Swipe started from top area - close modal
                             const activeModal = startTarget.closest('.modal.active');
                             if (activeModal) {
                                 activeModal.classList.remove('active');
@@ -3225,7 +2908,6 @@
                 });
             },
 
-            // ---- SETTINGS UI (req 7.3) ----
             loadSettings() {
                 const saved = localStorage.getItem('app_settings');
                 if (saved) {
@@ -3238,14 +2920,12 @@
             },
 
             initSettingsUI() {
-                // Popup transparency slider
                 const transparencySlider = document.getElementById('settingPopupTransparency');
                 const transparencyValue = document.getElementById('popupTransparencyValue');
                 transparencySlider.addEventListener('input', (e) => {
                     transparencyValue.textContent = e.target.value + '%';
                 });
                 
-                // Disable all help toggle
                 const disableAllHelp = document.getElementById('settingDisableAllHelp');
                 const flagConflicts = document.getElementById('settingFlagConflicts');
                 const flagIncorrect = document.getElementById('settingFlagIncorrect');
@@ -3262,14 +2942,12 @@
                     }
                 });
                 
-                // Wire menu item - open settings
                 document.getElementById('settingsMenu').addEventListener('click', () => {
                     uiController.toggleMenu();
                     this.syncSettingsToUI();
                     document.getElementById('settingsModal').classList.add('active');
                 });
 
-                // Save button
                 document.getElementById('saveSettings').addEventListener('click', () => {
                     this.syncSettingsFromUI();
                     this.saveSettingsToStorage();
@@ -3279,15 +2957,12 @@
                     this.haptic('light');
                 });
 
-                // Close button
                 document.getElementById('closeSettings').addEventListener('click', () => {
                     document.getElementById('settingsModal').classList.remove('active');
                 });
             },
             
             syncSettingsToUI() {
-                // Sync all settings to UI controls
-                // BEHAVIOR
                 document.getElementById('settingDigitEntryStyle').value = this.settings.digitEntryStyle;
                 document.getElementById('settingDefaultEntryMode').value = this.settings.defaultEntryMode;
                 document.getElementById('settingTwoTapsEdit').checked = this.settings.twoTapsEdit;
@@ -3295,7 +2970,6 @@
                 document.getElementById('settingShowDigitCounts').checked = this.settings.showDigitCounts;
                 document.getElementById('settingAutoPencil').checked = this.settings.autoPencil;
                 
-                // DISPLAY
                 document.getElementById('settingShowTimer').checked = this.settings.showTimer;
                 document.getElementById('settingShowCrosshairs').checked = this.settings.showCrosshairs;
                 document.getElementById('settingHighlightDigits').checked = this.settings.highlightDigits;
@@ -3307,12 +2981,10 @@
                 document.getElementById('settingAnimations').checked = this.settings.animations;
                 document.getElementById('settingNetwork').checked = this.settings.network;
                 
-                // HELPER
                 document.getElementById('settingDisableAllHelp').checked = this.settings.disableAllHelp;
                 document.getElementById('settingFlagConflicts').checked = this.settings.flagConflicts;
                 document.getElementById('settingFlagIncorrect').checked = this.settings.flagIncorrect;
                 
-                // Update disabled state based on disableAllHelp
                 if (this.settings.disableAllHelp) {
                     document.getElementById('settingFlagConflicts').disabled = true;
                     document.getElementById('settingFlagIncorrect').disabled = true;
@@ -3323,8 +2995,6 @@
             },
             
             syncSettingsFromUI() {
-                // Read all settings from UI controls
-                // BEHAVIOR
                 this.settings.digitEntryStyle = document.getElementById('settingDigitEntryStyle').value;
                 this.settings.defaultEntryMode = document.getElementById('settingDefaultEntryMode').value;
                 this.settings.twoTapsEdit = document.getElementById('settingTwoTapsEdit').checked;
@@ -3332,7 +3002,6 @@
                 this.settings.showDigitCounts = document.getElementById('settingShowDigitCounts').checked;
                 this.settings.autoPencil = document.getElementById('settingAutoPencil').checked;
                 
-                // DISPLAY
                 this.settings.showTimer = document.getElementById('settingShowTimer').checked;
                 this.settings.showCrosshairs = document.getElementById('settingShowCrosshairs').checked;
                 this.settings.highlightDigits = document.getElementById('settingHighlightDigits').checked;
@@ -3343,37 +3012,28 @@
                 this.settings.animations = document.getElementById('settingAnimations').checked;
                 this.settings.network = document.getElementById('settingNetwork').checked;
                 
-                // HELPER
                 this.settings.disableAllHelp = document.getElementById('settingDisableAllHelp').checked;
                 this.settings.flagConflicts = document.getElementById('settingFlagConflicts').checked;
                 this.settings.flagIncorrect = document.getElementById('settingFlagIncorrect').checked;
             },
             
             applySettings() {
-                // Apply settings to game immediately
-                // Show/hide timer
                 const timerEl = document.getElementById('timer');
                 if (timerEl) {
                     timerEl.style.display = this.settings.showTimer ? 'block' : 'none';
                 }
                 
-                // Wake lock for prevent sleep
                 if (this.settings.preventSleep && 'wakeLock' in navigator) {
                     navigator.wakeLock.request('screen').catch(e => {
-                        console.log('[WakeLock] Failed:', e.message);
                     });
                 }
                 
-                // *** NEW: Immediate UI refresh ***
                 if (window.uiController) {
                     uiController.refreshDisplay();
-                    console.log('[Settings] Applied with immediate UI refresh');
                 }
             },
 
-            // ---- RESET / REMOVAL UI (req 2.1-2.3) ----
             initResetUI() {
-                // Selective reset
                 document.getElementById('openSelectiveReset').addEventListener('click', () => {
                     document.getElementById('reinstallModal').classList.remove('active');
                     document.getElementById('resetModal').classList.add('active');
@@ -3399,7 +3059,6 @@
                     setTimeout(() => location.reload(), 1200);
                 });
 
-                // Full removal
                 document.getElementById('cancelReinstall').addEventListener('click', () => {
                     document.getElementById('reinstallModal').classList.remove('active');
                 });
@@ -3433,7 +3092,6 @@
                 }
             },
 
-            // ---- URL PARAM handling (difficulty/stats shortcuts) ----
             applyUrlParams() {
                 const params = new URLSearchParams(location.search);
                 const diff = params.get('difficulty');
@@ -3447,37 +3105,11 @@
             }
         };
 
-        // ============= SERVICE WORKER REGISTRATION =============
-        // (Handled inside AppSystems.registerSW above)
-        // Legacy SW version-check on load kept for back-compat:
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                // AppSystems.registerSW() is called from DOMContentLoaded above
             });
         }
 
     </script>
-
-    <!-- Digit Entry Pop-up Modal -->
-    <div id="digitPopupModal" class="digit-popup-modal">
-        <div class="digit-popup-backdrop" onclick="closeDigitPopup()"></div>
-        <div class="digit-popup-container" id="digitPopupContainer">
-            <div class="digit-popup-grid">
-                <button class="digit-popup-btn" onclick="popupDigitClick(1)">1</button>
-                <button class="digit-popup-btn" onclick="popupDigitClick(2)">2</button>
-                <button class="digit-popup-btn" onclick="popupDigitClick(3)">3</button>
-                <button class="digit-popup-btn" onclick="popupDigitClick(4)">4</button>
-                <button class="digit-popup-btn" onclick="popupDigitClick(5)">5</button>
-                <button class="digit-popup-btn" onclick="popupDigitClick(6)">6</button>
-                <button class="digit-popup-btn" onclick="popupDigitClick(7)">7</button>
-                <button class="digit-popup-btn" onclick="popupDigitClick(8)">8</button>
-                <button class="digit-popup-btn" onclick="popupDigitClick(9)">9</button>
-                <button class="digit-popup-btn digit-erase" onclick="popupDigitClick(0)">
-                    <span style="font-size: 24px;">✕</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
 </body>
 </html>
