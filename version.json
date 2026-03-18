@@ -2,12 +2,20 @@
   "version": "9.5.1",
   "releaseDate": "2026-03-18",
   "changelog": [
-    "HOTFIX: Fixed critical syntax error in UIController that prevented app load",
-    "Fixed: Unified mistake tracking between popup modal and bottom number pad",
-    "Fixed: Initialized mistakes variables in GameState to prevent undefined errors"
+    "🔴 CRITICAL FIX: Board no longer loads pre-solved",
+    "FIXED: hasUniqueSolution() now preserves board state",
+    "FIXED: solveCount() properly restores this.board after recursion",
+    "ADDED: Safety check in newGame() - alerts if puzzle generation fails",
+    "ADDED: Debug logging for puzzle generation process",
+    "ADDED: Empty cells count validation",
+    "Puzzle generation now reliable for all difficulty levels",
+    "Game is fully playable again"
   ],
   "breaking_changes": false,
-  "fixes_count": 3,
+  "critical_fix": true,
+  "bug_fixed": "Board loaded completely solved (all 81 cells filled)",
+  "impact": "Game was unplayable - now fixed",
   "offline_compatible": true,
-  "offline_first": true
+  "offline_first": true,
+  "settings_count": 18
 }

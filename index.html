@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#4A90E2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Sudoku Pro - V9.5.1</title>
+    <title>Sudoku Pro - V9.5.1.1.1</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon-512.png">
     <link rel="apple-touch-icon" href="icon-512.png">
@@ -161,7 +161,7 @@
         .icon-btn:active { transform: scale(0.95); }
         .icon-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        /* ================= GAME BOARD & CELLS (V9.5.1 DESIGN SYSTEM) ================= */
+        /* ================= GAME BOARD & CELLS (V9.5.1.1.1 DESIGN SYSTEM) ================= */
         .game-board-container {
             flex: 0 0 auto; display: flex; justify-content: center; margin-bottom: 8px;
         }
@@ -352,7 +352,7 @@
     <div class="container">
         <div class="header">
             <div class="app-title" id="appTitle">Sudoku Pro</div>
-            <div class="version" id="versionBtn">Version 9.5.1</div>
+            <div class="version" id="versionBtn">Version 9.5.1.1</div>
         </div>
 
         <div class="top-bar">
@@ -914,6 +914,8 @@
                     }
                 }
                 
+                console.log('[Generate] Difficulty:', difficulty, 'Target:', target, 'Removed:', removed);
+                
                 if (removed < target) {
                     const remainingCells = [];
                     for (let i = 0; i < 81; i++) {
@@ -942,6 +944,11 @@
                 }
 
                 this.notes = Array(81).fill(null).map(() => new Set());
+                
+                const emptyCount = this.board.filter(cell => cell === 0).length;
+                console.log('[Generate] Final result - Empty cells:', emptyCount, 'Target:', target);
+                console.log('[Generate] Board preview:', this.board.slice(0, 9));
+                
                 return {
                     board: [...this.board],
                     solution: [...this.solution],
@@ -969,8 +976,9 @@
 
             hasUniqueSolution() {
                 const solutions = [];
-                const board = [...this.board];
-                this.solveCount(board, solutions, 2);
+                const boardCopy = [...this.board]; // Save original board
+                const result = this.solveCount([...this.board], solutions, 2);
+                this.board = boardCopy; // Restore original board
                 return solutions.length === 1;
             }
 
@@ -983,13 +991,17 @@
                 }
                 for (let num = 1; num <= 9; num++) {
                     const tempBoard = [...board];
-                    this.board = tempBoard;
+                    // Don't modify this.board - work with tempBoard only
+                    const originalBoard = this.board;
+                    this.board = tempBoard; // Temporarily set for isValid check
+                    
                     if (this.isValid(pos, num)) {
                         tempBoard[pos] = num;
                         this.solveCount(tempBoard, solutions, limit);
                     }
+                    
+                    this.board = originalBoard; // Restore
                 }
-                this.board = board;
             }
 
             getConflicts(pos, num) {
@@ -1065,6 +1077,19 @@
             newGame(difficulty) {
                 this.difficulty = difficulty;
                 const puzzle = this.engine.generatePuzzle(difficulty);
+                
+                // CRITICAL CHECK: Verify puzzle is not fully solved
+                const emptyCount = puzzle.board.filter(cell => cell === 0).length;
+                if (emptyCount === 0) {
+                    console.error('🔴 CRITICAL BUG: Puzzle generated with NO empty cells!');
+                    console.error('Difficulty:', difficulty);
+                    console.error('Board:', puzzle.board);
+                    alert('Error: Puzzle generation failed. Please refresh and try again.');
+                    return;
+                }
+                
+                console.log('✅ Puzzle generated successfully - Empty cells:', emptyCount);
+                
                 this.engine.board = puzzle.board;
                 this.engine.solution = puzzle.solution;
                 this.engine.fixed = puzzle.fixed;
@@ -1855,7 +1880,7 @@
             }
         }
 
-        const APP_VERSION = '9.5.1';
+        const APP_VERSION = '9.5.1.1';
         let gameState, uiController;
         
         window.popupDigitClick = function(num) {
