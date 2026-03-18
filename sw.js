@@ -1,5 +1,5 @@
 // Service Worker for Sudoku PWA - Offline-First Strategy
-const CACHE_NAME = 'sudoku-cache-v9.5.2';
+const CACHE_NAME = 'sudoku-cache-v9.5.3';
 const urlsToCache = [
   './',
   './index.html',

@@ -1,21 +1,20 @@
 {
-  "version": "9.5.2",
+  "version": "9.5.3",
   "releaseDate": "2026-03-18",
   "changelog": [
-    "🚀 PERFORMANCE FIX: Puzzle generation no longer freezes browser",
-    "FIXED: solveCount() now properly passes timeout parameters in recursion",
-    "OPTIMIZED: Reduced per-validation timeout from 1000ms to 500ms",
-    "OPTIMIZED: Reduced max generation attempts from 250 to 150",
-    "ADDED: Overall generation timeout of 8 seconds",
-    "ADDED: Progress logging every 20 attempts",
-    "IMPROVED: Better timeout handling prevents browser hangs",
-    "Generation completes within 3-8 seconds on all difficulty levels"
+    "🔧 CRITICAL FIX: Puzzle generation failure resolved",
+    "FIXED: Aggressive fallback now ensures puzzles always generate",
+    "FIXED: Fallback triggers at 50% of target (was 60%)",
+    "FIXED: Fallback removes cells up to full target (not just minimum)",
+    "OPTIMIZED: Timeout increased to 2000ms for better accuracy",
+    "OPTIMIZED: Reduced target cells - Easy:32, Medium:42, Hard:50, Expert:56",
+    "IMPROVED: Better balance between speed and puzzle quality",
+    "No more 'Failed to generate puzzle' errors!"
   ],
   "breaking_changes": false,
-  "critical_fix": false,
-  "performance_fix": true,
-  "bug_fixed": "Browser freeze during puzzle generation",
-  "impact": "Smooth puzzle generation - no more hangs",
+  "critical_fix": true,
+  "bug_fixed": "Puzzle generation returning 0 empty cells",
+  "impact": "Game now always generates playable puzzles",
   "offline_compatible": true,
   "offline_first": true,
   "settings_count": 18
