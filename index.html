@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#4A90E2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Sudoku Pro - V9.2</title>
+    <title>Sudoku Pro - V9.3</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon-512.png">
     <link rel="apple-touch-icon" href="icon-512.png">
@@ -203,6 +203,74 @@
         .settings-row:last-child { border-bottom: none; }
         .settings-label { font-size: 15px; color: var(--text-primary); }
         .settings-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        
+        /* Settings categories */
+        .settings-category {
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--bg-tertiary);
+        }
+        .settings-category:last-of-type { border-bottom: none; }
+        .settings-category-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--btn-primary);
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+        
+        /* Select dropdown */
+        .settings-select {
+            padding: 6px 12px;
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 13px;
+            cursor: pointer;
+            min-width: 150px;
+        }
+        .settings-select:focus {
+            outline: 2px solid var(--btn-primary);
+            outline-offset: 1px;
+        }
+        
+        /* Range slider */
+        .settings-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--bg-tertiary);
+            outline: none;
+            margin: 0 12px;
+        }
+        .settings-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--btn-primary);
+            cursor: pointer;
+        }
+        .settings-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--btn-primary);
+            cursor: pointer;
+            border: none;
+        }
+        .settings-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            min-width: 35px;
+            text-align: right;
+        }
+        
         /* Toggle switch */
         .toggle { position: relative; width: 48px; height: 26px; }
         .toggle input { opacity: 0; width: 0; height: 0; }
@@ -715,7 +783,7 @@
         <!-- Header -->
         <div class="header">
             <div class="app-title" id="appTitle">Sudoku Pro</div>
-            <div class="version" id="versionBtn">Version 9.2</div>
+            <div class="version" id="versionBtn">Version 9.3</div>
         </div>
 
         <!-- Top Bar -->
@@ -931,41 +999,225 @@
         </div>
     </div>
 
-    <!-- Settings Modal (req 7.3) -->
+    <!-- Settings Modal (req 7.3) - Comprehensive Game Settings -->
     <div class="modal" id="settingsModal">
-        <div class="modal-content">
-            <h2>⚙️ Settings</h2>
-            <div class="settings-row">
-                <div>
-                    <div class="settings-label">Haptic Feedback</div>
-                    <div class="settings-sub">Vibrate on tap, error &amp; win</div>
+        <div class="modal-content" style="max-width: 500px; max-height: 80vh; overflow-y: auto;">
+            <h2>⚙️ Game Settings</h2>
+            
+            <!-- BEHAVIOR Category -->
+            <div class="settings-category">
+                <h3 class="settings-category-title">🎮 Behavior</h3>
+                
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-label">Digit Entry Style</div>
+                        <div class="settings-sub">Where number buttons appear</div>
+                    </div>
+                    <select id="settingDigitEntryStyle" class="settings-select">
+                        <option value="fixed">Fixed Buttons (Bottom)</option>
+                        <option value="popup">Pop-up (On Tap)</option>
+                    </select>
                 </div>
-                <label class="toggle">
-                    <input type="checkbox" id="settingHaptics" checked>
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
-            <div class="settings-row">
-                <div>
-                    <div class="settings-label">Animations</div>
-                    <div class="settings-sub">Cell shake, transitions</div>
+                
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-label">Default Entry Mode</div>
+                        <div class="settings-sub">How to start each puzzle</div>
+                    </div>
+                    <select id="settingDefaultEntryMode" class="settings-select">
+                        <option value="digit-first">Digit First</option>
+                        <option value="cell-first">Cell First</option>
+                        <option value="last-used">Last Used</option>
+                    </select>
                 </div>
-                <label class="toggle">
-                    <input type="checkbox" id="settingAnimations" checked>
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
-            <div class="settings-row">
-                <div>
-                    <div class="settings-label">Show Network Status</div>
-                    <div class="settings-sub">Display offline/online banner</div>
+                
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-label">Two Taps to Edit</div>
+                        <div class="settings-sub">Double-tap to modify cells</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="settingTwoTapsEdit">
+                        <span class="toggle-slider"></span>
+                    </label>
                 </div>
-                <label class="toggle">
-                    <input type="checkbox" id="settingNetwork" checked>
-                    <span class="toggle-slider"></span>
-                </label>
+                
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-label">Prevent Sleep</div>
+                        <div class="settings-sub">Keep screen awake</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="settingPreventSleep" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-label">Show Digit Counts</div>
+                        <div class="settings-sub">Display how many times each digit used</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="settingShowDigitCounts" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-label">Auto Pencil: Erase</div>
+                        <div class="settings-sub">Auto-remove notes when digit placed</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="settingAutoPencil" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
             </div>
-            <div class="modal-buttons" style="margin-top:16px;">
+            
+            <!-- DISPLAY Category -->
+            <div class="settings-category">
+                <h3 class="settings-category-title">👁️ Display</h3>
+                
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-label">Show Timer</div>
+                        <div class="settings-sub">Display elapsed time</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="settingShowTimer" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-label">Show Crosshairs</div>
+                        <div class="settings-sub">Highlight row/column/block</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="settingShowCrosshairs" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-label">Highlight Digits</div>
+                        <div class="settings-sub">Highlight same numbers</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="settingHighlightDigits" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-label">Highlight Initial</div>
+                        <div class="settings-sub">Different color for given clues</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="settingHighlightInitial" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-label">Bold Initial</div>
+                        <div class="settings-sub">Bold font for given clues</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="settingBoldInitial" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-label">Pop-up Transparency</div>
+                        <div class="settings-sub">See board through pop-up</div>
+                    </div>
+                    <input type="range" id="settingPopupTransparency" min="0" max="50" value="5" 
+                           class="settings-slider" style="width: 100px;">
+                    <span id="popupTransparencyValue" class="settings-value">5%</span>
+                </div>
+                
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-label">Haptic Feedback</div>
+                        <div class="settings-sub">Vibrate on tap, error &amp; win</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="settingHaptics" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-label">Animations</div>
+                        <div class="settings-sub">Cell shake, transitions</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="settingAnimations" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-label">Show Network Status</div>
+                        <div class="settings-sub">Display offline/online banner</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="settingNetwork" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- HELPER Category -->
+            <div class="settings-category">
+                <h3 class="settings-category-title">🛟 Helper</h3>
+                
+                <div class="settings-row" style="background: var(--bg-tertiary); padding: 12px; border-radius: 8px; margin-bottom: 12px;">
+                    <div>
+                        <div class="settings-label" style="font-weight: 700;">Disable All Help</div>
+                        <div class="settings-sub">Turn off all assistance (Pure mode)</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="settingDisableAllHelp">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-label">Flag Conflicting Values</div>
+                        <div class="settings-sub">Warn when number breaks rules</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="settingFlagConflicts" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-label">Flag Incorrect Values</div>
+                        <div class="settings-sub">Warn when answer is wrong</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="settingFlagIncorrect">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="modal-buttons" style="margin-top: 20px;">
                 <button class="modal-btn primary" id="saveSettings">Save Settings</button>
                 <button class="modal-btn secondary" id="closeSettings">Close</button>
             </div>
@@ -2001,7 +2253,7 @@
         }
 
         // ============= INITIALIZE APP =============
-        const APP_VERSION = '9.2';
+        const APP_VERSION = '9.3';
         let gameState, uiController;
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -2026,9 +2278,31 @@
         const AppSystems = {
 
             settings: {
+                // PWA settings (existing)
                 haptics: true,
                 animations: true,
-                network: true
+                network: true,
+                
+                // BEHAVIOR settings
+                digitEntryStyle: 'fixed',  // 'fixed' or 'popup'
+                defaultEntryMode: 'cell-first',  // 'digit-first', 'cell-first', 'last-used'
+                twoTapsEdit: false,
+                preventDefault: true,
+                showDigitCounts: true,
+                autoPencil: true,
+                
+                // DISPLAY settings
+                showTimer: true,
+                showCrosshairs: true,
+                highlightDigits: true,
+                highlightInitial: true,
+                boldInitial: true,
+                popupTransparency: 5,  // 0-50%
+                
+                // HELPER settings
+                disableAllHelp: false,
+                flagConflicts: true,
+                flagIncorrect: false
             },
 
             // ---- INIT ----
@@ -2312,29 +2586,136 @@
             },
 
             initSettingsUI() {
-                // Wire menu item
+                // Popup transparency slider
+                const transparencySlider = document.getElementById('settingPopupTransparency');
+                const transparencyValue = document.getElementById('popupTransparencyValue');
+                transparencySlider.addEventListener('input', (e) => {
+                    transparencyValue.textContent = e.target.value + '%';
+                });
+                
+                // Disable all help toggle
+                const disableAllHelp = document.getElementById('settingDisableAllHelp');
+                const flagConflicts = document.getElementById('settingFlagConflicts');
+                const flagIncorrect = document.getElementById('settingFlagIncorrect');
+                
+                disableAllHelp.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        flagConflicts.checked = false;
+                        flagIncorrect.checked = false;
+                        flagConflicts.disabled = true;
+                        flagIncorrect.disabled = true;
+                    } else {
+                        flagConflicts.disabled = false;
+                        flagIncorrect.disabled = false;
+                    }
+                });
+                
+                // Wire menu item - open settings
                 document.getElementById('settingsMenu').addEventListener('click', () => {
                     uiController.toggleMenu();
-                    // Sync toggles with current settings
-                    document.getElementById('settingHaptics').checked    = this.settings.haptics;
-                    document.getElementById('settingAnimations').checked = this.settings.animations;
-                    document.getElementById('settingNetwork').checked    = this.settings.network;
+                    this.syncSettingsToUI();
                     document.getElementById('settingsModal').classList.add('active');
                 });
 
+                // Save button
                 document.getElementById('saveSettings').addEventListener('click', () => {
-                    this.settings.haptics    = document.getElementById('settingHaptics').checked;
-                    this.settings.animations = document.getElementById('settingAnimations').checked;
-                    this.settings.network    = document.getElementById('settingNetwork').checked;
+                    this.syncSettingsFromUI();
                     this.saveSettingsToStorage();
+                    this.applySettings();
                     document.getElementById('settingsModal').classList.remove('active');
                     this.showToast('✅ Settings saved', 'success');
                     this.haptic('light');
                 });
 
+                // Close button
                 document.getElementById('closeSettings').addEventListener('click', () => {
                     document.getElementById('settingsModal').classList.remove('active');
                 });
+            },
+            
+            syncSettingsToUI() {
+                // Sync all settings to UI controls
+                // BEHAVIOR
+                document.getElementById('settingDigitEntryStyle').value = this.settings.digitEntryStyle;
+                document.getElementById('settingDefaultEntryMode').value = this.settings.defaultEntryMode;
+                document.getElementById('settingTwoTapsEdit').checked = this.settings.twoTapsEdit;
+                document.getElementById('settingPreventSleep').checked = this.settings.preventSleep;
+                document.getElementById('settingShowDigitCounts').checked = this.settings.showDigitCounts;
+                document.getElementById('settingAutoPencil').checked = this.settings.autoPencil;
+                
+                // DISPLAY
+                document.getElementById('settingShowTimer').checked = this.settings.showTimer;
+                document.getElementById('settingShowCrosshairs').checked = this.settings.showCrosshairs;
+                document.getElementById('settingHighlightDigits').checked = this.settings.highlightDigits;
+                document.getElementById('settingHighlightInitial').checked = this.settings.highlightInitial;
+                document.getElementById('settingBoldInitial').checked = this.settings.boldInitial;
+                document.getElementById('settingPopupTransparency').value = this.settings.popupTransparency;
+                document.getElementById('popupTransparencyValue').textContent = this.settings.popupTransparency + '%';
+                document.getElementById('settingHaptics').checked = this.settings.haptics;
+                document.getElementById('settingAnimations').checked = this.settings.animations;
+                document.getElementById('settingNetwork').checked = this.settings.network;
+                
+                // HELPER
+                document.getElementById('settingDisableAllHelp').checked = this.settings.disableAllHelp;
+                document.getElementById('settingFlagConflicts').checked = this.settings.flagConflicts;
+                document.getElementById('settingFlagIncorrect').checked = this.settings.flagIncorrect;
+                
+                // Update disabled state based on disableAllHelp
+                if (this.settings.disableAllHelp) {
+                    document.getElementById('settingFlagConflicts').disabled = true;
+                    document.getElementById('settingFlagIncorrect').disabled = true;
+                } else {
+                    document.getElementById('settingFlagConflicts').disabled = false;
+                    document.getElementById('settingFlagIncorrect').disabled = false;
+                }
+            },
+            
+            syncSettingsFromUI() {
+                // Read all settings from UI controls
+                // BEHAVIOR
+                this.settings.digitEntryStyle = document.getElementById('settingDigitEntryStyle').value;
+                this.settings.defaultEntryMode = document.getElementById('settingDefaultEntryMode').value;
+                this.settings.twoTapsEdit = document.getElementById('settingTwoTapsEdit').checked;
+                this.settings.preventSleep = document.getElementById('settingPreventSleep').checked;
+                this.settings.showDigitCounts = document.getElementById('settingShowDigitCounts').checked;
+                this.settings.autoPencil = document.getElementById('settingAutoPencil').checked;
+                
+                // DISPLAY
+                this.settings.showTimer = document.getElementById('settingShowTimer').checked;
+                this.settings.showCrosshairs = document.getElementById('settingShowCrosshairs').checked;
+                this.settings.highlightDigits = document.getElementById('settingHighlightDigits').checked;
+                this.settings.highlightInitial = document.getElementById('settingHighlightInitial').checked;
+                this.settings.boldInitial = document.getElementById('settingBoldInitial').checked;
+                this.settings.popupTransparency = parseInt(document.getElementById('settingPopupTransparency').value);
+                this.settings.haptics = document.getElementById('settingHaptics').checked;
+                this.settings.animations = document.getElementById('settingAnimations').checked;
+                this.settings.network = document.getElementById('settingNetwork').checked;
+                
+                // HELPER
+                this.settings.disableAllHelp = document.getElementById('settingDisableAllHelp').checked;
+                this.settings.flagConflicts = document.getElementById('settingFlagConflicts').checked;
+                this.settings.flagIncorrect = document.getElementById('settingFlagIncorrect').checked;
+            },
+            
+            applySettings() {
+                // Apply settings to game immediately
+                // Show/hide timer
+                const timerEl = document.getElementById('timer');
+                if (timerEl) {
+                    timerEl.style.display = this.settings.showTimer ? 'block' : 'none';
+                }
+                
+                // Wake lock for prevent sleep
+                if (this.settings.preventSleep && 'wakeLock' in navigator) {
+                    navigator.wakeLock.request('screen').catch(e => {
+                        console.log('[WakeLock] Failed:', e.message);
+                    });
+                }
+                
+                // Force UI update if game is running
+                if (window.uiController) {
+                    uiController.updateUI();
+                }
             },
 
             // ---- RESET / REMOVAL UI (req 2.1-2.3) ----

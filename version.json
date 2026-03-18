@@ -1,15 +1,17 @@
 {
-  "version": "9.2",
+  "version": "9.3",
   "releaseDate": "2026-03-18",
   "changelog": [
-    "CACHE-FIRST STRATEGY: App works instantly in full offline mode",
-    "Service Worker changed from network-first to cache-first",
-    "Zero delay on offline startup - instant app launch",
-    "All resources served from cache when offline",
-    "Network used only as fallback for new resources",
-    "Perfect offline-first PWA implementation"
+    "COMPREHENSIVE SETTINGS: 3-category game settings system",
+    "Behavior settings: digit entry style, edit mode, sleep prevent",
+    "Display settings: timer, crosshairs, highlights, transparency",
+    "Helper settings: conflict detection, incorrect value warnings",
+    "18 customizable settings total",
+    "Pure mode: Disable all help for maximum challenge",
+    "Professional settings UI with categories and descriptions"
   ],
   "breaking_changes": false,
   "offline_compatible": true,
-  "offline_first": true
+  "offline_first": true,
+  "settings_count": 18
 }
