@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#4A90E2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Sudoku Pro - V9.5.1.1.1</title>
+    <title>Sudoku Pro - V9.5.2.1.1</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon-512.png">
     <link rel="apple-touch-icon" href="icon-512.png">
@@ -161,7 +161,7 @@
         .icon-btn:active { transform: scale(0.95); }
         .icon-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        /* ================= GAME BOARD & CELLS (V9.5.1.1.1 DESIGN SYSTEM) ================= */
+        /* ================= GAME BOARD & CELLS (V9.5.2.1.1 DESIGN SYSTEM) ================= */
         .game-board-container {
             flex: 0 0 auto; display: flex; justify-content: center; margin-bottom: 8px;
         }
@@ -352,7 +352,7 @@
     <div class="container">
         <div class="header">
             <div class="app-title" id="appTitle">Sudoku Pro</div>
-            <div class="version" id="versionBtn">Version 9.5.1.1</div>
+            <div class="version" id="versionBtn">Version 9.5.2.1</div>
         </div>
 
         <div class="top-bar">
@@ -860,14 +860,16 @@
             }
 
             generatePuzzle(difficulty = 'medium') {
+                console.log('[Generate] Starting puzzle generation for', difficulty);
+                const startTime = performance.now();
+                const GENERATION_TIMEOUT = 8000; // 8 seconds max total
+                
                 const cellsToRemove = { 
                     easy: 38,       
                     medium: 48,     
                     hard: 58,       
                     expert: 64      
                 };
-                
-                const startTime = performance.now();
                 
                 const complete = this.generateComplete();
                 this.solution = [...complete];
@@ -881,13 +883,23 @@
                 
                 let removed = 0;
                 let attempts = 0;
-                const maxAttempts = 250; 
+                const maxAttempts = 150; // Reduced from 250
                 
                 for (let pair of symmetricPairs) {
                     if (removed >= target) break;
                     if (attempts >= maxAttempts) break;
                     
+                    // Overall timeout check
+                    if (performance.now() - startTime > GENERATION_TIMEOUT) {
+                        console.warn('[Generate] Overall timeout reached at', removed, '/', target);
+                        break;
+                    }
+                    
                     attempts++;
+                    
+                    if (attempts % 20 === 0) {
+                        console.log('[Generate] Progress:', removed, '/', target, 'attempts:', attempts);
+                    }
                     
                     const backup1 = this.board[pair[0]];
                     const backup2 = this.board[pair[1]];
@@ -927,9 +939,13 @@
                     attempts = 0;
                     for (let pos of remainingCells) {
                         if (removed >= target) break;
-                        if (attempts >= maxAttempts * 2) break;
+                        if (attempts >= 200) break;
                         
                         attempts++;
+                        
+                        if (attempts % 20 === 0) {
+                            console.log('[Generate] Phase 2:', removed, '/', target);
+                        }
                         const backup = this.board[pos];
                         this.board[pos] = 0;
                         
@@ -946,6 +962,8 @@
                 this.notes = Array(81).fill(null).map(() => new Set());
                 
                 const emptyCount = this.board.filter(cell => cell === 0).length;
+                const elapsed = performance.now() - startTime;
+                console.log('[Generate] COMPLETE in', Math.round(elapsed), 'ms');
                 console.log('[Generate] Final result - Empty cells:', emptyCount, 'Target:', target);
                 console.log('[Generate] Board preview:', this.board.slice(0, 9));
                 
@@ -976,13 +994,28 @@
 
             hasUniqueSolution() {
                 const solutions = [];
-                const boardCopy = [...this.board]; // Save original board
-                const result = this.solveCount([...this.board], solutions, 2);
-                this.board = boardCopy; // Restore original board
+                const boardCopy = [...this.board];
+                
+                // Reduced timeout to prevent browser freeze
+                const startTime = Date.now();
+                const maxTime = 500; // 500ms max per validation
+                
+                this.solveCount([...this.board], solutions, 2, startTime, maxTime);
+                this.board = boardCopy;
+                
                 return solutions.length === 1;
             }
 
-            solveCount(board, solutions, limit) {
+            solveCount(board, solutions, limit, startTime = 0, maxTime = Infinity) {
+                // Timeout check
+                if (maxTime !== Infinity && Date.now() - startTime > maxTime) {
+                    // Force non-unique to be safe
+                    if (solutions.length < limit) {
+                        solutions.push([], []);
+                    }
+                    return;
+                }
+                
                 if (solutions.length >= limit) return;
                 const pos = board.indexOf(0);
                 if (pos === -1) {
@@ -991,16 +1024,15 @@
                 }
                 for (let num = 1; num <= 9; num++) {
                     const tempBoard = [...board];
-                    // Don't modify this.board - work with tempBoard only
                     const originalBoard = this.board;
-                    this.board = tempBoard; // Temporarily set for isValid check
+                    this.board = tempBoard;
                     
                     if (this.isValid(pos, num)) {
                         tempBoard[pos] = num;
-                        this.solveCount(tempBoard, solutions, limit);
+                        this.solveCount(tempBoard, solutions, limit, startTime, maxTime); // Fixed: pass timeout params
                     }
                     
-                    this.board = originalBoard; // Restore
+                    this.board = originalBoard;
                 }
             }
 
@@ -1585,9 +1617,23 @@
 
             startNewGame(difficulty) {
                 this.difficultyModal.classList.remove('active');
+                
+                // Show loading state
+                const board = this.gameBoard;
+                board.innerHTML = '<div style="text-align:center;padding:50px;font-size:18px;">⏳ Generating puzzle...</div>';
+                
+                // Run generation with small delay to allow UI update
+                setTimeout(() => {
+                    try {
                 this.game.newGame(difficulty);
                 this.updateDifficultyTitle(difficulty);
                 this.updateUI();
+                    } catch (err) {
+                        console.error('[StartNewGame] Error:', err);
+                        alert('Failed to generate puzzle. Please try again.');
+                        board.innerHTML = '';
+                    }
+                }, 50);
             }
 
             showDigitPopup(row, col) {
@@ -1880,7 +1926,7 @@
             }
         }
 
-        const APP_VERSION = '9.5.1.1';
+        const APP_VERSION = '9.5.2';
         let gameState, uiController;
         
         window.popupDigitClick = function(num) {
