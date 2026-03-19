@@ -1084,7 +1084,6 @@
                 let removed = 0;
                 let attempts = 0;
                 const maxAttempts = 250; // Increased for expert level
-                const MAX_GENERATION_TIME = 15000; // 15 seconds timeout
                 
                 // ========== PHASE 1: SYMMETRIC REMOVAL ==========
                 console.log(`📐 Phase 1: Symmetric pair removal (target: ${target} cells)`);
@@ -1093,12 +1092,6 @@
                     if (removed >= target) break;
                     if (attempts >= maxAttempts) {
                         console.warn(`⚠️ Max attempts reached at ${removed} cells`);
-                        break;
-                    }
-                    
-                    // ⏱️ V9.2: Timeout check to prevent browser freeze
-                    if (performance.now() - startTime > MAX_GENERATION_TIME) {
-                        console.warn(`⏱️ Generation timeout at ${removed}/${target} cells (15s limit)`);
                         break;
                     }
                     
@@ -1159,12 +1152,6 @@
                         if (removed >= target) break;
                         if (attempts >= maxAttempts * 2) {
                             console.warn(`⚠️ Phase 2 max attempts reached`);
-                            break;
-                        }
-                        
-                        // ⏱️ V9.2: Timeout check for Phase 2
-                        if (performance.now() - startTime > MAX_GENERATION_TIME) {
-                            console.warn(`⏱️ Phase 2 timeout at ${removed}/${target} cells`);
                             break;
                         }
                         
@@ -2014,7 +2001,7 @@
         }
 
         // ============= INITIALIZE APP =============
-        const APP_VERSION = '9.2';
+        const APP_VERSION = '9.1';
         let gameState, uiController;
 
         window.addEventListener('DOMContentLoaded', () => {
