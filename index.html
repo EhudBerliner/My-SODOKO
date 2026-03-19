@@ -429,12 +429,6 @@
             25% { transform: translateX(-4px); }
             75% { transform: translateX(4px); }
         }
-        
-        /* V9.6: Spinner animation for loading */
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
 
         /* Number Pad */
         .number-pad {
@@ -986,7 +980,6 @@
                 this.solution = Array(81).fill(0);
                 this.fixed = Array(81).fill(false);
                 this.notes = Array(81).fill(null).map(() => new Set());
-                this.validationCache = new Map(); // V9.4: Cache for hasUniqueSolution
             }
 
             generateComplete() {
@@ -1073,12 +1066,8 @@
                     expert: 64      // ~17 clues - MAXIMUM difficulty!
                 };
                 
-                // V9.3: Improved concise logging
-                console.log(`[Generate] Starting ${difficulty} - target: ${target} cells`);
+                console.log(`🎯 Generating ${difficulty.toUpperCase()} puzzle with V8.0 Pro Engine...`);
                 const startTime = performance.now();
-                
-                // V9.4: Clear validation cache for new puzzle
-                this.validationCache.clear();
                 
                 // Step 1: Generate complete solution
                 const complete = this.generateComplete();
@@ -1095,20 +1084,14 @@
                 let removed = 0;
                 let attempts = 0;
                 const maxAttempts = 250; // Increased for expert level
-                const MAX_GENERATION_TIME = 15000; // 15 seconds timeout
                 
                 // ========== PHASE 1: SYMMETRIC REMOVAL ==========
+                console.log(`📐 Phase 1: Symmetric pair removal (target: ${target} cells)`);
                 
                 for (let pair of symmetricPairs) {
                     if (removed >= target) break;
                     if (attempts >= maxAttempts) {
                         console.warn(`⚠️ Max attempts reached at ${removed} cells`);
-                        break;
-                    }
-                    
-                    // ⏱️ V9.2: Timeout check to prevent browser freeze
-                    if (performance.now() - startTime > MAX_GENERATION_TIME) {
-                        console.warn(`[Generate] ⏱️ Timeout (15s) - ${removed}/${target} cells`);
                         break;
                     }
                     
@@ -1135,10 +1118,8 @@
                         }
                         attempts = 0; // Reset on success
                         
-                        // V9.3: Progress every 20 cells (less verbose)
-                        if (removed % 20 === 0 && removed > 0) {
-                            const elapsed = ((performance.now() - startTime) / 1000).toFixed(1);
-                            console.log(`[Generate] Progress: ${removed}/${target} (${elapsed}s)`);
+                        if (removed % 10 === 0) {
+                            console.log(`   Progress: ${removed}/${target} cells removed`);
                         }
                     } else {
                         // Restore if multiple solutions exist
@@ -1149,8 +1130,11 @@
                     }
                 }
                 
+                console.log(`   ✓ Symmetric phase complete: ${removed}/${target} cells`);
+                
                 // ========== PHASE 2: SINGLE CELL REMOVAL ==========
                 if (removed < target) {
+                    console.log(`📝 Phase 2: Strategic single cell removal (${target - removed} remaining)`);
                     
                     // Collect remaining filled cells
                     const remainingCells = [];
@@ -1171,12 +1155,6 @@
                             break;
                         }
                         
-                        // ⏱️ V9.2: Timeout check for Phase 2
-                        if (performance.now() - startTime > MAX_GENERATION_TIME) {
-                            console.warn(`[Generate] ⏱️ Phase 2 timeout - ${removed}/${target}`);
-                            break;
-                        }
-                        
                         attempts++;
                         const backup = this.board[pos];
                         this.board[pos] = 0;
@@ -1185,52 +1163,34 @@
                             this.fixed[pos] = false;
                             removed++;
                             attempts = 0;
+                            
+                            if ((removed - (target - (target - removed))) % 5 === 0) {
+                                console.log(`   Progress: ${removed}/${target} cells`);
+                            }
                         } else {
                             this.board[pos] = backup;
                         }
                     }
                     
-                    console.log(`[Generate] Phase 2 complete: ${removed}/${target}`);
-                }
-                }
-                
-                // ========== V9.5: FALLBACK (if needed) ==========
-                // Only trigger if we're significantly below target
-                const minAcceptable = Math.floor(target * 0.7); // 70% of target
-                
-                if (removed < minAcceptable) {
-                    console.warn(`[Generate] ⚠️ Fallback: only ${removed}/${target} (need ${minAcceptable}+)`);
-                    
-                    // Collect all filled cells
-                    const filledCells = [];
-                    for (let i = 0; i < 81; i++) {
-                        if (this.board[i] !== 0 && !this.fixed[i]) {
-                            filledCells.push(i);
-                        }
-                    }
-                    
-                    // Shuffle and remove until we reach minimum
-                    this.shuffleArray(filledCells);
-                    let needToRemove = minAcceptable - removed;
-                    
-                    for (let i = 0; i < needToRemove && i < filledCells.length; i++) {
-                        const pos = filledCells[i];
-                        this.board[pos] = 0;
-                        this.fixed[pos] = false;
-                        removed++;
-                    }
-                    
-                    console.log(`[Generate] Fallback complete: ${removed}/${target}`);
+                    console.log(`   ✓ Single cell phase complete: ${removed}/${target} cells`);
                 }
 
                 this.notes = Array(81).fill(null).map(() => new Set());
                 
-                // V9.3: Concise generation summary
+                // ========== GENERATION SUMMARY ==========
                 const endTime = performance.now();
                 const duration = ((endTime - startTime) / 1000).toFixed(2);
-                const emptyCount = this.board.filter(c => c === 0).length;
+                const symmetryPercent = this.getSymmetryPercent();
                 
-                console.log(`[Generate] Complete: ${emptyCount} cells (${duration}s) - ${difficulty}`);
+                console.log(`\n✅ PUZZLE GENERATED SUCCESSFULLY!`);
+                console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+                console.log(`   🎲 Difficulty: ${difficulty.toUpperCase()}`);
+                console.log(`   📊 Cells removed: ${removed}/${target}`);
+                console.log(`   🎯 Clues given: ${81 - removed}`);
+                console.log(`   🔄 Symmetry: ${symmetryPercent >= 0.95 ? 'PERFECT ✓' : Math.round(symmetryPercent * 100) + '%'}`);
+                console.log(`   ⏱️ Generation time: ${duration}s`);
+                console.log(`   ✔️ Unique solution: VERIFIED`);
+                console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
                 
                 return {
                     board: [...this.board],
@@ -1300,57 +1260,28 @@
             }
 
             hasUniqueSolution() {
-                // V9.4: Simple cache to avoid re-checking same board
-                const boardKey = this.board.join(',');
-                if (this.validationCache.has(boardKey)) {
-                    return this.validationCache.get(boardKey);
-                }
-                
                 const solutions = [];
-                const boardBackup = [...this.board]; // V9.4: Save original board
-                this.solveCount([...this.board], solutions, 2, 0);
-                this.board = boardBackup; // V9.4: Always restore
-                
-                const result = solutions.length === 1;
-                this.validationCache.set(boardKey, result);
-                
-                // V9.4: Limit cache size to prevent memory issues
-                if (this.validationCache.size > 1000) {
-                    const firstKey = this.validationCache.keys().next().value;
-                    this.validationCache.delete(firstKey);
-                }
-                
-                return result;
+                const board = [...this.board];
+                this.solveCount(board, solutions, 2);
+                return solutions.length === 1;
             }
 
-            solveCount(board, solutions, limit, depth = 0) {
-                // V9.4: Early exit if found enough solutions
+            solveCount(board, solutions, limit) {
                 if (solutions.length >= limit) return;
-                
-                // V9.4: Depth limit to prevent stack overflow (max 60 levels)
-                if (depth > 60) return;
-                
                 const pos = board.indexOf(0);
                 if (pos === -1) {
                     solutions.push([...board]);
                     return;
                 }
-                
-                // V9.4: Try numbers in order, with early exit
                 for (let num = 1; num <= 9; num++) {
-                    if (solutions.length >= limit) return; // Early exit in loop
-                    
                     const tempBoard = [...board];
-                    const originalBoard = this.board;
-                    this.board = tempBoard; // Temporarily for isValid
-                    
+                    this.board = tempBoard;
                     if (this.isValid(pos, num)) {
                         tempBoard[pos] = num;
-                        this.solveCount(tempBoard, solutions, limit, depth + 1);
+                        this.solveCount(tempBoard, solutions, limit);
                     }
-                    
-                    this.board = originalBoard; // Restore after each iteration
                 }
+                this.board = board;
             }
 
             getConflicts(pos, num) {
@@ -1602,14 +1533,6 @@
                 if (!stored) return false;
                 try {
                     const gameData = JSON.parse(stored);
-                    
-                    // V9.6: Check if old game format (missing notes)
-                    if (!gameData.notes || !Array.isArray(gameData.notes)) {
-                        console.log('[Load] Old game format detected, clearing...');
-                        localStorage.removeItem('sudoku_current_game');
-                        return false;
-                    }
-                    
                     this.engine.board = gameData.board;
                     this.engine.solution = gameData.solution;
                     this.engine.fixed = gameData.fixed;
@@ -1622,8 +1545,6 @@
                     this.startTimer();
                     return true;
                 } catch (e) {
-                    console.log('[Load] Error loading game:', e);
-                    localStorage.removeItem('sudoku_current_game');
                     return false;
                 }
             }
@@ -1900,26 +1821,9 @@
 
             startNewGame(difficulty) {
                 this.difficultyModal.classList.remove('active');
-                
-                // V9.6: Show loading indicator
-                const board = this.gameBoard;
-                const diffNames = { easy: 'Easy', medium: 'Medium', hard: 'Hard', expert: 'Expert' };
-                const diffName = diffNames[difficulty] || 'Medium';
-                
-                board.innerHTML = `
-                    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:40px;text-align:center;">
-                        <div style="width:50px;height:50px;border:4px solid var(--btn-primary);border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:20px;"></div>
-                        <p style="font-size:18px;color:var(--text-primary);margin:0;">⏳ Creating ${diffName} puzzle...</p>
-                        <p style="font-size:14px;color:var(--text-secondary);margin-top:8px;">This may take up to 15 seconds</p>
-                    </div>
-                `;
-                
-                // V9.6: Small delay to allow UI to update
-                setTimeout(() => {
-                    this.game.newGame(difficulty);
-                    this.updateDifficultyTitle(difficulty);
-                    this.updateUI();
-                }, 50);
+                this.game.newGame(difficulty);
+                this.updateDifficultyTitle(difficulty);
+                this.updateUI();
             }
 
             updateDifficultyTitle(difficulty) {
@@ -2097,7 +2001,7 @@
         }
 
         // ============= INITIALIZE APP =============
-        const APP_VERSION = '9.6';
+        const APP_VERSION = '9.1';
         let gameState, uiController;
 
         window.addEventListener('DOMContentLoaded', () => {
