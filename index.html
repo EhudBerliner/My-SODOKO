@@ -1602,6 +1602,14 @@
                 if (!stored) return false;
                 try {
                     const gameData = JSON.parse(stored);
+                    
+                    // V9.6: Check if old game format (missing notes)
+                    if (!gameData.notes || !Array.isArray(gameData.notes)) {
+                        console.log('[Load] Old game format detected, clearing...');
+                        localStorage.removeItem('sudoku_current_game');
+                        return false;
+                    }
+                    
                     this.engine.board = gameData.board;
                     this.engine.solution = gameData.solution;
                     this.engine.fixed = gameData.fixed;
@@ -1614,6 +1622,8 @@
                     this.startTimer();
                     return true;
                 } catch (e) {
+                    console.log('[Load] Error loading game:', e);
+                    localStorage.removeItem('sudoku_current_game');
                     return false;
                 }
             }
