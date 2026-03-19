@@ -6,35 +6,28 @@
     <meta name="theme-color" content="#4A90E2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Sudoku Pro - V9.5.1</title>
+    <title>Sudoku Pro - V9.1</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon-512.png">
     <link rel="apple-touch-icon" href="icon-512.png">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
-        /* משתני צבעים לפי האפיון המלא */
         :root {
             --bg-primary: #ffffff;
             --bg-secondary: #f8f9fa;
             --bg-tertiary: #e9ecef;
-            
             --text-primary: #212529;
             --text-secondary: #6c757d;
-            
-            --border-light: #E0E0E0;
-            --border-heavy: #333333;
-            
-            --cell-bg-normal: #FFFFFF;
-            --cell-bg-fixed: #F5F5F5;
-            --cell-bg-crosshair: rgba(74, 144, 226, 0.1);
-            --cell-bg-highlighted: #FFC107;
-            --cell-bg-error: #F44336;
-            --cell-bg-selected: #4A90E2;
-            --cell-bg-selected-error: #D32F2F;
-            
-            --cell-text-dark: #333333;
-            --cell-text-light: #FFFFFF;
-            --cell-text-notes: #777777;
-            
+            --border-light: #212529;
+            --border-medium: #495057;
+            --border-heavy: #212529;
+            --cell-fixed: #212529;
+            --cell-fixed-bg: #e2e8f0;
+            --cell-user: #2d3748;
+            --cell-selected: #B9DCFE;
+            --cell-highlighted: #B9DCFE;
+            --cell-conflict: #fee2e2;
+            --cell-error: #ef4444;
             --btn-primary: #4A90E2;
             --btn-success: #10b981;
             --btn-danger: #ef4444;
@@ -45,24 +38,19 @@
             --bg-primary: #1a1a1a;
             --bg-secondary: #2d2d2d;
             --bg-tertiary: #404040;
-            
             --text-primary: #e5e5e5;
             --text-secondary: #a0a0a0;
-            
-            --border-light: #606060;
-            --border-heavy: #1a1a1a;
-            
-            --cell-bg-normal: #2d2d2d;
-            --cell-bg-fixed: #1e1e1e;
-            --cell-bg-crosshair: rgba(74, 144, 226, 0.15);
-            --cell-bg-highlighted: #B08D00;
-            --cell-bg-error: #B71C1C;
-            --cell-bg-selected: #2171C7;
-            --cell-bg-selected-error: #8E0000;
-            
-            --cell-text-dark: #E0E0E0;
-            --cell-text-light: #FFFFFF;
-            --cell-text-notes: #A0A0A0;
+            --border-light: #808080;
+            --border-medium: #606060;
+            --border-heavy: #808080;
+            --cell-fixed: #60a5fa;
+            --cell-fixed-bg: #1e3a5f;
+            --cell-user: #e5e5e5;
+            --cell-selected: #B9DCFE;
+            --cell-highlighted: #B9DCFE;
+            --cell-conflict: #4a1a1a;
+            --cell-error: #dc2626;
+            --shadow: rgba(0, 0, 0, 0.3);
         }
 
         * {
@@ -81,26 +69,53 @@
             height: 100vh;
             height: -webkit-fill-available;
             overflow: hidden;
+            /* Safe area for notch devices (req 5.5) */
             padding-top: env(safe-area-inset-top);
             padding-bottom: env(safe-area-inset-bottom);
         }
 
-        /* ================= UI COMPONENTS ================= */
+        /* ===== OFFLINE BANNER (req 4.3) ===== */
         .offline-banner {
-            position: fixed; top: 0; left: 0; right: 0;
-            background: #ef4444; color: white; text-align: center;
-            padding: 8px 16px; font-size: 13px; font-weight: 600;
-            z-index: 9000; transform: translateY(-100%); transition: transform 0.3s ease;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #ef4444;
+            color: white;
+            text-align: center;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            z-index: 9000;
+            transform: translateY(-100%);
+            transition: transform 0.3s ease;
         }
         .offline-banner.visible { transform: translateY(0); }
 
+        /* ===== TOAST SYSTEM (req 6.1) ===== */
         .toast-container {
-            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-            z-index: 8000; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none;
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 8000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            pointer-events: none;
         }
         .toast {
-            padding: 10px 20px; border-radius: 24px; font-size: 14px; font-weight: 600;
-            color: white; opacity: 0; transform: translateY(20px); transition: all 0.3s ease; white-space: nowrap; pointer-events: none;
+            padding: 10px 20px;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            pointer-events: none;
         }
         .toast.show { opacity: 1; transform: translateY(0); }
         .toast.success { background: #10b981; }
@@ -108,10 +123,21 @@
         .toast.info    { background: #4A90E2; }
         .toast.warning { background: #f59e0b; }
 
+        /* ===== INSTALL BANNER (req 3.3) ===== */
         .install-banner {
-            position: fixed; bottom: -120px; left: 0; right: 0;
-            background: var(--bg-primary); border-top: 2px solid var(--btn-primary);
-            padding: 16px; z-index: 7000; transition: bottom 0.4s ease; display: flex; align-items: center; gap: 12px; box-shadow: 0 -4px 20px var(--shadow);
+            position: fixed;
+            bottom: -120px;
+            left: 0;
+            right: 0;
+            background: var(--bg-primary);
+            border-top: 2px solid var(--btn-primary);
+            padding: 16px;
+            z-index: 7000;
+            transition: bottom 0.4s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 -4px 20px var(--shadow);
         }
         .install-banner.visible { bottom: 0; }
         .install-banner img { width: 48px; height: 48px; border-radius: 12px; }
@@ -123,240 +149,577 @@
         .install-btn.primary { background: var(--btn-primary); color: white; }
         .install-btn.secondary { background: var(--bg-tertiary); color: var(--text-secondary); }
 
+        /* ===== PULL TO REFRESH (req 5.2) ===== */
         .ptr-indicator {
-            position: fixed; top: env(safe-area-inset-top, 0px); left: 50%; transform: translateX(-50%) translateY(-60px);
-            width: 40px; height: 40px; background: var(--btn-primary); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;
-            z-index: 6000; transition: transform 0.2s ease; box-shadow: 0 4px 12px var(--shadow);
+            position: fixed;
+            top: env(safe-area-inset-top, 0px);
+            left: 50%;
+            transform: translateX(-50%) translateY(-60px);
+            width: 40px;
+            height: 40px;
+            background: var(--btn-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            z-index: 6000;
+            transition: transform 0.2s ease;
+            box-shadow: 0 4px 12px var(--shadow);
         }
         .ptr-indicator.visible { transform: translateX(-50%) translateY(8px); }
 
+        /* ===== UPDATE PROMPT (req 1.4) ===== */
         .update-prompt {
-            position: fixed; top: 60px; left: 50%; transform: translateX(-50%) translateY(-120px);
-            background: var(--bg-primary); border: 2px solid var(--btn-primary); border-radius: 12px;
-            padding: 12px 20px; z-index: 8500; transition: transform 0.3s ease; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 20px var(--shadow); white-space: nowrap;
+            position: fixed;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-120px);
+            background: var(--bg-primary);
+            border: 2px solid var(--btn-primary);
+            border-radius: 12px;
+            padding: 12px 20px;
+            z-index: 8500;
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 4px 20px var(--shadow);
+            white-space: nowrap;
         }
         .update-prompt.visible { transform: translateX(-50%) translateY(0); }
         .update-prompt span { font-size: 13px; font-weight: 600; color: var(--text-primary); }
         .update-now-btn { padding: 6px 14px; background: var(--btn-primary); color: white; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; }
 
-        .container {
-            max-width: 600px; margin: 0 auto; padding: 8px; height: 100%; display: flex; flex-direction: column;
+        /* ===== SETTINGS MODAL (req 7.3) ===== */
+        .settings-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--bg-tertiary);
         }
-        .header { text-align: center; margin-bottom: 8px; }
-        .app-title { font-size: 20px; font-weight: 700; color: var(--btn-primary); margin-bottom: 2px; }
-        .version { font-size: 11px; color: var(--text-secondary); cursor: pointer; user-select: none; transition: color 0.2s; }
-        .version:hover { color: var(--btn-primary); }
-
-        .top-bar {
-            display: flex; justify-content: space-between; align-items: center; padding: 8px 12px;
-            background: var(--bg-secondary); border-radius: 8px; margin-bottom: 8px; box-shadow: 0 2px 4px var(--shadow);
-        }
-        .timer { font-size: 20px; font-weight: 700; color: var(--btn-primary); font-variant-numeric: tabular-nums; }
-        .top-buttons { display: flex; gap: 8px; align-items: center; }
-        .icon-btn {
-            width: 40px; height: 40px; border: none; border-radius: 8px; background: var(--bg-primary);
-            color: var(--text-primary); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px var(--shadow); transition: all 0.2s;
-        }
-        .icon-btn:active { transform: scale(0.95); }
-        .icon-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-        /* ================= GAME BOARD & CELLS (V9.5.1 DESIGN SYSTEM) ================= */
-        .game-board-container {
-            flex: 0 0 auto; display: flex; justify-content: center; margin-bottom: 8px;
-        }
-        .game-board {
-            display: grid; grid-template-columns: repeat(9, 1fr); gap: 0;
-            background: var(--border-heavy); border: 3px solid var(--border-heavy);
-            border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px var(--shadow);
-            aspect-ratio: 1; width: 100%; max-width: 500px;
-        }
-
-        .cell {
-            aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
-            background-color: var(--cell-bg-normal); color: var(--cell-text-dark);
-            border: 0.5px solid var(--border-light); font-size: clamp(20px, 5vw, 32px);
-            cursor: pointer; position: relative; user-select: none; box-sizing: border-box;
-            transition: background-color 0.15s ease, color 0.15s ease; 
-        }
-
-        /* Block Borders */
-        .cell:nth-child(9n+3), 
-        .cell:nth-child(9n+6) { border-right: 3px solid var(--border-heavy) !important; }
-        .cell:nth-child(n+19):nth-child(-n+27),
-        .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 3px solid var(--border-heavy) !important; }
-
-        /* Priority 7: Fixed */
-        .cell.fixed {
-            background-color: var(--cell-bg-fixed);
-            font-weight: 700;
-            color: var(--cell-text-dark);
-        }
-
-        /* Priority 5/6: Crosshair */
-        .cell.crosshair { background-color: var(--cell-bg-crosshair) !important; }
-
-        /* Priority 4: Highlighted (Same Digit) */
-        .cell.highlighted {
-            background-color: var(--cell-bg-highlighted) !important;
-            color: var(--cell-text-dark) !important;
-        }
-
-        /* Priority 3: Error */
-        .cell.error {
-            background-color: var(--cell-bg-error) !important;
-            color: var(--cell-text-light) !important;
-            font-weight: 700;
-        }
-
-        /* Priority 2: Selected */
-        .cell.selected {
-            background-color: var(--cell-bg-selected) !important;
-            color: var(--cell-text-light) !important;
-            outline: 3px solid var(--cell-bg-selected);
-            outline-offset: -3px;
-            z-index: 10;
-        }
-
-        /* Priority 1: Selected + Error */
-        .cell.selected.error {
-            background-color: var(--cell-bg-selected-error) !important;
-            color: var(--cell-text-light) !important;
-            outline-color: var(--cell-bg-selected-error);
-        }
-
-        /* Notes styling */
-        .cell .notes {
-            display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);
-            gap: 1px; width: 100%; height: 100%; padding: 2px;
-        }
-        .cell .notes span {
-            font-size: clamp(8px, 1.5vw, 11px); color: var(--cell-text-notes);
-            display: flex; align-items: center; justify-content: center; font-weight: 500;
-        }
-
-        /* ================= NUMBER PAD & MODALS ================= */
-        .number-pad {
-            display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px;
-        }
-        .number-row { display: grid; gap: 6px; }
-        .number-row.first { grid-template-columns: repeat(6, 1fr); }
-        .number-row.second { grid-template-columns: repeat(6, 1fr); }
-        .num-btn {
-            aspect-ratio: 1; border: none; border-radius: 8px; background: var(--bg-secondary);
-            color: var(--text-primary); font-size: 34px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 4px var(--shadow); transition: all 0.2s; position: relative;
-        }
-        .num-btn:active:not(:disabled) { transform: scale(0.95); background: var(--btn-primary); color: white; }
-        .num-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-        .num-btn.delete { background: var(--bg-tertiary); color: var(--text-primary); font-size: 22px; }
-        .num-btn.notes { background: var(--bg-tertiary); font-size: 22px; }
-        .num-btn.notes.active { background: var(--btn-success); color: white; }
-        .num-btn.placeholder { opacity: 0; pointer-events: none; }
-        .num-btn.sticky-active { background: var(--btn-primary); color: white; box-shadow: 0 0 0 3px var(--btn-primary); transform: scale(1.1); }
-
-        .menu-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7); display: none; z-index: 1000; backdrop-filter: blur(4px);
-        }
-        .menu-overlay.active { display: block; }
-        .menu-panel {
-            position: fixed; top: 0; right: -300px; width: 280px; height: 100%;
-            background: var(--bg-primary); box-shadow: -4px 0 12px var(--shadow); transition: right 0.3s ease; z-index: 1001; overflow-y: auto;
-        }
-        .menu-panel.active { right: 0; }
-        .menu-header { padding: 20px; background: var(--btn-primary); color: white; font-size: 20px; font-weight: 700; }
-        .menu-items { padding: 8px; }
-        .menu-item {
-            padding: 16px; border-radius: 8px; margin-bottom: 8px; background: var(--bg-secondary);
-            cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 16px; transition: all 0.2s;
-        }
-        .menu-item:active { background: var(--bg-tertiary); transform: scale(0.98); }
-        .menu-item-icon { font-size: 24px; width: 32px; text-align: center; }
-
-        .modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(4px);
-        }
-        .modal.active { display: flex; }
-        .modal-content {
-            background: var(--bg-primary); padding: 24px; border-radius: 16px; max-width: 90%; width: 350px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); max-height: 85vh; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
-        }
-        .modal-content h2 { font-size: 24px; margin-bottom: 16px; color: var(--btn-primary); text-align: center; }
-        .modal-buttons { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
-        .modal-btn {
-            padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s;
-        }
-        .modal-btn.primary { background: var(--btn-primary); color: white; }
-        .modal-btn.success { background: var(--btn-success); color: white; }
-        .modal-btn.danger { background: var(--btn-danger); color: white; }
-        .modal-btn.secondary { background: var(--bg-tertiary); color: var(--text-primary); }
-
-        .difficulty-grid { display: flex; flex-direction: column; gap: 12px; margin: 16px 0; }
-        .difficulty-btn {
-            padding: 12px 12px; border: 2px solid var(--border-light); border-radius: 12px;
-            background: var(--bg-secondary); cursor: pointer; transition: all 0.2s; text-align: center; font-weight: 600;
-        }
-        .difficulty-btn:active { transform: scale(0.95); background: var(--btn-primary); color: white; }
-
-        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 16px 0; }
-        .stat-card { background: var(--bg-secondary); padding: 16px; border-radius: 12px; text-align: center; }
-        .stat-value { font-size: 28px; font-weight: 700; color: var(--btn-primary); margin-bottom: 8px; }
-        .stat-label { font-size: 13px; color: var(--text-secondary); }
-
-        .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--bg-tertiary); }
         .settings-row:last-child { border-bottom: none; }
         .settings-label { font-size: 15px; color: var(--text-primary); }
         .settings-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
-        .settings-category { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid var(--bg-tertiary); }
-        .settings-category:last-of-type { border-bottom: none; }
-        .settings-category-title { font-size: 16px; font-weight: 700; color: var(--btn-primary); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--bg-tertiary); }
-        .settings-select { padding: 6px 12px; border: 1px solid var(--border-light); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 13px; cursor: pointer; min-width: 150px; }
-        .settings-slider { -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px; background: var(--bg-tertiary); outline: none; margin: 0 12px; }
-        .settings-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--btn-primary); cursor: pointer; }
-        .settings-value { font-size: 13px; font-weight: 600; color: var(--text-primary); min-width: 35px; text-align: right; }
+        /* Toggle switch */
         .toggle { position: relative; width: 48px; height: 26px; }
         .toggle input { opacity: 0; width: 0; height: 0; }
-        .toggle-slider { position: absolute; inset: 0; background: var(--bg-tertiary); border-radius: 26px; cursor: pointer; transition: background 0.3s; }
-        .toggle-slider::before { content: ''; position: absolute; width: 20px; height: 20px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: transform 0.3s; }
+        .toggle-slider {
+            position: absolute; inset: 0;
+            background: var(--bg-tertiary);
+            border-radius: 26px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            width: 20px; height: 20px;
+            left: 3px; top: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
         .toggle input:checked + .toggle-slider { background: var(--btn-primary); }
         .toggle input:checked + .toggle-slider::before { transform: translateX(22px); }
 
-        .reset-option { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-secondary); border-radius: 10px; margin-bottom: 8px; cursor: pointer; }
+        /* ===== SELECTIVE RESET MODAL (req 2.3) ===== */
+        .reset-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
         .reset-option input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--btn-primary); cursor: pointer; }
         .reset-option-label { font-size: 14px; color: var(--text-primary); }
         .reset-option-sub { font-size: 11px; color: var(--text-secondary); }
 
-        @media (max-width: 480px) {
-            .container { padding: 6px; }
-            .num-btn { font-size: 30px; }
-            .icon-btn { width: 36px; height: 36px; font-size: 16px; }
-            .timer { font-size: 18px; }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 8px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
 
-        .digit-popup-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 3000; }
-        .digit-popup-modal.active { display: block; }
-        .digit-popup-backdrop { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(2px); }
-        .digit-popup-container { position: absolute; background: var(--bg-primary); border-radius: 16px; padding: 16px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); border: 2px solid var(--border-medium); z-index: 3001; }
-        .digit-popup-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 240px; }
-        .digit-popup-btn { aspect-ratio: 1; font-size: 28px; font-weight: bold; border: 2px solid var(--border-medium); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); cursor: pointer; transition: all 0.15s; font-family: inherit; }
-        .digit-popup-btn:active { transform: scale(0.9); background: var(--btn-primary); color: white; }
-        .digit-popup-btn.digit-erase { grid-column: span 3; background: var(--btn-danger); color: white; border-color: var(--btn-danger); }
-        
-        .cell.tap-pending { box-shadow: 0 0 0 3px var(--btn-primary) inset; animation: pulse-tap 0.3s ease; }
-        @keyframes pulse-tap { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 8px;
+        }
 
+        .app-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--btn-primary);
+            margin-bottom: 2px;
+        }
+
+        .version {
+            font-size: 11px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            user-select: none;
+            transition: color 0.2s;
+        }
+
+        .version:hover {
+            color: var(--btn-primary);
+        }
+
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        .timer {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--btn-primary);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .top-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px var(--shadow);
+            transition: all 0.2s;
+        }
+
+        .icon-btn:active {
+            transform: scale(0.95);
+        }
+
+        .icon-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* Game Board */
+        .game-board-container {
+            flex: 0 0 auto;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            gap: 0;
+            background: var(--bg-primary);
+            border: 3px solid var(--border-heavy);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px var(--shadow);
+            aspect-ratio: 1;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-primary);
+            border: 0.5px solid var(--border-light);
+            font-size: clamp(20px, 5vw, 32px);
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.15s;
+            position: relative;
+            user-select: none;
+        }
+
+        .cell:nth-child(9n+3), 
+        .cell:nth-child(9n+6) {
+            border-right: 3px solid var(--border-heavy) !important;
+        }
+        
+        .cell:nth-child(n+19):nth-child(-n+27),
+        .cell:nth-child(n+46):nth-child(-n+54) {
+            border-bottom: 3px solid var(--border-heavy) !important;
+        }
+        
+        .cell {
+            box-sizing: border-box;
+        }
+
+        .cell.fixed {
+            color: var(--cell-fixed);
+            background-color: var(--cell-fixed-bg);
+            font-weight: 700;
+        }
+
+        .cell.user {
+            color: var(--cell-user);
+        }
+
+        .cell.selected {
+            background: var(--cell-selected) !important;
+            outline: 3px solid var(--border-light);
+            outline-offset: -3px;
+            z-index: 10;
+        }
+
+        .cell.highlighted {
+            background: var(--cell-highlighted) !important;
+            /* box-shadow: inset 0 0 0 2px var(--btn-primary); */ 
+        }
+
+        .cell.conflict {
+            background: var(--cell-conflict) !important;
+            color: var(--cell-error) !important;
+            animation: shake 0.3s;
+            box-shadow: inset 0 0 0 3px var(--cell-error) !important;
+            z-index: 100;
+        }
+
+        .cell .notes {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 1px;
+            width: 100%;
+            height: 100%;
+            padding: 2px;
+        }
+
+        .cell .notes span {
+            font-size: clamp(8px, 1.5vw, 11px);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+        }
+
+        /* Number Pad */
+        .number-pad {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .number-row {
+            display: grid;
+            gap: 6px;
+        }
+
+        .number-row.first {
+            grid-template-columns: repeat(6, 1fr);
+        }
+
+        .number-row.second {
+            grid-template-columns: repeat(6, 1fr);
+        }
+
+        .num-btn {
+            aspect-ratio: 1;
+            border: none;
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 34px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 2px 4px var(--shadow);
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .num-btn:active:not(:disabled) {
+            transform: scale(0.95);
+            background: var(--btn-primary);
+            color: white;
+        }
+
+        .num-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .num-btn.delete {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-size: 22px;
+        }
+
+        .num-btn.notes {
+            background: var(--bg-tertiary);
+            font-size: 22px;
+        }
+
+        .num-btn.notes.active {
+            background: var(--btn-success);
+            color: white;
+        }
+
+        .num-btn.placeholder {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Hamburger Menu */
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .menu-overlay.active {
+            display: block;
+        }
+
+        .menu-panel {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 280px;
+            height: 100%;
+            background: var(--bg-primary);
+            box-shadow: -4px 0 12px var(--shadow);
+            transition: right 0.3s ease;
+            z-index: 1001;
+            overflow-y: auto;
+        }
+
+        .menu-panel.active {
+            right: 0;
+        }
+
+        .menu-header {
+            padding: 20px;
+            background: var(--btn-primary);
+            color: white;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .menu-items {
+            padding: 8px;
+        }
+
+        .menu-item {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            background: var(--bg-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .menu-item:active {
+            background: var(--bg-tertiary);
+            transform: scale(0.98);
+        }
+
+        .menu-item-icon {
+            font-size: 24px;
+            width: 32px;
+            text-align: center;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-primary);
+            padding: 24px;
+            border-radius: 16px;
+            max-width: 90%;
+            width: 350px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-content h2 {
+            font-size: 24px;
+            margin-bottom: 16px;
+            color: var(--btn-primary);
+            text-align: center;
+        }
+
+        .modal-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .modal-btn {
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-btn.primary {
+            background: var(--btn-primary);
+            color: white;
+        }
+
+        .modal-btn.success {
+            background: var(--btn-success);
+            color: white;
+        }
+
+        .modal-btn.danger {
+            background: var(--btn-danger);
+            color: white;
+        }
+
+        .modal-btn.secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .difficulty-grid {
+            display: flex;
+            flex-direction: column; /* מסדר את האלמנטים בטור */
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .difficulty-btn {
+            padding: 12px 12px;
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            background: var(--bg-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .difficulty-btn:active {
+            transform: scale(0.95);
+            background: var(--btn-primary);
+            color: white;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--btn-primary);
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 6px;
+            }
+
+            .num-btn {
+                font-size: 30px;
+            }
+
+            .icon-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 16px;
+            }
+
+            .timer {
+                font-size: 18px;
+            }
+        }
     </style>
 </head>
 <body data-theme="light">
     <div class="container">
+        <!-- Header -->
         <div class="header">
             <div class="app-title" id="appTitle">Sudoku Pro</div>
-            <div class="version" id="versionBtn">Version 9.5.1</div>
+            <div class="version" id="versionBtn">Version 9.1</div>
         </div>
 
+        <!-- Top Bar -->
         <div class="top-bar">
-            <div id="mistakeCounter" style="color: var(--btn-danger); font-weight: bold; font-size: 14px;">❌ 0/3</div>
             <div class="timer" id="timer">00:00</div>
             <div class="top-buttons">
                 <button class="icon-btn" id="undoBtn" title="Undo">↶</button>
@@ -364,10 +727,12 @@
             </div>
         </div>
 
+        <!-- Game Board -->
         <div class="game-board-container">
             <div class="game-board" id="gameBoard"></div>
         </div>
 
+        <!-- Number Pad -->
         <div class="number-pad">
             <div class="number-row first">
                 <button class="num-btn" data-num="1">1</button>
@@ -388,17 +753,22 @@
         </div>
     </div>
 
+    <!-- Offline Banner (req 4.3) -->
     <div class="offline-banner" id="offlineBanner">⚠️ No internet connection</div>
 
+    <!-- Pull to Refresh Indicator (req 5.2) -->
     <div class="ptr-indicator" id="ptrIndicator">↻</div>
 
+    <!-- Update Prompt (req 1.4) -->
     <div class="update-prompt" id="updatePrompt">
         <span>🆕 New version available!</span>
         <button class="update-now-btn" id="updateNowBtn">Update Now</button>
     </div>
 
+    <!-- Toast Container (req 6.1) -->
     <div class="toast-container" id="toastContainer"></div>
 
+    <!-- Install Banner (req 3.3) -->
     <div class="install-banner" id="installBanner">
         <img src="icon-512.png" alt="Sudoku Pro" onerror="this.style.display='none'">
         <div class="install-banner-text">
@@ -411,6 +781,7 @@
         </div>
     </div>
 
+    <!-- Hamburger Menu -->
     <div class="menu-overlay" id="menuOverlay"></div>
     <div class="menu-panel" id="menuPanel">
         <div class="menu-header">Menu</div>
@@ -442,6 +813,7 @@
         </div>
     </div>
 
+    <!-- Difficulty Modal -->
     <div class="modal" id="difficultyModal">
         <div class="modal-content">
             <h2>Select Difficulty</h2>
@@ -458,6 +830,7 @@
         </div>
     </div>
 
+    <!-- Victory Modal -->
     <div class="modal" id="victoryModal">
         <div class="modal-content">
             <h2>🎉 Congratulations! 🎉</h2>
@@ -469,6 +842,7 @@
         </div>
     </div>
 
+    <!-- Stats Modal -->
     <div class="modal" id="statsModal">
         <div class="modal-content">
             <h2>📊 Statistics</h2>
@@ -497,6 +871,7 @@
         </div>
     </div>
 
+    <!-- Selective Reset Modal (req 2.3) -->
     <div class="modal" id="resetModal">
         <div class="modal-content">
             <h2>⚙️ Reset Options</h2>
@@ -536,6 +911,7 @@
         </div>
     </div>
 
+    <!-- Full Removal Modal (req 2.1/2.2) -->
     <div class="modal" id="reinstallModal">
         <div class="modal-content">
             <h2>🗑️ Complete App Removal</h2>
@@ -555,221 +931,41 @@
         </div>
     </div>
 
+    <!-- Settings Modal (req 7.3) -->
     <div class="modal" id="settingsModal">
-        <div class="modal-content" style="max-width: 500px; max-height: 80vh; overflow-y: auto;">
-            <h2>⚙️ Game Settings</h2>
-            
-            <div class="settings-category">
-                <h3 class="settings-category-title">🎮 Behavior</h3>
-                
-                <div class="settings-row">
-                    <div>
-                        <div class="settings-label">Digit Entry Style</div>
-                        <div class="settings-sub">Where number buttons appear</div>
-                    </div>
-                    <select id="settingDigitEntryStyle" class="settings-select">
-                        <option value="fixed">Fixed Buttons (Bottom)</option>
-                        <option value="popup">Pop-up (On Tap)</option>
-                    </select>
+        <div class="modal-content">
+            <h2>⚙️ Settings</h2>
+            <div class="settings-row">
+                <div>
+                    <div class="settings-label">Haptic Feedback</div>
+                    <div class="settings-sub">Vibrate on tap, error &amp; win</div>
                 </div>
-                
-                <div class="settings-row">
-                    <div>
-                        <div class="settings-label">Default Entry Mode</div>
-                        <div class="settings-sub">How to start each puzzle</div>
-                    </div>
-                    <select id="settingDefaultEntryMode" class="settings-select">
-                        <option value="digit-first">Digit First</option>
-                        <option value="cell-first">Cell First</option>
-                        <option value="last-used">Last Used</option>
-                    </select>
-                </div>
-                
-                <div class="settings-row">
-                    <div>
-                        <div class="settings-label">Two Taps to Edit</div>
-                        <div class="settings-sub">Double-tap to modify cells</div>
-                    </div>
-                    <label class="toggle">
-                        <input type="checkbox" id="settingTwoTapsEdit">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                
-                <div class="settings-row">
-                    <div>
-                        <div class="settings-label">Prevent Sleep</div>
-                        <div class="settings-sub">Keep screen awake</div>
-                    </div>
-                    <label class="toggle">
-                        <input type="checkbox" id="settingPreventSleep" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                
-                <div class="settings-row">
-                    <div>
-                        <div class="settings-label">Show Digit Counts</div>
-                        <div class="settings-sub">Display how many times each digit used</div>
-                    </div>
-                    <label class="toggle">
-                        <input type="checkbox" id="settingShowDigitCounts" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                
-                <div class="settings-row">
-                    <div>
-                        <div class="settings-label">Auto Pencil: Erase</div>
-                        <div class="settings-sub">Auto-remove notes when digit placed</div>
-                    </div>
-                    <label class="toggle">
-                        <input type="checkbox" id="settingAutoPencil" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
+                <label class="toggle">
+                    <input type="checkbox" id="settingHaptics" checked>
+                    <span class="toggle-slider"></span>
+                </label>
             </div>
-            
-            <div class="settings-category">
-                <h3 class="settings-category-title">👁️ Display</h3>
-                
-                <div class="settings-row">
-                    <div>
-                        <div class="settings-label">Show Timer</div>
-                        <div class="settings-sub">Display elapsed time</div>
-                    </div>
-                    <label class="toggle">
-                        <input type="checkbox" id="settingShowTimer" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
+            <div class="settings-row">
+                <div>
+                    <div class="settings-label">Animations</div>
+                    <div class="settings-sub">Cell shake, transitions</div>
                 </div>
-                
-                <div class="settings-row">
-                    <div>
-                        <div class="settings-label">Show Crosshairs</div>
-                        <div class="settings-sub">Highlight row/column/block</div>
-                    </div>
-                    <label class="toggle">
-                        <input type="checkbox" id="settingShowCrosshairs" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                
-                <div class="settings-row">
-                    <div>
-                        <div class="settings-label">Highlight Digits</div>
-                        <div class="settings-sub">Highlight same numbers</div>
-                    </div>
-                    <label class="toggle">
-                        <input type="checkbox" id="settingHighlightDigits" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                
-                <div class="settings-row">
-                    <div>
-                        <div class="settings-label">Highlight Initial</div>
-                        <div class="settings-sub">Different color for given clues</div>
-                    </div>
-                    <label class="toggle">
-                        <input type="checkbox" id="settingHighlightInitial" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                
-                <div class="settings-row">
-                    <div>
-                        <div class="settings-label">Bold Initial</div>
-                        <div class="settings-sub">Bold font for given clues</div>
-                    </div>
-                    <label class="toggle">
-                        <input type="checkbox" id="settingBoldInitial" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                
-                <div class="settings-row">
-                    <div>
-                        <div class="settings-label">Pop-up Transparency</div>
-                        <div class="settings-sub">See board through pop-up</div>
-                    </div>
-                    <input type="range" id="settingPopupTransparency" min="0" max="50" value="5" 
-                           class="settings-slider" style="width: 100px;">
-                    <span id="popupTransparencyValue" class="settings-value">5%</span>
-                </div>
-                
-                <div class="settings-row">
-                    <div>
-                        <div class="settings-label">Haptic Feedback</div>
-                        <div class="settings-sub">Vibrate on tap, error &amp; win</div>
-                    </div>
-                    <label class="toggle">
-                        <input type="checkbox" id="settingHaptics" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                
-                <div class="settings-row">
-                    <div>
-                        <div class="settings-label">Animations</div>
-                        <div class="settings-sub">Cell transitions</div>
-                    </div>
-                    <label class="toggle">
-                        <input type="checkbox" id="settingAnimations" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                
-                <div class="settings-row">
-                    <div>
-                        <div class="settings-label">Show Network Status</div>
-                        <div class="settings-sub">Display offline/online banner</div>
-                    </div>
-                    <label class="toggle">
-                        <input type="checkbox" id="settingNetwork" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
+                <label class="toggle">
+                    <input type="checkbox" id="settingAnimations" checked>
+                    <span class="toggle-slider"></span>
+                </label>
             </div>
-            
-            <div class="settings-category">
-                <h3 class="settings-category-title">🛟 Helper</h3>
-                
-                <div class="settings-row" style="background: var(--bg-tertiary); padding: 12px; border-radius: 8px; margin-bottom: 12px;">
-                    <div>
-                        <div class="settings-label" style="font-weight: 700;">Disable All Help</div>
-                        <div class="settings-sub">Turn off all assistance (Pure mode)</div>
-                    </div>
-                    <label class="toggle">
-                        <input type="checkbox" id="settingDisableAllHelp">
-                        <span class="toggle-slider"></span>
-                    </label>
+            <div class="settings-row">
+                <div>
+                    <div class="settings-label">Show Network Status</div>
+                    <div class="settings-sub">Display offline/online banner</div>
                 </div>
-                
-                <div class="settings-row">
-                    <div>
-                        <div class="settings-label">Flag Conflicting Values</div>
-                        <div class="settings-sub">Warn when number breaks rules</div>
-                    </div>
-                    <label class="toggle">
-                        <input type="checkbox" id="settingFlagConflicts" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                
-                <div class="settings-row">
-                    <div>
-                        <div class="settings-label">Flag Incorrect Values</div>
-                        <div class="settings-sub">Warn when answer is wrong</div>
-                    </div>
-                    <label class="toggle">
-                        <input type="checkbox" id="settingFlagIncorrect">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
+                <label class="toggle">
+                    <input type="checkbox" id="settingNetwork" checked>
+                    <span class="toggle-slider"></span>
+                </label>
             </div>
-            
-            <div class="modal-buttons" style="margin-top: 20px;">
+            <div class="modal-buttons" style="margin-top:16px;">
                 <button class="modal-btn primary" id="saveSettings">Save Settings</button>
                 <button class="modal-btn secondary" id="closeSettings">Close</button>
             </div>
@@ -860,15 +1056,20 @@
             }
 
             generatePuzzle(difficulty = 'medium') {
+                // ========== V8.0 PROFESSIONAL PUZZLE GENERATOR ==========
+                // 4 difficulty levels with symmetry and unique solution verification
+                
                 const cellsToRemove = { 
-                    easy: 38,       
-                    medium: 48,     
-                    hard: 58,       
-                    expert: 64      
+                    easy: 38,       // ~43 clues - beginner friendly
+                    medium: 48,     // ~33 clues - intermediate
+                    hard: 58,       // ~23 clues - advanced
+                    expert: 64      // ~17 clues - MAXIMUM difficulty!
                 };
                 
+                console.log(`🎯 Generating ${difficulty.toUpperCase()} puzzle with V8.0 Pro Engine...`);
                 const startTime = performance.now();
                 
+                // Step 1: Generate complete solution
                 const complete = this.generateComplete();
                 this.solution = [...complete];
                 this.board = [...complete];
@@ -876,27 +1077,37 @@
 
                 const target = cellsToRemove[difficulty] || 48;
                 
+                // Step 2: Create symmetric pairs (180° rotation)
                 const symmetricPairs = this.createSymmetricPairs();
                 this.shuffleArray(symmetricPairs);
                 
                 let removed = 0;
                 let attempts = 0;
-                const maxAttempts = 250; 
+                const maxAttempts = 250; // Increased for expert level
+                
+                // ========== PHASE 1: SYMMETRIC REMOVAL ==========
+                console.log(`📐 Phase 1: Symmetric pair removal (target: ${target} cells)`);
                 
                 for (let pair of symmetricPairs) {
                     if (removed >= target) break;
-                    if (attempts >= maxAttempts) break;
+                    if (attempts >= maxAttempts) {
+                        console.warn(`⚠️ Max attempts reached at ${removed} cells`);
+                        break;
+                    }
                     
                     attempts++;
                     
+                    // Backup both positions
                     const backup1 = this.board[pair[0]];
                     const backup2 = this.board[pair[1]];
                     
+                    // Try removing both cells (or one if it's the center)
                     this.board[pair[0]] = 0;
-                    if (pair[0] !== pair[1]) { 
+                    if (pair[0] !== pair[1]) { // Not center cell
                         this.board[pair[1]] = 0;
                     }
                     
+                    // Verify unique solution
                     if (this.hasUniqueSolution()) {
                         this.fixed[pair[0]] = false;
                         if (pair[0] !== pair[1]) {
@@ -905,8 +1116,13 @@
                         } else {
                             removed += 1;
                         }
-                        attempts = 0; 
+                        attempts = 0; // Reset on success
+                        
+                        if (removed % 10 === 0) {
+                            console.log(`   Progress: ${removed}/${target} cells removed`);
+                        }
                     } else {
+                        // Restore if multiple solutions exist
                         this.board[pair[0]] = backup1;
                         if (pair[0] !== pair[1]) {
                             this.board[pair[1]] = backup2;
@@ -914,18 +1130,30 @@
                     }
                 }
                 
+                console.log(`   ✓ Symmetric phase complete: ${removed}/${target} cells`);
+                
+                // ========== PHASE 2: SINGLE CELL REMOVAL ==========
                 if (removed < target) {
+                    console.log(`📝 Phase 2: Strategic single cell removal (${target - removed} remaining)`);
+                    
+                    // Collect remaining filled cells
                     const remainingCells = [];
                     for (let i = 0; i < 81; i++) {
-                        if (this.board[i] !== 0) remainingCells.push(i);
+                        if (this.board[i] !== 0) {
+                            remainingCells.push(i);
+                        }
                     }
                     
+                    // Prioritize cells that create logical bottlenecks
                     this.shuffleArray(remainingCells);
                     
                     attempts = 0;
                     for (let pos of remainingCells) {
                         if (removed >= target) break;
-                        if (attempts >= maxAttempts * 2) break;
+                        if (attempts >= maxAttempts * 2) {
+                            console.warn(`⚠️ Phase 2 max attempts reached`);
+                            break;
+                        }
                         
                         attempts++;
                         const backup = this.board[pos];
@@ -935,36 +1163,100 @@
                             this.fixed[pos] = false;
                             removed++;
                             attempts = 0;
+                            
+                            if ((removed - (target - (target - removed))) % 5 === 0) {
+                                console.log(`   Progress: ${removed}/${target} cells`);
+                            }
                         } else {
                             this.board[pos] = backup;
                         }
                     }
+                    
+                    console.log(`   ✓ Single cell phase complete: ${removed}/${target} cells`);
                 }
 
                 this.notes = Array(81).fill(null).map(() => new Set());
+                
+                // ========== GENERATION SUMMARY ==========
+                const endTime = performance.now();
+                const duration = ((endTime - startTime) / 1000).toFixed(2);
+                const symmetryPercent = this.getSymmetryPercent();
+                
+                console.log(`\n✅ PUZZLE GENERATED SUCCESSFULLY!`);
+                console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+                console.log(`   🎲 Difficulty: ${difficulty.toUpperCase()}`);
+                console.log(`   📊 Cells removed: ${removed}/${target}`);
+                console.log(`   🎯 Clues given: ${81 - removed}`);
+                console.log(`   🔄 Symmetry: ${symmetryPercent >= 0.95 ? 'PERFECT ✓' : Math.round(symmetryPercent * 100) + '%'}`);
+                console.log(`   ⏱️ Generation time: ${duration}s`);
+                console.log(`   ✔️ Unique solution: VERIFIED`);
+                console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
+                
                 return {
                     board: [...this.board],
                     solution: [...this.solution],
-                    fixed: [...this.fixed]
+                    fixed: [...this.fixed],
+                    metadata: {
+                        difficulty,
+                        cellsRemoved: removed,
+                        cluesGiven: 81 - removed,
+                        symmetry: symmetryPercent,
+                        generationTime: duration
+                    }
                 };
             }
 
             createSymmetricPairs() {
+                // Create 180-degree rotational symmetry pairs
+                // Each position (i) pairs with position (80-i)
                 const pairs = [];
                 const used = new Set();
+                
                 for (let i = 0; i < 81; i++) {
                     if (used.has(i)) continue;
-                    const symmetric = 80 - i; 
+                    
+                    const symmetric = 80 - i; // 180° rotation
+                    
                     if (i === symmetric) {
+                        // Center cell (position 40) - pairs with itself
                         pairs.push([i, i]);
                         used.add(i);
                     } else if (!used.has(symmetric)) {
+                        // Regular pair
                         pairs.push([i, symmetric]);
                         used.add(i);
                         used.add(symmetric);
                     }
                 }
+                
                 return pairs;
+            }
+
+            getSymmetryPercent() {
+                // Calculate symmetry percentage (0-1)
+                let symmetricPairs = 0;
+                let totalPairs = 0;
+                
+                for (let i = 0; i < 41; i++) { // Check only half + center
+                    const symmetric = 80 - i;
+                    totalPairs++;
+                    
+                    const isEmpty1 = this.board[i] === 0;
+                    const isEmpty2 = this.board[symmetric] === 0;
+                    
+                    if (isEmpty1 === isEmpty2) {
+                        symmetricPairs++;
+                    }
+                }
+                
+                return symmetricPairs / totalPairs;
+            }
+
+            shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
             }
 
             hasUniqueSolution() {
@@ -993,21 +1285,22 @@
             }
 
             getConflicts(pos, num) {
-                if (!this.isHelpAllowed('conflicts')) return new Set();
-                if (!AppSystems.settings?.flagConflicts) return new Set();
-                
                 const conflicts = new Set();
                 const row = Math.floor(pos / 9);
                 const col = pos % 9;
 
                 for (let c = 0; c < 9; c++) {
                     const checkPos = row * 9 + c;
-                    if (checkPos !== pos && this.board[checkPos] === num) conflicts.add(checkPos);
+                    if (checkPos !== pos && this.board[checkPos] === num) {
+                        conflicts.add(checkPos);
+                    }
                 }
 
                 for (let r = 0; r < 9; r++) {
                     const checkPos = r * 9 + col;
-                    if (checkPos !== pos && this.board[checkPos] === num) conflicts.add(checkPos);
+                    if (checkPos !== pos && this.board[checkPos] === num) {
+                        conflicts.add(checkPos);
+                    }
                 }
 
                 const blockRow = Math.floor(row / 3) * 3;
@@ -1015,9 +1308,12 @@
                 for (let r = blockRow; r < blockRow + 3; r++) {
                     for (let c = blockCol; c < blockCol + 3; c++) {
                         const checkPos = r * 9 + c;
-                        if (checkPos !== pos && this.board[checkPos] === num) conflicts.add(checkPos);
+                        if (checkPos !== pos && this.board[checkPos] === num) {
+                            conflicts.add(checkPos);
+                        }
                     }
                 }
+
                 return conflicts;
             }
 
@@ -1027,10 +1323,6 @@
                     if (this.board[i] === num) count++;
                 }
                 return count;
-            }
-            
-            isHelpAllowed(feature) {
-                return !(AppSystems.settings || {}).disableAllHelp;
             }
         }
 
@@ -1046,15 +1338,16 @@
                 this.hints = 3;
                 this.history = [];
                 this.historyIndex = -1;
-                this.mistakes = 0;
-                this.maxMistakes = 3;
                 this.stats = this.loadStats();
             }
 
             loadStats() {
                 const stored = localStorage.getItem('sudoku_stats');
                 return stored ? JSON.parse(stored) : {
-                    totalWins: 0, gamesPlayed: 0, bestTime: null, totalHints: 0
+                    totalWins: 0,
+                    gamesPlayed: 0,
+                    bestTime: null,
+                    totalHints: 0
                 };
             }
 
@@ -1073,7 +1366,6 @@
                 this.noteMode = false;
                 this.timer = 0;
                 this.hints = 3;
-                this.mistakes = 0;
                 this.history = [];
                 this.historyIndex = -1;
                 this.saveSnapshot();
@@ -1126,6 +1418,7 @@
             placeNumber(pos, num) {
                 if (this.engine.fixed[pos]) return { success: false };
 
+                // Check if number is already at max count (9)
                 if (num !== 0 && this.engine.countNumber(num) >= 9) {
                     return { success: false, maxed: true };
                 }
@@ -1152,70 +1445,46 @@
                     if (conflicts.size > 0) {
                         return { success: false, conflicts: Array.from(conflicts) };
                     }
-                    
                     this.engine.board[pos] = num;
                     this.engine.notes[pos].clear();
-                    
-                    if ((AppSystems.settings || {}).autoPencilErase && num > 0) {
-                        const row = Math.floor(pos / 9);
-                        const col = pos % 9;
-                        const peers = this.getPeers(row, col);
-                        
-                        peers.forEach(([r, c]) => {
-                            const peerPos = r * 9 + c;
-                            if (this.engine.notes[peerPos]?.has(num)) {
-                                this.engine.notes[peerPos].delete(num);
-                            }
-                        });
-                    }
-                    
                     this.saveSnapshot();
                     this.saveGame();
-                    if (this.checkWin()) this.onWin();
+                    if (this.checkWin()) {
+                        this.onWin();
+                    }
                     return { success: true };
                 }
             }
 
             giveHint() {
-                if (!this.engine.isHelpAllowed('hint')) return false;
                 if (this.hints <= 0 || this.selectedCell === null) return false;
                 if (this.engine.fixed[this.selectedCell]) return false;
-                
                 const correctNum = this.engine.solution[this.selectedCell];
                 this.engine.board[this.selectedCell] = correctNum;
                 this.engine.notes[this.selectedCell].clear();
                 this.hints--;
                 this.saveSnapshot();
                 this.saveGame();
-                if (this.checkWin()) this.onWin();
+                if (this.checkWin()) {
+                    this.onWin();
+                }
                 return true;
             }
 
             checkWin() {
                 for (let i = 0; i < 81; i++) {
-                    if (this.engine.board[i] !== this.engine.solution[i]) return false;
-                }
-                return true;
-            }
-            
-            getPeers(row, col) {
-                const peers = new Set();
-                for (let c = 0; c < 9; c++) if (c !== col) peers.add(`${row},${c}`);
-                for (let r = 0; r < 9; r++) if (r !== row) peers.add(`${r},${col}`);
-                const boxRow = Math.floor(row / 3) * 3;
-                const boxCol = Math.floor(col / 3) * 3;
-                for (let r = boxRow; r < boxRow + 3; r++) {
-                    for (let c = boxCol; c < boxCol + 3; c++) {
-                        if (r !== row || c !== col) peers.add(`${r},${c}`);
+                    if (this.engine.board[i] !== this.engine.solution[i]) {
+                        return false;
                     }
                 }
-                return Array.from(peers).map(key => key.split(',').map(Number));
+                return true;
             }
 
             onWin() {
                 this.stopTimer();
                 this.stats.totalWins++;
-                this.stats.totalHints += (3 - this.hints);
+                const usedHints = 3 - this.hints;
+                this.stats.totalHints += usedHints;
                 if (!this.stats.bestTime || this.timer < this.stats.bestTime) {
                     this.stats.bestTime = this.timer;
                 }
@@ -1254,8 +1523,7 @@
                     timer: this.timer,
                     hints: this.hints,
                     history: this.history,
-                    historyIndex: this.historyIndex,
-                    mistakes: this.mistakes
+                    historyIndex: this.historyIndex
                 };
                 localStorage.setItem('sudoku_current_game', JSON.stringify(gameData));
             }
@@ -1274,7 +1542,6 @@
                     this.hints = gameData.hints || 3;
                     this.history = gameData.history || [];
                     this.historyIndex = gameData.historyIndex || -1;
-                    this.mistakes = gameData.mistakes || 0;
                     this.startTimer();
                     return true;
                 } catch (e) {
@@ -1295,20 +1562,10 @@
         class UIController {
             constructor(gameState) {
                 this.game = gameState;
-                
-                this.DOUBLE_TAP_THRESHOLD = 300; 
-                this.lastTapTime = 0;
-                this.lastTapCell = null;
-                this.popupTargetRow = null;
-                this.popupTargetCol = null;
-                
                 this.initElements();
                 this.initTheme();
                 this.bindEvents();
                 this.updateUI();
-                
-                this.initDigitFirstMode();
-                this.applyDigitEntryStyle();
             }
 
             initElements() {
@@ -1342,12 +1599,13 @@
                     const col = i % 9;
                     const blockRow = Math.floor(row / 3);
                     const blockCol = Math.floor(col / 3);
+                    const block = blockRow * 3 + blockCol;
                     
                     cell.dataset.row = row;
                     cell.dataset.col = col;
-                    cell.dataset.block = blockRow * 3 + blockCol;
+                    cell.dataset.block = block;
                     
-                    cell.addEventListener('click', () => this.handleCellTap(row, col));
+                    cell.addEventListener('click', () => this.selectCell(i));
                     this.gameBoard.appendChild(cell);
                 }
             }
@@ -1357,21 +1615,6 @@
                 this.menuBtn.addEventListener('click', () => this.toggleMenu());
                 this.noteBtn.addEventListener('click', () => this.toggleNoteMode());
                 this.menuOverlay.addEventListener('click', () => this.toggleMenu());
-
-                // ביטול בחירה בלחיצה מחוץ ללוח (דרישה 2)
-                document.addEventListener('click', (e) => {
-                    const isBoardClick = e.target.closest('.game-board-container');
-                    const isPadClick = e.target.closest('.number-pad');
-                    const isModalClick = e.target.closest('.modal') || e.target.closest('.digit-popup-modal');
-                    const isMenuClick = e.target.closest('.top-bar');
-
-                    if (!isBoardClick && !isPadClick && !isModalClick && !isMenuClick) {
-                        if (this.game.selectedCell !== null) {
-                            this.game.selectedCell = null;
-                            this.updateUI();
-                        }
-                    }
-                });
 
                 document.getElementById('versionBtn').addEventListener('click', () => {
                     this.showReinstallModal();
@@ -1447,7 +1690,12 @@
 
                 document.getElementById('resetStats').addEventListener('click', () => {
                     if (confirm('Are you sure you want to reset all statistics?')) {
-                        this.game.stats = { totalWins: 0, gamesPlayed: 0, bestTime: null, totalHints: 0 };
+                        this.game.stats = {
+                            totalWins: 0,
+                            gamesPlayed: 0,
+                            bestTime: null,
+                            totalHints: 0
+                        };
                         this.game.saveStats();
                         this.showStats();
                     }
@@ -1501,38 +1749,41 @@
                 }
             }
 
-            selectCell(posOrRow, col = null) {
-                let pos = col !== null ? (posOrRow * 9 + col) : posOrRow;
-                if (pos >= 0 && pos < 81) {
-                    this.game.selectedCell = pos;
-                    this.updateUI();
-                }
+            selectCell(index) {
+                this.game.selectedCell = index;
+                this.updateUI();
             }
 
-            // הזנה מרכזית אחודה המשמשת את כל אמצעי הקלט
             inputNumber(num) {
                 if (this.game.selectedCell === null) return;
                 AppSystems.haptic('tap');
-                
-                const pos = this.game.selectedCell;
-                const result = this.game.placeNumber(pos, num);
-                
-                if (result.success && num !== 0 && !this.game.noteMode) {
-                    // בדיקת שגיאות
-                    if (AppSystems.settings?.flagIncorrect && this.game.engine.solution) {
-                        const correct = this.game.engine.solution[pos];
-                        if (num !== correct) {
-                            this.game.mistakes++;
-                            AppSystems.haptic('error');
-                        }
-                    }
-                } else if (!result.success && result.conflicts) {
-                    // ערך מתנגש
+                const result = this.game.placeNumber(this.game.selectedCell, num);
+                this.updateUI();
+                if (!result.success && result.conflicts) {
                     AppSystems.haptic('error');
+                    this.showConflicts(result.conflicts);
+                }
+            }
+
+            showConflicts(conflicts) {
+                const cells = this.gameBoard.querySelectorAll('.cell');
+                
+                if (this.game.selectedCell !== null) {
+                    cells[this.game.selectedCell].classList.add('conflict');
                 }
                 
-                // updateUI יטפל בצביעת השגיאות בצורה קבועה ויעדכן את מונה הטעויות
-                this.updateUI();
+                conflicts.forEach(pos => {
+                    cells[pos].classList.add('conflict');
+                });
+
+                setTimeout(() => {
+                    if (this.game.selectedCell !== null) {
+                        cells[this.game.selectedCell].classList.remove('conflict');
+                    }
+                    conflicts.forEach(pos => {
+                        cells[pos].classList.remove('conflict');
+                    });
+                }, 600);
             }
 
             toggleNoteMode() {
@@ -1541,20 +1792,30 @@
             }
 
             giveHint() {
-                if (this.game.giveHint()) this.updateUI();
+                if (this.game.giveHint()) {
+                    this.updateUI();
+                }
             }
 
             undo() {
-                if (this.game.undo()) this.updateUI();
+                if (this.game.undo()) {
+                    this.updateUI();
+                }
             }
 
             redo() {
-                if (this.game.redo()) this.updateUI();
+                if (this.game.redo()) {
+                    this.updateUI();
+                }
             }
 
             showDifficultyModal() {
                 const resumeSection = document.getElementById('resumeSection');
-                resumeSection.style.display = this.game.hasSavedGame() ? 'block' : 'none';
+                if (this.game.hasSavedGame()) {
+                    resumeSection.style.display = 'block';
+                } else {
+                    resumeSection.style.display = 'none';
+                }
                 this.difficultyModal.classList.add('active');
             }
 
@@ -1565,157 +1826,28 @@
                 this.updateUI();
             }
 
-            showDigitPopup(row, col) {
-                this.popupTargetRow = row;
-                this.popupTargetCol = col;
-                
-                const modal = document.getElementById('digitPopupModal');
-                const container = document.getElementById('digitPopupContainer');
-                if (!modal || !container) return;
-                
-                const transparency = AppSystems.settings?.popupTransparency || 5;
-                container.style.opacity = 1 - (transparency / 100);
-                
-                const cell = this.gameBoard.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-                if (!cell) return;
-                
-                const rect = cell.getBoundingClientRect();
-                const popupWidth = 272; 
-                const popupHeight = 300;
-                
-                let left = rect.left + (rect.width / 2) - (popupWidth / 2);
-                let top = rect.top - popupHeight - 10;
-                
-                if (left < 10) left = 10;
-                if (left + popupWidth > window.innerWidth - 10) left = window.innerWidth - popupWidth - 10;
-                if (top < 10) top = rect.bottom + 10; 
-                
-                container.style.left = left + 'px';
-                container.style.top = top + 'px';
-                modal.classList.add('active');
-            }
-            
-            handleCellTap(row, col) {
-                const pos = row * 9 + col;
-                
-                if (this.game.engine.fixed[pos]) {
-                    this.selectCell(pos); // סעיף 1: תאים קבועים ניתנים לבחירה
-                    return;
-                }
-                
-                const mode = AppSystems.settings?.defaultEntryMode || 'cell-first';
-                
-                if (mode === 'sticky' && this.game.stickyDigit) {
-                    this.selectCell(pos);
-                    this.inputNumber(this.game.stickyDigit);
-                    return;
-                }
-                if (mode === 'last-used' && this.game.lastUsedDigit) {
-                    this.selectCell(pos);
-                    this.inputNumber(this.game.lastUsedDigit);
-                    return;
-                }
-                
-                if (!AppSystems.settings?.twoTapsEdit) {
-                    this.selectCellWithPopup(row, col);
-                    return;
-                }
-                
-                const now = Date.now();
-                const cellKey = `${row},${col}`;
-                const isSameCell = (cellKey === this.lastTapCell);
-                const timeSinceLast = now - this.lastTapTime;
-                
-                if (isSameCell && timeSinceLast < this.DOUBLE_TAP_THRESHOLD) {
-                    this.selectCellWithPopup(row, col);
-                    this.lastTapTime = 0;
-                    this.lastTapCell = null;
-                } else {
-                    this.selectCell(pos); // בוחר תא במקום רק להאיר
-                    this.lastTapTime = now;
-                    this.lastTapCell = cellKey;
-                    
-                    const cell = this.getCellElement(row, col);
-                    if (cell) {
-                        cell.classList.add('tap-pending');
-                        setTimeout(() => cell.classList.remove('tap-pending'), 300);
-                    }
-                }
-            }
-            
-            selectCellWithPopup(row, col) {
-                if (AppSystems.settings?.digitEntryStyle === 'popup') {
-                    this.selectCell(row * 9 + col);
-                    this.showDigitPopup(row, col);
-                } else {
-                    this.selectCell(row * 9 + col);
-                }
-            }
-            
-            getCellElement(row, col) {
-                return this.gameBoard.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-            }
-            
-            initDigitFirstMode() {
-                document.querySelectorAll('.num-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const num = parseInt(e.target.dataset.num);
-                        if (AppSystems.settings?.defaultEntryMode === 'sticky') {
-                            this.activateStickyDigit(num);
-                        } else if (AppSystems.settings?.defaultEntryMode === 'last-used') {
-                            this.game.lastUsedDigit = num;
-                        }
-                    });
-                });
-            }
-            
-            activateStickyDigit(num) {
-                this.game.stickyDigit = num;
-                document.querySelectorAll('.num-btn').forEach(btn => btn.classList.remove('sticky-active'));
-                
-                const activeBtn = document.querySelector(`.num-btn[data-num="${num}"]`);
-                if (activeBtn) activeBtn.classList.add('sticky-active');
-                this.showToast(`Sticky: ${num} - Tap cells to place`, 'info');
-            }
-            
-            refreshDisplay() {
-                this.updateBoard();
-                this.updateNumberPad();
-                this.applyDigitEntryStyle();
-                this.applyPopupTransparency();
-            }
-            
-            applyDigitEntryStyle() {
-                const numberPad = document.querySelector('.number-pad');
-                if (!numberPad) return;
-                numberPad.style.display = AppSystems.settings?.digitEntryStyle === 'popup' ? 'none' : 'grid';
-            }
-            
-            applyPopupTransparency() {
-                const container = document.getElementById('digitPopupContainer');
-                if (!container) return;
-                const transparency = AppSystems.settings?.popupTransparency || 5;
-                container.style.opacity = 1 - (transparency / 100);
-            }
-            
-            updateMistakeCounter() {
-                const counter = document.getElementById('mistakeCounter');
-                if (counter) {
-                    counter.textContent = `❌ ${this.game.mistakes}/${this.game.maxMistakes}`;
-                }
-            }
-
             updateDifficultyTitle(difficulty) {
-                const names = { easy: 'Easy', medium: 'Medium', hard: 'Hard', expert: 'Expert 🔥' };
-                document.getElementById('appTitle').textContent = `Sudoku Pro - ${names[difficulty] || 'Medium'}`;
+                const difficultyNames = {
+                    easy: 'Easy',
+                    medium: 'Medium',
+                    hard: 'Hard',
+                    expert: 'Expert 🔥'
+                };
+                const titleElement = document.getElementById('appTitle');
+                titleElement.textContent = `Sudoku Pro - ${difficultyNames[difficulty] || 'Medium'}`;
             }
 
             showStats() {
                 const stats = this.game.stats;
                 document.getElementById('totalWins').textContent = stats.totalWins;
                 document.getElementById('gamesPlayed').textContent = stats.gamesPlayed;
-                document.getElementById('bestTime').textContent = stats.bestTime ? this.game.formatTime(stats.bestTime) : '--:--';
-                document.getElementById('avgHints').textContent = stats.totalWins > 0 ? (stats.totalHints / stats.totalWins).toFixed(1) : '0';
+                document.getElementById('bestTime').textContent = stats.bestTime 
+                    ? this.game.formatTime(stats.bestTime) 
+                    : '--:--';
+                const avgHints = stats.totalWins > 0 
+                    ? (stats.totalHints / stats.totalWins).toFixed(1)
+                    : '0';
+                document.getElementById('avgHints').textContent = avgHints;
                 this.statsModal.classList.add('active');
             }
 
@@ -1723,55 +1855,36 @@
                 this.updateBoard();
                 this.updateControls();
                 this.updateNumberPad();
-                this.updateMistakeCounter();
             }
 
             updateBoard() {
                 const cells = this.gameBoard.querySelectorAll('.cell');
                 
+                // Get selected number ONLY if a cell is selected that has a number
                 const selectedNum = (this.game.selectedCell !== null && 
                                     this.game.engine.board[this.game.selectedCell] !== 0)
-                    ? this.game.engine.board[this.game.selectedCell] : 0;
+                    ? this.game.engine.board[this.game.selectedCell] 
+                    : 0;
                 
-                const selectedRow = this.game.selectedCell !== null ? Math.floor(this.game.selectedCell / 9) : -1;
-                const selectedCol = this.game.selectedCell !== null ? this.game.selectedCell % 9 : -1;
-                const selectedBlock = this.game.selectedCell !== null 
-                    ? Math.floor(selectedRow / 3) * 3 + Math.floor(selectedCol / 3) : -1;
-                
-                // סריקה מוקדמת של שגיאות לפי סעיף 8
-                const errorCells = new Set();
-                if (AppSystems.settings?.flagConflicts || AppSystems.settings?.flagIncorrect) {
-                    for (let i = 0; i < 81; i++) {
-                        const val = this.game.engine.board[i];
-                        if (val === 0) continue;
-                        
-                        if (AppSystems.settings?.flagIncorrect && this.game.engine.solution) {
-                            if (val !== this.game.engine.solution[i]) {
-                                errorCells.add(i);
-                                continue;
-                            }
-                        }
-                        
-                        if (AppSystems.settings?.flagConflicts) {
-                            const conflicts = this.game.engine.getConflicts(i, val);
-                            if (conflicts.size > 0) {
-                                errorCells.add(i);
-                                conflicts.forEach(c => errorCells.add(c));
-                            }
-                        }
-                    }
-                }
-
                 cells.forEach((cell, index) => {
-                    // 1. איפוס מוחלט של מצב התא
                     cell.className = 'cell';
                     cell.innerHTML = '';
-                    
-                    const row = Math.floor(index / 9);
-                    const col = index % 9;
-                    const block = Math.floor(row / 3) * 3 + Math.floor(col / 3);
 
-                    // 2. הזנת תוכן
+                    if (this.game.engine.fixed[index]) {
+                        cell.classList.add('fixed');
+                    } else {
+                        cell.classList.add('user');
+                    }
+
+                    if (index === this.game.selectedCell) {
+                        cell.classList.add('selected');
+                    }
+
+                    // Highlight same numbers ONLY when selectedNum is not 0
+                    if (selectedNum !== 0 && this.game.engine.board[index] === selectedNum) {
+                        cell.classList.add('highlighted');
+                    }
+
                     if (this.game.engine.board[index] !== 0) {
                         cell.textContent = this.game.engine.board[index];
                     } else if (this.game.engine.notes[index].size > 0) {
@@ -1784,96 +1897,112 @@
                         }
                         cell.appendChild(notesDiv);
                     }
-
-                    // 3. החלת מחלקות לעיצוב (ה-CSS יטפל בסדר העדיפויות באופן אוטומטי)
-                    if (this.game.engine.fixed[index]) {
-                        cell.classList.add('fixed');
-                    }
-
-                    if (AppSystems.settings?.showCrosshairs && this.game.selectedCell !== null) {
-                        if (row === selectedRow || col === selectedCol || block === selectedBlock) {
-                            cell.classList.add('crosshair');
-                        }
-                    }
-
-                    if (AppSystems.settings?.highlightDigits && selectedNum !== 0 && 
-                        this.game.engine.board[index] === selectedNum) {
-                        cell.classList.add('highlighted');
-                    }
-
-                    if (errorCells.has(index)) {
-                        cell.classList.add('error');
-                    }
-
-                    if (index === this.game.selectedCell) {
-                        cell.classList.add('selected');
-                    }
                 });
             }
 
             updateNumberPad() {
+                // Disable buttons when number count reaches 9
                 for (let num = 1; num <= 9; num++) {
                     const count = this.game.engine.countNumber(num);
                     const btn = document.querySelector(`.num-btn[data-num="${num}"]`);
-                    if (btn) btn.disabled = count >= 9;
+                    if (btn) {
+                        if (count >= 9) {
+                            btn.disabled = true;
+                        } else {
+                            btn.disabled = false;
+                        }
+                    }
                 }
             }
 
             updateControls() {
-                this.noteBtn.classList.toggle('active', this.game.noteMode);
+                if (this.game.noteMode) {
+                    this.noteBtn.classList.add('active');
+                } else {
+                    this.noteBtn.classList.remove('active');
+                }
+
                 this.undoBtn.disabled = this.game.historyIndex <= 0;
             }
 
             showVictory() {
                 const usedHints = 3 - this.game.hints;
-                document.getElementById('victoryTime').textContent = `Time: ${this.game.formatTime(this.game.timer)} | Hints: ${usedHints}`;
+                document.getElementById('victoryTime').textContent = 
+                    `Time: ${this.game.formatTime(this.game.timer)} | Hints: ${usedHints}`;
                 this.victoryModal.classList.add('active');
             }
 
-            showReinstallModal() { document.getElementById('reinstallModal').classList.add('active'); }
+            showReinstallModal() {
+                document.getElementById('reinstallModal').classList.add('active');
+            }
 
             async performReinstall() {
                 document.getElementById('reinstallModal').classList.remove('active');
+                
                 try {
-                    localStorage.clear(); sessionStorage.clear();
+                    console.log('🗑️ Starting complete app removal...');
+                    
+                    // Step 1: Clear all localStorage
+                    console.log('   Clearing localStorage...');
+                    localStorage.clear();
+                    
+                    // Step 2: Clear all sessionStorage
+                    console.log('   Clearing sessionStorage...');
+                    sessionStorage.clear();
+                    
+                    // Step 3: Unregister all service workers
                     if ('serviceWorker' in navigator) {
+                        console.log('   Unregistering service workers...');
                         const registrations = await navigator.serviceWorker.getRegistrations();
-                        for (let reg of registrations) await reg.unregister();
+                        for (let registration of registrations) {
+                            await registration.unregister();
+                            console.log('   ✓ Service worker unregistered');
+                        }
                     }
+                    
+                    // Step 4: Clear all caches
                     if ('caches' in window) {
+                        console.log('   Clearing all caches...');
                         const cacheNames = await caches.keys();
-                        for (let cacheName of cacheNames) await caches.delete(cacheName);
+                        for (let cacheName of cacheNames) {
+                            await caches.delete(cacheName);
+                            console.log(`   ✓ Cache deleted: ${cacheName}`);
+                        }
                     }
+                    
+                    // Step 5: Clear IndexedDB (if exists)
                     if ('indexedDB' in window) {
+                        console.log('   Clearing IndexedDB...');
                         const dbs = await indexedDB.databases();
-                        for (let db of dbs) if (db.name) indexedDB.deleteDatabase(db.name);
+                        for (let db of dbs) {
+                            if (db.name) {
+                                indexedDB.deleteDatabase(db.name);
+                                console.log(`   ✓ Database deleted: ${db.name}`);
+                            }
+                        }
                     }
-                    document.cookie.split(";").forEach(c => document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"));
+                    
+                    // Step 6: Clear cookies for this domain
+                    console.log('   Clearing cookies...');
+                    document.cookie.split(";").forEach(function(c) { 
+                        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                    });
+                    
+                    console.log('✅ Complete app removal finished!');
                     alert('✅ App completely removed!\n\nAll data, cache, and storage cleared.\nPage will reload.');
+                    
+                    // Force hard reload
                     window.location.href = window.location.href.split('?')[0] + '?t=' + new Date().getTime();
-                } catch (error) { alert('⚠️ Removal error: ' + error.message); }
+                } catch (error) {
+                    console.error('❌ Removal error:', error);
+                    alert('⚠️ Removal error: ' + error.message + '\n\nSome data may still remain.');
+                }
             }
         }
 
-        const APP_VERSION = '9.5.1';
+        // ============= INITIALIZE APP =============
+        const APP_VERSION = '9.1';
         let gameState, uiController;
-        
-        window.popupDigitClick = function(num) {
-            if (!uiController || uiController.popupTargetRow === null) return;
-            const pos = uiController.popupTargetRow * 9 + uiController.popupTargetCol;
-            uiController.selectCell(pos);
-            uiController.inputNumber(num);
-            window.closeDigitPopup();
-        };
-        
-        window.closeDigitPopup = function() {
-            const modal = document.getElementById('digitPopupModal');
-            if (modal) modal.classList.remove('active');
-            if (uiController) {
-                uiController.popupTargetRow = null;
-                uiController.popupTargetCol = null;
-            }
-        };
 
         window.addEventListener('DOMContentLoaded', () => {
             gameState = new GameState();
@@ -1883,79 +2012,112 @@
             gameState.onWin = function() {
                 originalOnWin();
                 uiController.showVictory();
+                // Haptic: win pattern (req 5.4)
                 AppSystems.haptic('win');
             };
 
             uiController.showDifficultyModal();
+
+            // Boot all systems
             AppSystems.init();
-            
-            document.addEventListener('visibilitychange', () => {
-                if (document.visibilityState === 'visible') {
-                    if (AppSystems.settings.preventSleep && 'wakeLock' in navigator) {
-                        navigator.wakeLock.request('screen').catch(e => console.log('[WakeLock] Re-acquisition failed:', e.message));
-                    }
-                }
-            });
         });
 
         // ============= APP SYSTEMS V9.0 =============
         const AppSystems = {
+
             settings: {
-                haptics: true, animations: true, network: true,
-                digitEntryStyle: 'fixed', defaultEntryMode: 'cell-first', twoTapsEdit: false,
-                preventDefault: true, showDigitCounts: true, autoPencil: true,
-                showTimer: true, showCrosshairs: true, highlightDigits: true,
-                highlightInitial: true, boldInitial: true, popupTransparency: 5,  
-                disableAllHelp: false, flagConflicts: true, flagIncorrect: false
+                haptics: true,
+                animations: true,
+                network: true
             },
 
+            // ---- INIT ----
             init() {
                 this.loadSettings();
-                this.initVersionManager();   
-                this.initNetworkMonitor();   
-                this.initInstallPrompt();    
-                this.initPullToRefresh();    
-                this.initSwipeGestures();    
-                this.initSettingsUI();       
-                this.initResetUI();          
-                this.registerSW();           
+                this.initVersionManager();   // req 1.1-1.4
+                this.initNetworkMonitor();   // req 4.2-4.3, 4.4
+                this.initInstallPrompt();    // req 3.2-3.4
+                this.initPullToRefresh();    // req 5.2
+                this.initSwipeGestures();    // req 5.3
+                this.initSettingsUI();       // req 7.3
+                this.initResetUI();          // req 2.1-2.3
+                this.registerSW();           // req 4.1, 1.3-1.4
                 this.applyUrlParams();
             },
 
+            // ---- TOAST SYSTEM (req 6.1) ----
             showToast(message, type = 'info', duration = 3000) {
                 const container = document.getElementById('toastContainer');
                 const toast = document.createElement('div');
-                toast.className = `toast ${type}`; toast.textContent = message;
+                toast.className = `toast ${type}`;
+                toast.textContent = message;
                 container.appendChild(toast);
-                requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('show')));
-                setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, duration);
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => toast.classList.add('show'));
+                });
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300);
+                }, duration);
             },
 
+            // ---- HAPTIC FEEDBACK (req 5.4) ----
             haptic(type = 'light') {
                 if (!this.settings.haptics || !navigator.vibrate) return;
-                const patterns = { light: [10], error: [50, 30, 50], win: [50, 30, 50, 30, 100], tap: [8] };
+                const patterns = {
+                    light:  [10],
+                    error:  [50, 30, 50],
+                    win:    [50, 30, 50, 30, 100],
+                    tap:    [8]
+                };
                 navigator.vibrate(patterns[type] || [10]);
             },
 
+            // ---- VERSION MANAGER (req 1.1-1.4) ----
             initVersionManager() {
+                // 1.3 Auto-update: compare stored vs code version
                 const storedVersion = localStorage.getItem('app_version');
                 if (storedVersion && storedVersion !== APP_VERSION) {
-                    this.clearCacheSilent().then(() => localStorage.setItem('app_version', APP_VERSION));
+                    console.log(`[Version] Upgrade ${storedVersion} → ${APP_VERSION}, clearing cache...`);
+                    this.clearCacheSilent().then(() => {
+                        localStorage.setItem('app_version', APP_VERSION);
+                    });
                 } else {
                     localStorage.setItem('app_version', APP_VERSION);
                 }
+
+                // 1.2 Check version.json from server
                 this.checkRemoteVersion();
-                document.getElementById('versionBtn').addEventListener('click', () => document.getElementById('reinstallModal').classList.add('active'));
+
+                // 1.1 Version display click → full removal modal
+                document.getElementById('versionBtn').addEventListener('click', () => {
+                    document.getElementById('reinstallModal').classList.add('active');
+                });
             },
 
             async checkRemoteVersion() {
-                if (!navigator.onLine) return;
+                // 1.2 Fetch version.json to detect newer version
+                // OFFLINE SAFE: Only check if online, fail silently otherwise
+                if (!navigator.onLine) {
+                    console.log('[Version] Offline - skipping remote version check');
+                    return;
+                }
+                
                 try {
-                    const res = await fetch('./version.json?t=' + Date.now(), { cache: 'no-store', signal: AbortSignal.timeout(3000) });
+                    const res = await fetch('./version.json?t=' + Date.now(), { 
+                        cache: 'no-store',
+                        signal: AbortSignal.timeout(3000) // 3s timeout
+                    });
                     if (!res.ok) return;
                     const data = await res.json();
-                    if (data.version && data.version !== APP_VERSION) this.showUpdatePrompt();
-                } catch (e) {}
+                    if (data.version && data.version !== APP_VERSION) {
+                        console.log(`[Version] Server has ${data.version}, current ${APP_VERSION}`);
+                        this.showUpdatePrompt();
+                    }
+                } catch (e) {
+                    // version.json not found or network error – silently ignore
+                    console.log('[Version] Remote check failed (offline or file missing)');
+                }
             },
 
             showUpdatePrompt() {
@@ -1974,15 +2136,21 @@
                 }
             },
 
+            // ---- SW REGISTRATION + update polling (req 4.1, 1.4) ----
             async registerSW() {
                 if (!('serviceWorker' in navigator)) return;
                 try {
                     const reg = await navigator.serviceWorker.register('./sw.js');
+                    console.log('[SW] Registered');
+
+                    // 1.4 Poll for SW updates every 300 s
                     setInterval(() => reg.update(), 300_000);
+
                     reg.addEventListener('updatefound', () => {
                         const newWorker = reg.installing;
                         newWorker.addEventListener('statechange', () => {
                             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                // New SW ready → show prompt
                                 this.showUpdatePrompt();
                                 document.getElementById('updateNowBtn').onclick = () => {
                                     newWorker.postMessage({ type: 'SKIP_WAITING' });
@@ -1991,11 +2159,15 @@
                             }
                         });
                     });
-                } catch (err) {}
+                } catch (err) {
+                    console.warn('[SW] Registration failed:', err);
+                }
             },
 
+            // ---- NETWORK MONITOR (req 4.2-4.4) ----
             initNetworkMonitor() {
                 const banner = document.getElementById('offlineBanner');
+
                 const updateStatus = (online) => {
                     if (!this.settings.network) return;
                     if (!online) {
@@ -2006,25 +2178,40 @@
                         this.showToast('✅ Internet connection restored', 'success');
                     }
                 };
+
                 window.addEventListener('online',  () => updateStatus(true));
                 window.addEventListener('offline', () => updateStatus(false));
                 if (!navigator.onLine) updateStatus(false);
+
+                // 4.4 Data saver / slow connection
                 if ('connection' in navigator) {
                     const conn = navigator.connection;
                     const check = () => {
-                        if (conn.saveData || conn.effectiveType === '2g') this.showToast('🐌 Slow connection detected', 'warning', 5000);
+                        if (conn.saveData || conn.effectiveType === '2g') {
+                            this.showToast('🐌 Slow connection detected', 'warning', 5000);
+                        }
                     };
-                    check(); conn.addEventListener('change', check);
+                    check();
+                    conn.addEventListener('change', check);
                 }
             },
 
+            // ---- PWA INSTALL PROMPT (req 3.2-3.4) ----
             initInstallPrompt() {
                 const banner  = document.getElementById('installBanner');
-                if (localStorage.getItem('pwa_install_dismissed')) return;
+                const already = localStorage.getItem('pwa_install_dismissed');
+                if (already) return;
+
                 let deferredPrompt = null;
+
+                // 3.2 Capture beforeinstallprompt
                 window.addEventListener('beforeinstallprompt', (e) => {
-                    e.preventDefault(); deferredPrompt = e; setTimeout(() => banner.classList.add('visible'), 2000);
+                    e.preventDefault();
+                    deferredPrompt = e;
+                    setTimeout(() => banner.classList.add('visible'), 2000);
                 });
+
+                // 3.3 Accept
                 document.getElementById('installAcceptBtn').addEventListener('click', async () => {
                     banner.classList.remove('visible');
                     if (deferredPrompt) {
@@ -2034,202 +2221,207 @@
                         deferredPrompt = null;
                     }
                 });
+
+                // 3.3 Dismiss
                 document.getElementById('installDismissBtn').addEventListener('click', () => {
-                    banner.classList.remove('visible'); localStorage.setItem('pwa_install_dismissed', '1');
+                    banner.classList.remove('visible');
+                    localStorage.setItem('pwa_install_dismissed', '1');
                 });
+
+                // 3.4 Installed event
                 window.addEventListener('appinstalled', () => {
-                    banner.classList.remove('visible'); this.showToast('🎉 App installed successfully!', 'success', 4000);
+                    banner.classList.remove('visible');
+                    this.showToast('🎉 App installed successfully!', 'success', 4000);
                 });
             },
 
+            // ---- PULL TO REFRESH (req 5.2) ----
             initPullToRefresh() {
                 const indicator = document.getElementById('ptrIndicator');
                 let startY = 0, pulling = false;
+
                 document.addEventListener('touchstart', (e) => {
-                    if (document.querySelector('.modal.active') || document.getElementById('menuPanel')?.classList.contains('active')) { startY = 0; return; }
                     if (window.scrollY === 0) startY = e.touches[0].clientY;
                 }, { passive: true });
+
                 document.addEventListener('touchmove', (e) => {
                     if (!startY) return;
-                    if (document.querySelector('.modal.active') || document.getElementById('menuPanel')?.classList.contains('active')) {
-                        startY = 0; pulling = false; indicator.classList.remove('visible'); return;
-                    }
                     const dy = e.touches[0].clientY - startY;
-                    if (dy > 60) { pulling = true; indicator.classList.add('visible'); indicator.style.fontSize = '22px'; }
+                    if (dy > 60) {
+                        pulling = true;
+                        indicator.classList.add('visible');
+                        indicator.style.fontSize = '22px';
+                    }
                 }, { passive: true });
+
                 document.addEventListener('touchend', () => {
                     if (pulling) {
                         indicator.style.fontSize = '28px';
-                        setTimeout(() => { indicator.classList.remove('visible'); location.reload(); }, 500);
+                        setTimeout(() => {
+                            indicator.classList.remove('visible');
+                            location.reload();
+                        }, 500);
                     }
                     startY = 0; pulling = false;
                 });
             },
 
+            // ---- SWIPE GESTURES (req 5.3) ----
             initSwipeGestures() {
-                let startX = 0, startY = 0, startTarget = null;
-                document.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; startTarget = e.target; }, { passive: true });
+                let startX = 0, startY = 0;
+
+                document.addEventListener('touchstart', (e) => {
+                    startX = e.touches[0].clientX;
+                    startY = e.touches[0].clientY;
+                }, { passive: true });
+
                 document.addEventListener('touchend', (e) => {
-                    const dx = e.changedTouches[0].clientX - startX, dy = e.changedTouches[0].clientY - startY;
+                    const dx = e.changedTouches[0].clientX - startX;
+                    const dy = e.changedTouches[0].clientY - startY;
                     const absDx = Math.abs(dx), absDy = Math.abs(dy);
-                    if (Math.max(absDx, absDy) < 50) return; 
-                    const modalContent = startTarget?.closest('.modal-content');
+
+                    if (Math.max(absDx, absDy) < 50) return; // too short
+
                     if (absDx > absDy) {
-                        if (modalContent !== null) return; 
+                        // horizontal swipe
                         const panel = document.getElementById('menuPanel');
-                        if (dx < 0 && panel.classList.contains('active')) uiController.toggleMenu();
-                        else if (dx > 0 && !panel.classList.contains('active')) uiController.toggleMenu();
-                    } else if (dy < -50) {
-                        if (modalContent === null || modalContent.scrollTop > 0) return; 
-                        const modalRect = modalContent.getBoundingClientRect();
-                        if (startY - modalRect.top < 100) {
-                            const activeModal = startTarget.closest('.modal.active');
-                            if (activeModal) activeModal.classList.remove('active');
+                        if (dx < 0 && panel.classList.contains('active')) {
+                            // swipe left → close menu
+                            uiController.toggleMenu();
+                        } else if (dx > 0 && !panel.classList.contains('active')) {
+                            // swipe right → open menu
+                            uiController.toggleMenu();
                         }
+                    } else if (dy < -50) {
+                        // swipe up → close any open modal
+                        document.querySelectorAll('.modal.active').forEach(m => m.classList.remove('active'));
                     }
                 });
             },
 
+            // ---- SETTINGS UI (req 7.3) ----
             loadSettings() {
                 const saved = localStorage.getItem('app_settings');
-                if (saved) { try { Object.assign(this.settings, JSON.parse(saved)); } catch(e) {} }
-            },
-
-            saveSettingsToStorage() { localStorage.setItem('app_settings', JSON.stringify(this.settings)); },
-
-            initSettingsUI() {
-                const transparencySlider = document.getElementById('settingPopupTransparency');
-                const transparencyValue = document.getElementById('popupTransparencyValue');
-                transparencySlider.addEventListener('input', (e) => transparencyValue.textContent = e.target.value + '%');
-                
-                const disableAllHelp = document.getElementById('settingDisableAllHelp');
-                const flagConflicts = document.getElementById('settingFlagConflicts');
-                const flagIncorrect = document.getElementById('settingFlagIncorrect');
-                
-                disableAllHelp.addEventListener('change', (e) => {
-                    if (e.target.checked) {
-                        flagConflicts.checked = false; flagIncorrect.checked = false;
-                        flagConflicts.disabled = true; flagIncorrect.disabled = true;
-                    } else {
-                        flagConflicts.disabled = false; flagIncorrect.disabled = false;
-                    }
-                });
-                
-                document.getElementById('settingsMenu').addEventListener('click', () => {
-                    uiController.toggleMenu(); this.syncSettingsToUI(); document.getElementById('settingsModal').classList.add('active');
-                });
-                document.getElementById('saveSettings').addEventListener('click', () => {
-                    this.syncSettingsFromUI(); this.saveSettingsToStorage(); this.applySettings();
-                    document.getElementById('settingsModal').classList.remove('active');
-                    this.showToast('✅ Settings saved', 'success'); this.haptic('light');
-                });
-                document.getElementById('closeSettings').addEventListener('click', () => document.getElementById('settingsModal').classList.remove('active'));
-            },
-            
-            syncSettingsToUI() {
-                document.getElementById('settingDigitEntryStyle').value = this.settings.digitEntryStyle;
-                document.getElementById('settingDefaultEntryMode').value = this.settings.defaultEntryMode;
-                document.getElementById('settingTwoTapsEdit').checked = this.settings.twoTapsEdit;
-                document.getElementById('settingPreventSleep').checked = this.settings.preventSleep;
-                document.getElementById('settingShowDigitCounts').checked = this.settings.showDigitCounts;
-                document.getElementById('settingAutoPencil').checked = this.settings.autoPencil;
-                document.getElementById('settingShowTimer').checked = this.settings.showTimer;
-                document.getElementById('settingShowCrosshairs').checked = this.settings.showCrosshairs;
-                document.getElementById('settingHighlightDigits').checked = this.settings.highlightDigits;
-                document.getElementById('settingHighlightInitial').checked = this.settings.highlightInitial;
-                document.getElementById('settingBoldInitial').checked = this.settings.boldInitial;
-                document.getElementById('settingPopupTransparency').value = this.settings.popupTransparency;
-                document.getElementById('popupTransparencyValue').textContent = this.settings.popupTransparency + '%';
-                document.getElementById('settingHaptics').checked = this.settings.haptics;
-                document.getElementById('settingAnimations').checked = this.settings.animations;
-                document.getElementById('settingNetwork').checked = this.settings.network;
-                document.getElementById('settingDisableAllHelp').checked = this.settings.disableAllHelp;
-                document.getElementById('settingFlagConflicts').checked = this.settings.flagConflicts;
-                document.getElementById('settingFlagIncorrect').checked = this.settings.flagIncorrect;
-                
-                if (this.settings.disableAllHelp) {
-                    document.getElementById('settingFlagConflicts').disabled = true;
-                    document.getElementById('settingFlagIncorrect').disabled = true;
-                } else {
-                    document.getElementById('settingFlagConflicts').disabled = false;
-                    document.getElementById('settingFlagIncorrect').disabled = false;
+                if (saved) {
+                    try { Object.assign(this.settings, JSON.parse(saved)); } catch(e) {}
                 }
             },
-            
-            syncSettingsFromUI() {
-                this.settings.digitEntryStyle = document.getElementById('settingDigitEntryStyle').value;
-                this.settings.defaultEntryMode = document.getElementById('settingDefaultEntryMode').value;
-                this.settings.twoTapsEdit = document.getElementById('settingTwoTapsEdit').checked;
-                this.settings.preventSleep = document.getElementById('settingPreventSleep').checked;
-                this.settings.showDigitCounts = document.getElementById('settingShowDigitCounts').checked;
-                this.settings.autoPencil = document.getElementById('settingAutoPencil').checked;
-                this.settings.showTimer = document.getElementById('settingShowTimer').checked;
-                this.settings.showCrosshairs = document.getElementById('settingShowCrosshairs').checked;
-                this.settings.highlightDigits = document.getElementById('settingHighlightDigits').checked;
-                this.settings.highlightInitial = document.getElementById('settingHighlightInitial').checked;
-                this.settings.boldInitial = document.getElementById('settingBoldInitial').checked;
-                this.settings.popupTransparency = parseInt(document.getElementById('settingPopupTransparency').value);
-                this.settings.haptics = document.getElementById('settingHaptics').checked;
-                this.settings.animations = document.getElementById('settingAnimations').checked;
-                this.settings.network = document.getElementById('settingNetwork').checked;
-                this.settings.disableAllHelp = document.getElementById('settingDisableAllHelp').checked;
-                this.settings.flagConflicts = document.getElementById('settingFlagConflicts').checked;
-                this.settings.flagIncorrect = document.getElementById('settingFlagIncorrect').checked;
-            },
-            
-            applySettings() {
-                const timerEl = document.getElementById('timer');
-                if (timerEl) timerEl.style.display = this.settings.showTimer ? 'block' : 'none';
-                if (this.settings.preventSleep && 'wakeLock' in navigator) navigator.wakeLock.request('screen').catch(e => {});
-                if (window.uiController) uiController.refreshDisplay();
+
+            saveSettingsToStorage() {
+                localStorage.setItem('app_settings', JSON.stringify(this.settings));
             },
 
+            initSettingsUI() {
+                // Wire menu item
+                document.getElementById('settingsMenu').addEventListener('click', () => {
+                    uiController.toggleMenu();
+                    // Sync toggles with current settings
+                    document.getElementById('settingHaptics').checked    = this.settings.haptics;
+                    document.getElementById('settingAnimations').checked = this.settings.animations;
+                    document.getElementById('settingNetwork').checked    = this.settings.network;
+                    document.getElementById('settingsModal').classList.add('active');
+                });
+
+                document.getElementById('saveSettings').addEventListener('click', () => {
+                    this.settings.haptics    = document.getElementById('settingHaptics').checked;
+                    this.settings.animations = document.getElementById('settingAnimations').checked;
+                    this.settings.network    = document.getElementById('settingNetwork').checked;
+                    this.saveSettingsToStorage();
+                    document.getElementById('settingsModal').classList.remove('active');
+                    this.showToast('✅ Settings saved', 'success');
+                    this.haptic('light');
+                });
+
+                document.getElementById('closeSettings').addEventListener('click', () => {
+                    document.getElementById('settingsModal').classList.remove('active');
+                });
+            },
+
+            // ---- RESET / REMOVAL UI (req 2.1-2.3) ----
             initResetUI() {
+                // Selective reset
                 document.getElementById('openSelectiveReset').addEventListener('click', () => {
-                    document.getElementById('reinstallModal').classList.remove('active'); document.getElementById('resetModal').classList.add('active');
+                    document.getElementById('reinstallModal').classList.remove('active');
+                    document.getElementById('resetModal').classList.add('active');
                 });
-                document.getElementById('cancelReset').addEventListener('click', () => document.getElementById('resetModal').classList.remove('active'));
-                document.getElementById('confirmSelectiveReset').addEventListener('click', async () => {
-                    if (document.getElementById('resetSavedGame').checked) localStorage.removeItem('sudoku_current_game');
-                    if (document.getElementById('resetStats').checked) localStorage.removeItem('sudoku_stats');
-                    if (document.getElementById('resetSettings').checked) { localStorage.removeItem('app_settings'); localStorage.removeItem('sudoku_theme'); }
-                    if (document.getElementById('resetCache').checked) await this.clearCacheSilent();
+
+                document.getElementById('cancelReset').addEventListener('click', () => {
                     document.getElementById('resetModal').classList.remove('active');
-                    this.showToast('✅ Selected data removed', 'success'); setTimeout(() => location.reload(), 1200);
                 });
-                document.getElementById('cancelReinstall').addEventListener('click', () => document.getElementById('reinstallModal').classList.remove('active'));
-                document.getElementById('confirmReinstall').addEventListener('click', () => this.performFullRemoval());
+
+                document.getElementById('confirmSelectiveReset').addEventListener('click', async () => {
+                    const delGame     = document.getElementById('resetSavedGame').checked;
+                    const delStats    = document.getElementById('resetStats').checked;
+                    const delSettings = document.getElementById('resetSettings').checked;
+                    const delCache    = document.getElementById('resetCache').checked;
+
+                    if (delGame)     localStorage.removeItem('sudoku_current_game');
+                    if (delStats)    localStorage.removeItem('sudoku_stats');
+                    if (delSettings) { localStorage.removeItem('app_settings'); localStorage.removeItem('sudoku_theme'); }
+                    if (delCache)    await this.clearCacheSilent();
+
+                    document.getElementById('resetModal').classList.remove('active');
+                    this.showToast('✅ Selected data removed', 'success');
+                    setTimeout(() => location.reload(), 1200);
+                });
+
+                // Full removal
+                document.getElementById('cancelReinstall').addEventListener('click', () => {
+                    document.getElementById('reinstallModal').classList.remove('active');
+                });
+
+                document.getElementById('confirmReinstall').addEventListener('click', () => {
+                    this.performFullRemoval();
+                });
             },
 
             async performFullRemoval() {
                 document.getElementById('reinstallModal').classList.remove('active');
                 try {
-                    localStorage.clear(); sessionStorage.clear();
+                    localStorage.clear();
+                    sessionStorage.clear();
                     if ('serviceWorker' in navigator) {
                         const regs = await navigator.serviceWorker.getRegistrations();
                         await Promise.all(regs.map(r => r.unregister()));
                     }
                     await this.clearCacheSilent();
                     if ('indexedDB' in window && indexedDB.databases) {
-                        const dbs = await indexedDB.databases(); dbs.forEach(db => db.name && indexedDB.deleteDatabase(db.name));
+                        const dbs = await indexedDB.databases();
+                        dbs.forEach(db => db.name && indexedDB.deleteDatabase(db.name));
                     }
-                    document.cookie.split(';').forEach(c => document.cookie = c.replace(/^ +/, '').replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/'));
+                    document.cookie.split(';').forEach(c => {
+                        document.cookie = c.replace(/^ +/, '').replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/');
+                    });
                     this.showToast('✅ App completely removed', 'success');
                     setTimeout(() => { window.location.href = window.location.href.split('?')[0] + '?t=' + Date.now(); }, 1500);
-                } catch (err) { this.showToast('⚠️ Error: ' + err.message, 'error'); }
+                } catch (err) {
+                    this.showToast('⚠️ Error: ' + err.message, 'error');
+                }
             },
 
+            // ---- URL PARAM handling (difficulty/stats shortcuts) ----
             applyUrlParams() {
                 const params = new URLSearchParams(location.search);
                 const diff = params.get('difficulty');
-                if (diff && ['easy','medium','hard','expert'].includes(diff)) setTimeout(() => uiController.startNewGame(diff), 200);
-                if (params.get('view') === 'stats') setTimeout(() => uiController.showStats(), 200);
+                const view = params.get('view');
+                if (diff && ['easy','medium','hard','expert'].includes(diff)) {
+                    setTimeout(() => uiController.startNewGame(diff), 200);
+                }
+                if (view === 'stats') {
+                    setTimeout(() => uiController.showStats(), 200);
+                }
             }
         };
 
+        // ============= SERVICE WORKER REGISTRATION =============
+        // (Handled inside AppSystems.registerSW above)
+        // Legacy SW version-check on load kept for back-compat:
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {});
+            window.addEventListener('load', () => {
+                // AppSystems.registerSW() is called from DOMContentLoaded above
+            });
         }
+
     </script>
 </body>
 </html>

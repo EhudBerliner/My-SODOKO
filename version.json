@@ -1,21 +1,14 @@
 {
-  "version": "9.5.3",
-  "releaseDate": "2026-03-18",
+  "version": "9.1",
+  "releaseDate": "2026-03-05",
   "changelog": [
-    "🔧 CRITICAL FIX: Puzzle generation failure resolved",
-    "FIXED: Aggressive fallback now ensures puzzles always generate",
-    "FIXED: Fallback triggers at 50% of target (was 60%)",
-    "FIXED: Fallback removes cells up to full target (not just minimum)",
-    "OPTIMIZED: Timeout increased to 2000ms for better accuracy",
-    "OPTIMIZED: Reduced target cells - Easy:32, Medium:42, Hard:50, Expert:56",
-    "IMPROVED: Better balance between speed and puzzle quality",
-    "No more 'Failed to generate puzzle' errors!"
+    "OFFLINE MODE FIX: Full offline functionality guaranteed",
+    "Version check now fails gracefully when offline",
+    "Network timeout protection (3 seconds)",
+    "No network errors in offline mode",
+    "All game features work without internet",
+    "Service worker optimized for offline-first"
   ],
   "breaking_changes": false,
-  "critical_fix": true,
-  "bug_fixed": "Puzzle generation returning 0 empty cells",
-  "impact": "Game now always generates playable puzzles",
-  "offline_compatible": true,
-  "offline_first": true,
-  "settings_count": 18
+  "offline_compatible": true
 }
