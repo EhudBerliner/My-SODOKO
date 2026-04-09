@@ -1,5 +1,5 @@
 // ============= SUDOKU WEB WORKER =============
-// Version 9.4
+// Version 9.6
 // Handles puzzle generation in background thread to prevent UI blocking
 
 class SudokuEngine {
