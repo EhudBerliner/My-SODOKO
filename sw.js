@@ -1,10 +1,12 @@
-const CACHE_NAME = 'sudoku-cache-v9.4';
+const CACHE_NAME = 'sudoku-cache-v9.5';
 const urlsToCache = [
     './',
     './index.html',
     './manifest.json',
     './icon-512.png',
-    './sudoku-worker.js'  // Add worker to cache
+    './logo3.png',
+    './version.json',
+    './sudoku-worker.js'
 ];
 
 self.addEventListener('install', (event) => {
@@ -34,6 +36,36 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     event.respondWith(
         caches.match(event.request)
-            .then((response) => response || fetch(event.request))
+            .then((cachedResponse) => {
+                if (cachedResponse) {
+                    return cachedResponse;
+                }
+                
+                return fetch(event.request)
+                    .then((networkResponse) => {
+                        // Clone and cache successful network responses
+                        if (networkResponse && networkResponse.status === 200) {
+                            const responseToCache = networkResponse.clone();
+                            caches.open(CACHE_NAME).then((cache) => {
+                                cache.put(event.request, responseToCache);
+                            });
+                        }
+                        return networkResponse;
+                    })
+                    .catch((error) => {
+                        console.log('[SW] Fetch failed; returning offline fallback:', error);
+                        // Return a valid fallback response to prevent hanging
+                        return new Response(
+                            JSON.stringify({ offline: true, error: 'Network unavailable' }),
+                            {
+                                status: 503,
+                                statusText: 'Service Unavailable',
+                                headers: new Headers({
+                                    'Content-Type': 'application/json'
+                                })
+                            }
+                        );
+                    });
+            })
     );
 });

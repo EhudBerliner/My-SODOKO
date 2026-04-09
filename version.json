@@ -1,17 +1,21 @@
 {
-  "version": "9.4",
+  "version": "9.5",
   "releaseDate": "2026-04-09",
   "changelog": [
-    "PERFORMANCE: Web Worker for puzzle generation",
-    "Feature: Zero-wait board loading with cache system",
-    "Feature: Background pre-generation of puzzles",
-    "Feature: Fallback to main thread if Worker unsupported",
-    "Optimization: Puzzle cache for all difficulty levels",
-    "Tech: Separate sudoku-worker.js file",
-    "Tech: WorkerManager with queue management"
+    "OFFLINE PERFECT: Complete offline functionality guaranteed",
+    "Service Worker: Enhanced caching with all critical assets",
+    "Service Worker: Robust fetch fallback prevents hanging",
+    "Service Worker: Added version.json and logo3.png to cache",
+    "Application: Comprehensive error handling for version checks",
+    "Application: Silent failure with graceful degradation",
+    "Fix: No more 'Uncaught in promise' errors in offline mode",
+    "Fix: Application starts immediately without network",
+    "Performance: Web Worker for puzzle generation (from v9.4)",
+    "Performance: Zero-wait board loading with cache (from v9.4)"
   ],
   "breaking_changes": false,
   "offline_compatible": true,
   "offline_first": true,
-  "new_files": ["sudoku-worker.js"]
+  "new_files": ["sudoku-worker.js"],
+  "cache_version": "v9.5"
 }

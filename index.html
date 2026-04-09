@@ -2168,7 +2168,7 @@
         }
 
         // ============= INITIALIZE APP =============
-        const APP_VERSION = '9.4';
+        const APP_VERSION = '9.5';
         let gameState, uiController;
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -2276,15 +2276,30 @@
                         cache: 'no-store',
                         signal: AbortSignal.timeout(3000) // 3s timeout
                     });
-                    if (!res.ok) return;
+                    
+                    if (!res.ok) {
+                        console.log('[Version] Server returned status:', res.status);
+                        return;
+                    }
+                    
                     const data = await res.json();
+                    
                     if (data.version && data.version !== APP_VERSION) {
                         console.log(`[Version] Server has ${data.version}, current ${APP_VERSION}`);
                         this.showUpdatePrompt();
+                    } else {
+                        console.log('[Version] Up to date:', APP_VERSION);
                     }
                 } catch (e) {
-                    // version.json not found or network error – silently ignore
-                    console.log('[Version] Remote check failed (offline or file missing)');
+                    // Comprehensive error handling - network errors, timeouts, parse errors
+                    if (e.name === 'AbortError') {
+                        console.log('[Version] Check timed out - continuing with current version');
+                    } else if (e instanceof TypeError) {
+                        console.log('[Version] Network error - continuing offline with current version');
+                    } else {
+                        console.log('[Version] Check failed:', e.message);
+                    }
+                    // Application continues normally - no blocking behavior
                 }
             },
 
