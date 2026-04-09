@@ -1,5 +1,5 @@
-// Service Worker for Sudoku PWA - Dynamic Version
-const CACHE_NAME = 'sudoku-cache-v9.1';
+// Service Worker for Sudoku PWA - Offline First
+const CACHE_NAME = 'sudoku-cache-v9.2';
 const urlsToCache = [
   './',
   './index.html',
@@ -27,7 +27,7 @@ self.addEventListener('install', (event) => {
 // Activate event - clean old caches
 self.addEventListener('activate', (event) => {
   console.log('[Service Worker] Activating...');
-  const CURRENT_CACHE = 'sudoku-cache-v9.1';
+  const CURRENT_CACHE = 'sudoku-cache-v9.2';
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
@@ -41,35 +41,38 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch event - network first, fallback to cache
+// Fetch event - CACHE FIRST for offline capability
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        // Check if valid response
-        if (!response || response.status !== 200 || response.type !== 'basic') {
-          return response;
+    caches.match(event.request)
+      .then((cachedResponse) => {
+        // Return cached version if available
+        if (cachedResponse) {
+          return cachedResponse;
         }
+        
+        // Otherwise fetch from network
+        return fetch(event.request)
+          .then((response) => {
+            // Check if valid response
+            if (!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
 
-        // Clone and cache the response
-        const responseToCache = response.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
+            // Clone and cache the response for future offline use
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
 
-        return response;
-      })
-      .catch(() => {
-        // Network failed, try cache
-        return caches.match(event.request).then((response) => {
-          if (response) {
             return response;
-          }
-          // If both fail
-          return new Response('Offline - Game data saved locally', {
-            headers: { 'Content-Type': 'text/plain' }
+          })
+          .catch(() => {
+            // Network failed and no cache - return offline message
+            return new Response('Offline - Game data saved locally', {
+              headers: { 'Content-Type': 'text/plain' }
+            });
           });
-        });
       })
   );
 });

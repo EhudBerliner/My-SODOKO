@@ -1,13 +1,13 @@
 {
-  "version": "9.1",
-  "releaseDate": "2026-03-05",
+  "version": "9.2",
+  "releaseDate": "2026-04-09",
   "changelog": [
-    "OFFLINE MODE FIX: Full offline functionality guaranteed",
-    "Version check now fails gracefully when offline",
-    "Network timeout protection (3 seconds)",
-    "No network errors in offline mode",
-    "All game features work without internet",
-    "Service worker optimized for offline-first"
+    "OFFLINE FIRST: Full offline functionality with cache-first strategy",
+    "Service Worker optimized for complete offline operation",
+    "15-second timeout protection prevents browser freezing",
+    "Works perfectly without internet connection",
+    "All game features available offline",
+    "Improved PWA reliability"
   ],
   "breaking_changes": false,
   "offline_compatible": true
