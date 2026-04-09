@@ -1,12 +1,17 @@
 {
-  "version": "9.3",
+  "version": "9.4",
   "releaseDate": "2026-04-09",
   "changelog": [
-    "Added: Pull-to-Refresh toggle in Settings",
-    "Feature: Users can now disable/enable pull-to-refresh",
-    "UI: New setting 'Pull to Refresh' with description"
+    "PERFORMANCE: Web Worker for puzzle generation",
+    "Feature: Zero-wait board loading with cache system",
+    "Feature: Background pre-generation of puzzles",
+    "Feature: Fallback to main thread if Worker unsupported",
+    "Optimization: Puzzle cache for all difficulty levels",
+    "Tech: Separate sudoku-worker.js file",
+    "Tech: WorkerManager with queue management"
   ],
   "breaking_changes": false,
   "offline_compatible": true,
-  "offline_first": true
+  "offline_first": true,
+  "new_files": ["sudoku-worker.js"]
 }

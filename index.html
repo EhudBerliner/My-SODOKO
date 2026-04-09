@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#4A90E2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Sudoku Pro - V9.3</title>
+    <title>Sudoku Pro - V9.4</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon-512.png">
     <link rel="apple-touch-icon" href="icon-512.png">
@@ -715,7 +715,7 @@
         <!-- Header -->
         <div class="header">
             <div class="app-title" id="appTitle">Sudoku Pro</div>
-            <div class="version" id="versionBtn">Version 9.3</div>
+            <div class="version" id="versionBtn">Version 9.4</div>
         </div>
 
         <!-- Top Bar -->
@@ -1345,6 +1345,147 @@
             }
         }
 
+        // ============= WORKER MANAGER =============
+        class WorkerManager {
+            constructor() {
+                this.worker = null;
+                this.workerSupported = typeof Worker !== 'undefined';
+                this.cache = {
+                    easy: null,
+                    medium: null,
+                    hard: null,
+                    expert: null
+                };
+                this.generating = false;
+                this.currentDifficulty = null;
+                
+                if (this.workerSupported) {
+                    this.initWorker();
+                }
+            }
+            
+            initWorker() {
+                try {
+                    this.worker = new Worker('sudoku-worker.js');
+                    
+                    this.worker.onmessage = (e) => {
+                        const { status, board, solution, fixed, metadata, timeSpent } = e.data;
+                        
+                        if (status === 'SUCCESS') {
+                            console.log(`✅ Worker generated ${this.currentDifficulty} puzzle in ${timeSpent}ms`);
+                            
+                            // Cache the result
+                            this.cache[this.currentDifficulty] = {
+                                board,
+                                solution,
+                                fixed,
+                                metadata,
+                                timestamp: Date.now()
+                            };
+                            
+                            this.generating = false;
+                            this.currentDifficulty = null;
+                            
+                            // Trigger pre-generation for next difficulty
+                            this.preGenerateNext();
+                            
+                        } else if (status === 'ERROR') {
+                            console.error('❌ Worker error:', e.data.error);
+                            this.generating = false;
+                            this.currentDifficulty = null;
+                        }
+                    };
+                    
+                    this.worker.onerror = (error) => {
+                        console.error('❌ Worker error:', error);
+                        this.generating = false;
+                        this.workerSupported = false;
+                    };
+                    
+                    console.log('✅ Worker initialized successfully');
+                    
+                } catch (error) {
+                    console.error('❌ Failed to initialize worker:', error);
+                    this.workerSupported = false;
+                }
+            }
+            
+            async getPuzzle(difficulty) {
+                // Check if cached
+                if (this.cache[difficulty]) {
+                    console.log(`📦 Using cached ${difficulty} puzzle`);
+                    const cached = this.cache[difficulty];
+                    this.cache[difficulty] = null; // Clear cache
+                    
+                    // Start pre-generating replacement
+                    this.preGenerate(difficulty);
+                    
+                    return cached;
+                }
+                
+                // No cache - generate synchronously
+                console.log(`⏳ No cache for ${difficulty}, generating synchronously...`);
+                return await this.generateSync(difficulty);
+            }
+            
+            preGenerate(difficulty) {
+                // Don't pre-generate if already generating or cache exists
+                if (this.generating || this.cache[difficulty]) {
+                    return;
+                }
+                
+                if (!this.workerSupported || !this.worker) {
+                    return;
+                }
+                
+                console.log(`🔄 Pre-generating ${difficulty} puzzle in background...`);
+                this.generating = true;
+                this.currentDifficulty = difficulty;
+                
+                this.worker.postMessage({
+                    action: 'GENERATE',
+                    difficulty: difficulty,
+                    seed: Date.now()
+                });
+            }
+            
+            preGenerateNext() {
+                // Pre-generate puzzles for likely next difficulty
+                const priorities = ['medium', 'easy', 'hard', 'expert'];
+                
+                for (let diff of priorities) {
+                    if (!this.cache[diff] && !this.generating) {
+                        this.preGenerate(diff);
+                        break;
+                    }
+                }
+            }
+            
+            async generateSync(difficulty) {
+                // Fallback: generate in main thread
+                console.log('🔧 Fallback: Generating in main thread');
+                const engine = new SudokuEngine();
+                const result = engine.generatePuzzle(difficulty);
+                
+                return {
+                    board: result.board,
+                    solution: result.solution,
+                    fixed: result.fixed,
+                    metadata: result.metadata
+                };
+            }
+            
+            cancelGeneration() {
+                if (this.worker && this.generating) {
+                    this.worker.postMessage({ action: 'CANCEL' });
+                    this.generating = false;
+                }
+            }
+        }
+        
+        // Create global worker manager
+        const workerManager = new WorkerManager();
+
         // ============= GAME STATE MANAGER =============
         class GameState {
             constructor() {
@@ -1374,9 +1515,12 @@
                 localStorage.setItem('sudoku_stats', JSON.stringify(this.stats));
             }
 
-            newGame(difficulty) {
+            async newGame(difficulty) {
                 this.difficulty = difficulty;
-                const puzzle = this.engine.generatePuzzle(difficulty);
+                
+                // Get puzzle from worker (cached or generated)
+                const puzzle = await workerManager.getPuzzle(difficulty);
+                
                 this.engine.board = puzzle.board;
                 this.engine.solution = puzzle.solution;
                 this.engine.fixed = puzzle.fixed;
@@ -1838,9 +1982,13 @@
                 this.difficultyModal.classList.add('active');
             }
 
-            startNewGame(difficulty) {
+            async startNewGame(difficulty) {
                 this.difficultyModal.classList.remove('active');
-                this.game.newGame(difficulty);
+                
+                // Show loading indicator
+                AppSystems.showToast('⏳ Generating puzzle...', 'info', 2000);
+                
+                await this.game.newGame(difficulty);
                 this.updateDifficultyTitle(difficulty);
                 this.updateUI();
             }
@@ -2020,7 +2168,7 @@
         }
 
         // ============= INITIALIZE APP =============
-        const APP_VERSION = '9.3';
+        const APP_VERSION = '9.4';
         let gameState, uiController;
 
         window.addEventListener('DOMContentLoaded', () => {
