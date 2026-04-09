@@ -1,5 +1,5 @@
 {
-  "version": "9.6",
+  "version": "9.5",
   "releaseDate": "2026-04-09",
   "changelog": [
     "OFFLINE PERFECT: Complete offline functionality guaranteed",
@@ -17,5 +17,5 @@
   "offline_compatible": true,
   "offline_first": true,
   "new_files": ["sudoku-worker.js"],
-  "cache_version": "v9.6"
+  "cache_version": "v9.5"
 }
