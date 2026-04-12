@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#4A90E2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Sudoku Pro - V9.4</title>
+    <title>Sudoku Pro - V9.7</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon-512.png">
     <link rel="apple-touch-icon" href="icon-512.png">
@@ -394,7 +394,6 @@
 
         .cell.highlighted {
             background: var(--cell-highlighted) !important;
-            /* box-shadow: inset 0 0 0 2px var(--btn-primary); */ 
         }
 
         .cell.conflict {
@@ -641,7 +640,7 @@
 
         .difficulty-grid {
             display: flex;
-            flex-direction: column; /* מסדר את האלמנטים בטור */
+            flex-direction: column;
             gap: 12px;
             margin: 16px 0;
         }
@@ -712,13 +711,11 @@
 </head>
 <body data-theme="light">
     <div class="container">
-        <!-- Header -->
         <div class="header">
             <div class="app-title" id="appTitle">Sudoku Pro</div>
-            <div class="version" id="versionBtn">Version 9.4</div>
+            <div class="version" id="versionBtn">Version 9.7</div>
         </div>
 
-        <!-- Top Bar -->
         <div class="top-bar">
             <div class="timer" id="timer">00:00</div>
             <div class="top-buttons">
@@ -727,12 +724,10 @@
             </div>
         </div>
 
-        <!-- Game Board -->
         <div class="game-board-container">
             <div class="game-board" id="gameBoard"></div>
         </div>
 
-        <!-- Number Pad -->
         <div class="number-pad">
             <div class="number-row first">
                 <button class="num-btn" data-num="1">1</button>
@@ -753,22 +748,17 @@
         </div>
     </div>
 
-    <!-- Offline Banner (req 4.3) -->
     <div class="offline-banner" id="offlineBanner">⚠️ No internet connection</div>
 
-    <!-- Pull to Refresh Indicator (req 5.2) -->
     <div class="ptr-indicator" id="ptrIndicator">↻</div>
 
-    <!-- Update Prompt (req 1.4) -->
     <div class="update-prompt" id="updatePrompt">
         <span>🆕 New version available!</span>
         <button class="update-now-btn" id="updateNowBtn">Update Now</button>
     </div>
 
-    <!-- Toast Container (req 6.1) -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Install Banner (req 3.3) -->
     <div class="install-banner" id="installBanner">
         <img src="icon-512.png" alt="Sudoku Pro" onerror="this.style.display='none'">
         <div class="install-banner-text">
@@ -781,7 +771,6 @@
         </div>
     </div>
 
-    <!-- Hamburger Menu -->
     <div class="menu-overlay" id="menuOverlay"></div>
     <div class="menu-panel" id="menuPanel">
         <div class="menu-header">Menu</div>
@@ -813,7 +802,6 @@
         </div>
     </div>
 
-    <!-- Difficulty Modal -->
     <div class="modal" id="difficultyModal">
         <div class="modal-content">
             <h2>Select Difficulty</h2>
@@ -830,7 +818,6 @@
         </div>
     </div>
 
-    <!-- Victory Modal -->
     <div class="modal" id="victoryModal">
         <div class="modal-content">
             <h2>🎉 Congratulations! 🎉</h2>
@@ -842,7 +829,6 @@
         </div>
     </div>
 
-    <!-- Stats Modal -->
     <div class="modal" id="statsModal">
         <div class="modal-content">
             <h2>📊 Statistics</h2>
@@ -871,7 +857,6 @@
         </div>
     </div>
 
-    <!-- Selective Reset Modal (req 2.3) -->
     <div class="modal" id="resetModal">
         <div class="modal-content">
             <h2>⚙️ Reset Options</h2>
@@ -911,7 +896,6 @@
         </div>
     </div>
 
-    <!-- Full Removal Modal (req 2.1/2.2) -->
     <div class="modal" id="reinstallModal">
         <div class="modal-content">
             <h2>🗑️ Complete App Removal</h2>
@@ -931,7 +915,6 @@
         </div>
     </div>
 
-    <!-- Settings Modal (req 7.3) -->
     <div class="modal" id="settingsModal">
         <div class="modal-content">
             <h2>⚙️ Settings</h2>
@@ -972,6 +955,16 @@
                 </div>
                 <label class="toggle">
                     <input type="checkbox" id="settingPullToRefresh" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="settings-row">
+                <div>
+                    <div class="settings-label">Keep Screen Awake</div>
+                    <div class="settings-sub">Prevent screen from turning off</div>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" id="settingScreenAwake">
                     <span class="toggle-slider"></span>
                 </label>
             </div>
@@ -1066,20 +1059,16 @@
             }
 
             generatePuzzle(difficulty = 'medium') {
-                // ========== V8.0 PROFESSIONAL PUZZLE GENERATOR ==========
-                // 4 difficulty levels with symmetry and unique solution verification
-                
                 const cellsToRemove = { 
-                    easy: 38,       // ~43 clues - beginner friendly
-                    medium: 48,     // ~33 clues - intermediate
-                    hard: 58,       // ~23 clues - advanced
-                    expert: 64      // ~17 clues - MAXIMUM difficulty!
+                    easy: 38,       
+                    medium: 48,     
+                    hard: 58,       
+                    expert: 64      
                 };
                 
                 console.log(`🎯 Generating ${difficulty.toUpperCase()} puzzle with V8.0 Pro Engine...`);
                 const startTime = performance.now();
                 
-                // Step 1: Generate complete solution
                 const complete = this.generateComplete();
                 this.solution = [...complete];
                 this.board = [...complete];
@@ -1087,16 +1076,14 @@
 
                 const target = cellsToRemove[difficulty] || 48;
                 
-                // Step 2: Create symmetric pairs (180° rotation)
                 const symmetricPairs = this.createSymmetricPairs();
                 this.shuffleArray(symmetricPairs);
                 
                 let removed = 0;
                 let attempts = 0;
-                const maxAttempts = 250; // Increased for expert level
-                const MAX_TIME = 15000; // 15 second timeout to prevent freezing
+                const maxAttempts = 250; 
+                const MAX_TIME = 15000; 
                 
-                // ========== PHASE 1: SYMMETRIC REMOVAL ==========
                 console.log(`📐 Phase 1: Symmetric pair removal (target: ${target} cells)`);
                 
                 for (let pair of symmetricPairs) {
@@ -1112,17 +1099,14 @@
                     
                     attempts++;
                     
-                    // Backup both positions
                     const backup1 = this.board[pair[0]];
                     const backup2 = this.board[pair[1]];
                     
-                    // Try removing both cells (or one if it's the center)
                     this.board[pair[0]] = 0;
-                    if (pair[0] !== pair[1]) { // Not center cell
+                    if (pair[0] !== pair[1]) { 
                         this.board[pair[1]] = 0;
                     }
                     
-                    // Verify unique solution
                     if (this.hasUniqueSolution()) {
                         this.fixed[pair[0]] = false;
                         if (pair[0] !== pair[1]) {
@@ -1131,13 +1115,12 @@
                         } else {
                             removed += 1;
                         }
-                        attempts = 0; // Reset on success
+                        attempts = 0; 
                         
                         if (removed % 10 === 0) {
                             console.log(`   Progress: ${removed}/${target} cells removed`);
                         }
                     } else {
-                        // Restore if multiple solutions exist
                         this.board[pair[0]] = backup1;
                         if (pair[0] !== pair[1]) {
                             this.board[pair[1]] = backup2;
@@ -1147,11 +1130,9 @@
                 
                 console.log(`   ✓ Symmetric phase complete: ${removed}/${target} cells`);
                 
-                // ========== PHASE 2: SINGLE CELL REMOVAL ==========
                 if (removed < target) {
                     console.log(`📝 Phase 2: Strategic single cell removal (${target - removed} remaining)`);
                     
-                    // Collect remaining filled cells
                     const remainingCells = [];
                     for (let i = 0; i < 81; i++) {
                         if (this.board[i] !== 0) {
@@ -1159,7 +1140,6 @@
                         }
                     }
                     
-                    // Prioritize cells that create logical bottlenecks
                     this.shuffleArray(remainingCells);
                     
                     attempts = 0;
@@ -1196,7 +1176,6 @@
 
                 this.notes = Array(81).fill(null).map(() => new Set());
                 
-                // ========== GENERATION SUMMARY ==========
                 const endTime = performance.now();
                 const duration = ((endTime - startTime) / 1000).toFixed(2);
                 const symmetryPercent = this.getSymmetryPercent();
@@ -1226,22 +1205,18 @@
             }
 
             createSymmetricPairs() {
-                // Create 180-degree rotational symmetry pairs
-                // Each position (i) pairs with position (80-i)
                 const pairs = [];
                 const used = new Set();
                 
                 for (let i = 0; i < 81; i++) {
                     if (used.has(i)) continue;
                     
-                    const symmetric = 80 - i; // 180° rotation
+                    const symmetric = 80 - i;
                     
                     if (i === symmetric) {
-                        // Center cell (position 40) - pairs with itself
                         pairs.push([i, i]);
                         used.add(i);
                     } else if (!used.has(symmetric)) {
-                        // Regular pair
                         pairs.push([i, symmetric]);
                         used.add(i);
                         used.add(symmetric);
@@ -1252,11 +1227,10 @@
             }
 
             getSymmetryPercent() {
-                // Calculate symmetry percentage (0-1)
                 let symmetricPairs = 0;
                 let totalPairs = 0;
                 
-                for (let i = 0; i < 41; i++) { // Check only half + center
+                for (let i = 0; i < 41; i++) { 
                     const symmetric = 80 - i;
                     totalPairs++;
                     
@@ -1374,7 +1348,6 @@
                         if (status === 'SUCCESS') {
                             console.log(`✅ Worker generated ${this.currentDifficulty} puzzle in ${timeSpent}ms`);
                             
-                            // Cache the result
                             this.cache[this.currentDifficulty] = {
                                 board,
                                 solution,
@@ -1386,7 +1359,6 @@
                             this.generating = false;
                             this.currentDifficulty = null;
                             
-                            // Trigger pre-generation for next difficulty
                             this.preGenerateNext();
                             
                         } else if (status === 'ERROR') {
@@ -1411,25 +1383,21 @@
             }
             
             async getPuzzle(difficulty) {
-                // Check if cached
                 if (this.cache[difficulty]) {
                     console.log(`📦 Using cached ${difficulty} puzzle`);
                     const cached = this.cache[difficulty];
-                    this.cache[difficulty] = null; // Clear cache
+                    this.cache[difficulty] = null; 
                     
-                    // Start pre-generating replacement
                     this.preGenerate(difficulty);
                     
                     return cached;
                 }
                 
-                // No cache - generate synchronously
                 console.log(`⏳ No cache for ${difficulty}, generating synchronously...`);
                 return await this.generateSync(difficulty);
             }
             
             preGenerate(difficulty) {
-                // Don't pre-generate if already generating or cache exists
                 if (this.generating || this.cache[difficulty]) {
                     return;
                 }
@@ -1450,7 +1418,6 @@
             }
             
             preGenerateNext() {
-                // Pre-generate puzzles for likely next difficulty
                 const priorities = ['medium', 'easy', 'hard', 'expert'];
                 
                 for (let diff of priorities) {
@@ -1462,7 +1429,6 @@
             }
             
             async generateSync(difficulty) {
-                // Fallback: generate in main thread
                 console.log('🔧 Fallback: Generating in main thread');
                 const engine = new SudokuEngine();
                 const result = engine.generatePuzzle(difficulty);
@@ -1483,7 +1449,6 @@
             }
         }
         
-        // Create global worker manager
         const workerManager = new WorkerManager();
 
         // ============= GAME STATE MANAGER =============
@@ -1518,7 +1483,6 @@
             async newGame(difficulty) {
                 this.difficulty = difficulty;
                 
-                // Get puzzle from worker (cached or generated)
                 const puzzle = await workerManager.getPuzzle(difficulty);
                 
                 this.engine.board = puzzle.board;
@@ -1581,7 +1545,6 @@
             placeNumber(pos, num) {
                 if (this.engine.fixed[pos]) return { success: false };
 
-                // Check if number is already at max count (9)
                 if (num !== 0 && this.engine.countNumber(num) >= 9) {
                     return { success: false, maxed: true };
                 }
@@ -1985,7 +1948,6 @@
             async startNewGame(difficulty) {
                 this.difficultyModal.classList.remove('active');
                 
-                // Show loading indicator
                 AppSystems.showToast('⏳ Generating puzzle...', 'info', 2000);
                 
                 await this.game.newGame(difficulty);
@@ -2027,7 +1989,6 @@
             updateBoard() {
                 const cells = this.gameBoard.querySelectorAll('.cell');
                 
-                // Get selected number ONLY if a cell is selected that has a number
                 const selectedNum = (this.game.selectedCell !== null && 
                                     this.game.engine.board[this.game.selectedCell] !== 0)
                     ? this.game.engine.board[this.game.selectedCell] 
@@ -2047,7 +2008,6 @@
                         cell.classList.add('selected');
                     }
 
-                    // Highlight same numbers ONLY when selectedNum is not 0
                     if (selectedNum !== 0 && this.game.engine.board[index] === selectedNum) {
                         cell.classList.add('highlighted');
                     }
@@ -2068,7 +2028,6 @@
             }
 
             updateNumberPad() {
-                // Disable buttons when number count reaches 9
                 for (let num = 1; num <= 9; num++) {
                     const count = this.game.engine.countNumber(num);
                     const btn = document.querySelector(`.num-btn[data-num="${num}"]`);
@@ -2109,15 +2068,12 @@
                 try {
                     console.log('🗑️ Starting complete app removal...');
                     
-                    // Step 1: Clear all localStorage
                     console.log('   Clearing localStorage...');
                     localStorage.clear();
                     
-                    // Step 2: Clear all sessionStorage
                     console.log('   Clearing sessionStorage...');
                     sessionStorage.clear();
                     
-                    // Step 3: Unregister all service workers
                     if ('serviceWorker' in navigator) {
                         console.log('   Unregistering service workers...');
                         const registrations = await navigator.serviceWorker.getRegistrations();
@@ -2127,7 +2083,6 @@
                         }
                     }
                     
-                    // Step 4: Clear all caches
                     if ('caches' in window) {
                         console.log('   Clearing all caches...');
                         const cacheNames = await caches.keys();
@@ -2137,7 +2092,6 @@
                         }
                     }
                     
-                    // Step 5: Clear IndexedDB (if exists)
                     if ('indexedDB' in window) {
                         console.log('   Clearing IndexedDB...');
                         const dbs = await indexedDB.databases();
@@ -2149,7 +2103,6 @@
                         }
                     }
                     
-                    // Step 6: Clear cookies for this domain
                     console.log('   Clearing cookies...');
                     document.cookie.split(";").forEach(function(c) { 
                         document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
@@ -2158,7 +2111,6 @@
                     console.log('✅ Complete app removal finished!');
                     alert('✅ App completely removed!\n\nAll data, cache, and storage cleared.\nPage will reload.');
                     
-                    // Force hard reload
                     window.location.href = window.location.href.split('?')[0] + '?t=' + new Date().getTime();
                 } catch (error) {
                     console.error('❌ Removal error:', error);
@@ -2168,7 +2120,7 @@
         }
 
         // ============= INITIALIZE APP =============
-        const APP_VERSION = '9.5';
+        const APP_VERSION = '9.7';
         let gameState, uiController;
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -2179,7 +2131,6 @@
             gameState.onWin = function() {
                 originalOnWin();
                 uiController.showVictory();
-                // Haptic: win pattern (req 5.4)
                 AppSystems.haptic('win');
             };
 
@@ -2189,28 +2140,32 @@
             AppSystems.init();
         });
 
-        // ============= APP SYSTEMS V9.0 =============
+        // ============= APP SYSTEMS V9.7 =============
         const AppSystems = {
 
             settings: {
                 haptics: true,
                 animations: true,
                 network: true,
-                pullToRefresh: true
+                pullToRefresh: true,
+                screenAwake: false // Default off to save battery
             },
+
+            wakeLock: null,
 
             // ---- INIT ----
             init() {
                 this.loadSettings();
-                this.initVersionManager();   // req 1.1-1.4
-                this.initNetworkMonitor();   // req 4.2-4.3, 4.4
-                this.initInstallPrompt();    // req 3.2-3.4
-                this.initPullToRefresh();    // req 5.2
-                this.initSwipeGestures();    // req 5.3
-                this.initSettingsUI();       // req 7.3
-                this.initResetUI();          // req 2.1-2.3
-                this.registerSW();           // req 4.1, 1.3-1.4
+                this.initVersionManager();
+                this.initNetworkMonitor();
+                this.initInstallPrompt();
+                this.initPullToRefresh();
+                this.initSwipeGestures();
+                this.initSettingsUI();
+                this.initResetUI();
+                this.registerSW();
                 this.applyUrlParams();
+                this.initWakeLock();
             },
 
             // ---- TOAST SYSTEM (req 6.1) ----
@@ -2241,9 +2196,45 @@
                 navigator.vibrate(patterns[type] || [10]);
             },
 
+            // ---- WAKE LOCK (Keep Screen Awake) ----
+            initWakeLock() {
+                if ('wakeLock' in navigator) {
+                    document.addEventListener('visibilitychange', () => {
+                        if (document.visibilityState === 'visible' && this.settings.screenAwake) {
+                            this.applyWakeLock(true);
+                        }
+                    });
+                    if (this.settings.screenAwake) {
+                        this.applyWakeLock(true);
+                    }
+                }
+            },
+
+            async applyWakeLock(enable) {
+                if (!('wakeLock' in navigator)) return;
+                
+                try {
+                    if (enable) {
+                        if (this.wakeLock !== null) return;
+                        this.wakeLock = await navigator.wakeLock.request('screen');
+                        this.wakeLock.addEventListener('release', () => {
+                            this.wakeLock = null;
+                        });
+                        console.log('[WakeLock] Screen is kept awake');
+                    } else {
+                        if (this.wakeLock !== null) {
+                            await this.wakeLock.release();
+                            this.wakeLock = null;
+                            console.log('[WakeLock] Released');
+                        }
+                    }
+                } catch (err) {
+                    console.warn('[WakeLock] Error:', err);
+                }
+            },
+
             // ---- VERSION MANAGER (req 1.1-1.4) ----
             initVersionManager() {
-                // 1.3 Auto-update: compare stored vs code version
                 const storedVersion = localStorage.getItem('app_version');
                 if (storedVersion && storedVersion !== APP_VERSION) {
                     console.log(`[Version] Upgrade ${storedVersion} → ${APP_VERSION}, clearing cache...`);
@@ -2254,18 +2245,14 @@
                     localStorage.setItem('app_version', APP_VERSION);
                 }
 
-                // 1.2 Check version.json from server
                 this.checkRemoteVersion();
 
-                // 1.1 Version display click → full removal modal
                 document.getElementById('versionBtn').addEventListener('click', () => {
                     document.getElementById('reinstallModal').classList.add('active');
                 });
             },
 
             async checkRemoteVersion() {
-                // 1.2 Fetch version.json to detect newer version
-                // OFFLINE SAFE: Only check if online, fail silently otherwise
                 if (!navigator.onLine) {
                     console.log('[Version] Offline - skipping remote version check');
                     return;
@@ -2274,7 +2261,7 @@
                 try {
                     const res = await fetch('./version.json?t=' + Date.now(), { 
                         cache: 'no-store',
-                        signal: AbortSignal.timeout(3000) // 3s timeout
+                        signal: AbortSignal.timeout(3000)
                     });
                     
                     if (!res.ok) {
@@ -2291,7 +2278,6 @@
                         console.log('[Version] Up to date:', APP_VERSION);
                     }
                 } catch (e) {
-                    // Comprehensive error handling - network errors, timeouts, parse errors
                     if (e.name === 'AbortError') {
                         console.log('[Version] Check timed out - continuing with current version');
                     } else if (e instanceof TypeError) {
@@ -2299,7 +2285,6 @@
                     } else {
                         console.log('[Version] Check failed:', e.message);
                     }
-                    // Application continues normally - no blocking behavior
                 }
             },
 
@@ -2319,21 +2304,19 @@
                 }
             },
 
-            // ---- SW REGISTRATION + update polling (req 4.1, 1.4) ----
+            // ---- SW REGISTRATION + update polling ----
             async registerSW() {
                 if (!('serviceWorker' in navigator)) return;
                 try {
                     const reg = await navigator.serviceWorker.register('./sw.js');
                     console.log('[SW] Registered');
 
-                    // 1.4 Poll for SW updates every 300 s
                     setInterval(() => reg.update(), 300_000);
 
                     reg.addEventListener('updatefound', () => {
                         const newWorker = reg.installing;
                         newWorker.addEventListener('statechange', () => {
                             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                // New SW ready → show prompt
                                 this.showUpdatePrompt();
                                 document.getElementById('updateNowBtn').onclick = () => {
                                     newWorker.postMessage({ type: 'SKIP_WAITING' });
@@ -2347,7 +2330,7 @@
                 }
             },
 
-            // ---- NETWORK MONITOR (req 4.2-4.4) ----
+            // ---- NETWORK MONITOR ----
             initNetworkMonitor() {
                 const banner = document.getElementById('offlineBanner');
 
@@ -2366,7 +2349,6 @@
                 window.addEventListener('offline', () => updateStatus(false));
                 if (!navigator.onLine) updateStatus(false);
 
-                // 4.4 Data saver / slow connection
                 if ('connection' in navigator) {
                     const conn = navigator.connection;
                     const check = () => {
@@ -2379,7 +2361,7 @@
                 }
             },
 
-            // ---- PWA INSTALL PROMPT (req 3.2-3.4) ----
+            // ---- PWA INSTALL PROMPT ----
             initInstallPrompt() {
                 const banner  = document.getElementById('installBanner');
                 const already = localStorage.getItem('pwa_install_dismissed');
@@ -2387,14 +2369,12 @@
 
                 let deferredPrompt = null;
 
-                // 3.2 Capture beforeinstallprompt
                 window.addEventListener('beforeinstallprompt', (e) => {
                     e.preventDefault();
                     deferredPrompt = e;
                     setTimeout(() => banner.classList.add('visible'), 2000);
                 });
 
-                // 3.3 Accept
                 document.getElementById('installAcceptBtn').addEventListener('click', async () => {
                     banner.classList.remove('visible');
                     if (deferredPrompt) {
@@ -2405,26 +2385,23 @@
                     }
                 });
 
-                // 3.3 Dismiss
                 document.getElementById('installDismissBtn').addEventListener('click', () => {
                     banner.classList.remove('visible');
                     localStorage.setItem('pwa_install_dismissed', '1');
                 });
 
-                // 3.4 Installed event
                 window.addEventListener('appinstalled', () => {
                     banner.classList.remove('visible');
                     this.showToast('🎉 App installed successfully!', 'success', 4000);
                 });
             },
 
-            // ---- PULL TO REFRESH (req 5.2) ----
+            // ---- PULL TO REFRESH ----
             initPullToRefresh() {
                 const indicator = document.getElementById('ptrIndicator');
                 let startY = 0, pulling = false;
 
                 document.addEventListener('touchstart', (e) => {
-                    // Check if PTR is enabled in settings
                     if (!this.settings.pullToRefresh) return;
                     
                     if (window.scrollY === 0) startY = e.touches[0].clientY;
@@ -2433,7 +2410,6 @@
                 document.addEventListener('touchmove', (e) => {
                     if (!startY) return;
                     
-                    // Check if PTR is enabled
                     if (!this.settings.pullToRefresh) {
                         startY = 0;
                         return;
@@ -2459,7 +2435,7 @@
                 });
             },
 
-            // ---- SWIPE GESTURES (req 5.3) ----
+            // ---- SWIPE GESTURES ----
             initSwipeGestures() {
                 let startX = 0, startY = 0;
 
@@ -2473,26 +2449,22 @@
                     const dy = e.changedTouches[0].clientY - startY;
                     const absDx = Math.abs(dx), absDy = Math.abs(dy);
 
-                    if (Math.max(absDx, absDy) < 50) return; // too short
+                    if (Math.max(absDx, absDy) < 50) return;
 
                     if (absDx > absDy) {
-                        // horizontal swipe
                         const panel = document.getElementById('menuPanel');
                         if (dx < 0 && panel.classList.contains('active')) {
-                            // swipe left → close menu
                             uiController.toggleMenu();
                         } else if (dx > 0 && !panel.classList.contains('active')) {
-                            // swipe right → open menu
                             uiController.toggleMenu();
                         }
                     } else if (dy < -50) {
-                        // swipe up → close any open modal
                         document.querySelectorAll('.modal.active').forEach(m => m.classList.remove('active'));
                     }
                 });
             },
 
-            // ---- SETTINGS UI (req 7.3) ----
+            // ---- SETTINGS UI ----
             loadSettings() {
                 const saved = localStorage.getItem('app_settings');
                 if (saved) {
@@ -2505,14 +2477,13 @@
             },
 
             initSettingsUI() {
-                // Wire menu item
                 document.getElementById('settingsMenu').addEventListener('click', () => {
                     uiController.toggleMenu();
-                    // Sync toggles with current settings
                     document.getElementById('settingHaptics').checked       = this.settings.haptics;
                     document.getElementById('settingAnimations').checked    = this.settings.animations;
                     document.getElementById('settingNetwork').checked       = this.settings.network;
                     document.getElementById('settingPullToRefresh').checked = this.settings.pullToRefresh;
+                    document.getElementById('settingScreenAwake').checked   = this.settings.screenAwake;
                     document.getElementById('settingsModal').classList.add('active');
                 });
 
@@ -2521,7 +2492,11 @@
                     this.settings.animations    = document.getElementById('settingAnimations').checked;
                     this.settings.network       = document.getElementById('settingNetwork').checked;
                     this.settings.pullToRefresh = document.getElementById('settingPullToRefresh').checked;
+                    this.settings.screenAwake   = document.getElementById('settingScreenAwake').checked;
+                    
                     this.saveSettingsToStorage();
+                    this.applyWakeLock(this.settings.screenAwake);
+                    
                     document.getElementById('settingsModal').classList.remove('active');
                     this.showToast('✅ Settings saved', 'success');
                     this.haptic('light');
@@ -2532,9 +2507,8 @@
                 });
             },
 
-            // ---- RESET / REMOVAL UI (req 2.1-2.3) ----
+            // ---- RESET / REMOVAL UI ----
             initResetUI() {
-                // Selective reset
                 document.getElementById('openSelectiveReset').addEventListener('click', () => {
                     document.getElementById('reinstallModal').classList.remove('active');
                     document.getElementById('resetModal').classList.add('active');
@@ -2560,7 +2534,6 @@
                     setTimeout(() => location.reload(), 1200);
                 });
 
-                // Full removal
                 document.getElementById('cancelReinstall').addEventListener('click', () => {
                     document.getElementById('reinstallModal').classList.remove('active');
                 });
@@ -2594,7 +2567,7 @@
                 }
             },
 
-            // ---- URL PARAM handling (difficulty/stats shortcuts) ----
+            // ---- URL PARAM handling ----
             applyUrlParams() {
                 const params = new URLSearchParams(location.search);
                 const diff = params.get('difficulty');
@@ -2608,12 +2581,8 @@
             }
         };
 
-        // ============= SERVICE WORKER REGISTRATION =============
-        // (Handled inside AppSystems.registerSW above)
-        // Legacy SW version-check on load kept for back-compat:
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                // AppSystems.registerSW() is called from DOMContentLoaded above
             });
         }
 
