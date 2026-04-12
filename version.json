@@ -1,7 +1,8 @@
 {
-  "version": "9.5",
-  "releaseDate": "2026-04-09",
+  "version": "9.7",
+  "releaseDate": "2026-04-12",
   "changelog": [
+    "Feature: Added 'Keep Screen Awake' toggle in Settings (Screen Wake Lock API)",
     "OFFLINE PERFECT: Complete offline functionality guaranteed",
     "Service Worker: Enhanced caching with all critical assets",
     "Service Worker: Robust fetch fallback prevents hanging",
@@ -10,12 +11,12 @@
     "Application: Silent failure with graceful degradation",
     "Fix: No more 'Uncaught in promise' errors in offline mode",
     "Fix: Application starts immediately without network",
-    "Performance: Web Worker for puzzle generation (from v9.4)",
-    "Performance: Zero-wait board loading with cache (from v9.4)"
+    "Performance: Web Worker for puzzle generation",
+    "Performance: Zero-wait board loading with cache"
   ],
   "breaking_changes": false,
   "offline_compatible": true,
   "offline_first": true,
   "new_files": ["sudoku-worker.js"],
-  "cache_version": "v9.5"
+  "cache_version": "v9.7"
 }
