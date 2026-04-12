@@ -1,7 +1,8 @@
 {
-  "version": "9.7",
+  "version": "9.8",
   "releaseDate": "2026-04-12",
   "changelog": [
+    "Feature: Hardware Back Button integration (Android/Mobile) - smart navigation logic",
     "Feature: Added 'Keep Screen Awake' toggle in Settings (Screen Wake Lock API)",
     "OFFLINE PERFECT: Complete offline functionality guaranteed",
     "Service Worker: Enhanced caching with all critical assets",
@@ -18,5 +19,5 @@
   "offline_compatible": true,
   "offline_first": true,
   "new_files": ["sudoku-worker.js"],
-  "cache_version": "v9.7"
+  "cache_version": "v9.8"
 }
