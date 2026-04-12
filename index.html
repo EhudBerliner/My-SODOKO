@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#4A90E2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Sudoku Pro - V9.7</title>
+    <title>Sudoku Pro - V9.8</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon-512.png">
     <link rel="apple-touch-icon" href="icon-512.png">
@@ -713,7 +713,7 @@
     <div class="container">
         <div class="header">
             <div class="app-title" id="appTitle">Sudoku Pro</div>
-            <div class="version" id="versionBtn">Version 9.7</div>
+            <div class="version" id="versionBtn">Version 9.8</div>
         </div>
 
         <div class="top-bar">
@@ -1688,10 +1688,48 @@
         class UIController {
             constructor(gameState) {
                 this.game = gameState;
+                this.initBackButtonHandler(); // Initialize back button logic first
                 this.initElements();
                 this.initTheme();
                 this.bindEvents();
                 this.updateUI();
+            }
+
+            initBackButtonHandler() {
+                // Set initial state
+                history.replaceState({ page: 'root' }, '');
+
+                window.addEventListener('popstate', (e) => {
+                    const menuOverlay = document.getElementById('menuOverlay');
+                    const menuPanel = document.getElementById('menuPanel');
+                    const difficultyModal = document.getElementById('difficultyModal');
+                    const otherModals = Array.from(document.querySelectorAll('.modal.active')).filter(m => m.id !== 'difficultyModal');
+
+                    // 1. "אם בתפריט -> סוגר את התפריט" (If menu or side modals are open -> close them)
+                    if (menuOverlay.classList.contains('active')) {
+                        menuOverlay.classList.remove('active');
+                        menuPanel.classList.remove('active');
+                        history.pushState({ page: 'game' }, ''); // Keep game state alive
+                        return;
+                    }
+
+                    if (otherModals.length > 0) {
+                        otherModals.forEach(m => m.classList.remove('active'));
+                        history.pushState({ page: 'game' }, ''); // Keep game state alive
+                        return;
+                    }
+
+                    // 2. "אם בלוח המשחק -> פותח תפריט בחירת רמת משחק" (If in game board -> open difficulty)
+                    if (!difficultyModal.classList.contains('active')) {
+                        this.showDifficultyModal();
+                        // State popped to root. Next back will exit.
+                        return;
+                    }
+
+                    // 3. "אם בחירת רמת משחק -> סוגר את האפליקציה"
+                    // If we reach here, the difficulty modal is active, and we are at the root state.
+                    // The browser's default behavior handles exiting the app flawlessly.
+                });
             }
 
             initElements() {
@@ -1757,6 +1795,8 @@
                 document.getElementById('newGameMenu').addEventListener('click', () => {
                     this.toggleMenu();
                     this.showDifficultyModal();
+                    // Reset history stack to root so next back closes app
+                    history.replaceState({ page: 'root' }, '');
                 });
 
                 document.getElementById('hintMenu').addEventListener('click', () => {
@@ -1796,6 +1836,7 @@
                 document.getElementById('resumeBtn')?.addEventListener('click', () => {
                     if (this.game.loadGame()) {
                         this.difficultyModal.classList.remove('active');
+                        history.pushState({ page: 'game' }, ''); // Add game state
                         this.updateDifficultyTitle(this.game.difficulty);
                         this.updateUI();
                     }
@@ -1804,6 +1845,8 @@
                 document.getElementById('newGameAfterWin').addEventListener('click', () => {
                     this.victoryModal.classList.remove('active');
                     this.showDifficultyModal();
+                    // Reset history stack to root so next back closes app
+                    history.replaceState({ page: 'root' }, '');
                 });
 
                 document.getElementById('closeVictory').addEventListener('click', () => {
@@ -1947,6 +1990,7 @@
 
             async startNewGame(difficulty) {
                 this.difficultyModal.classList.remove('active');
+                history.pushState({ page: 'game' }, ''); // Add game state
                 
                 AppSystems.showToast('⏳ Generating puzzle...', 'info', 2000);
                 
@@ -2120,7 +2164,7 @@
         }
 
         // ============= INITIALIZE APP =============
-        const APP_VERSION = '9.7';
+        const APP_VERSION = '9.8';
         let gameState, uiController;
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -2140,7 +2184,7 @@
             AppSystems.init();
         });
 
-        // ============= APP SYSTEMS V9.7 =============
+        // ============= APP SYSTEMS V9.8 =============
         const AppSystems = {
 
             settings: {
@@ -2148,7 +2192,7 @@
                 animations: true,
                 network: true,
                 pullToRefresh: true,
-                screenAwake: false // Default off to save battery
+                screenAwake: false 
             },
 
             wakeLock: null,
