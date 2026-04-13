@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#4A90E2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Sudoku Pro - V9.8</title>
+    <title>Sudoku Pro - V9.9</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon-512.png">
     <link rel="apple-touch-icon" href="icon-512.png">
@@ -69,12 +69,11 @@
             height: 100vh;
             height: -webkit-fill-available;
             overflow: hidden;
-            /* Safe area for notch devices (req 5.5) */
             padding-top: env(safe-area-inset-top);
             padding-bottom: env(safe-area-inset-bottom);
         }
 
-        /* ===== OFFLINE BANNER (req 4.3) ===== */
+        /* ===== OFFLINE BANNER ===== */
         .offline-banner {
             position: fixed;
             top: 0;
@@ -92,7 +91,7 @@
         }
         .offline-banner.visible { transform: translateY(0); }
 
-        /* ===== TOAST SYSTEM (req 6.1) ===== */
+        /* ===== TOAST SYSTEM ===== */
         .toast-container {
             position: fixed;
             bottom: 80px;
@@ -123,7 +122,7 @@
         .toast.info    { background: #4A90E2; }
         .toast.warning { background: #f59e0b; }
 
-        /* ===== INSTALL BANNER (req 3.3) ===== */
+        /* ===== INSTALL BANNER ===== */
         .install-banner {
             position: fixed;
             bottom: -120px;
@@ -149,7 +148,7 @@
         .install-btn.primary { background: var(--btn-primary); color: white; }
         .install-btn.secondary { background: var(--bg-tertiary); color: var(--text-secondary); }
 
-        /* ===== PULL TO REFRESH (req 5.2) ===== */
+        /* ===== PULL TO REFRESH ===== */
         .ptr-indicator {
             position: fixed;
             top: env(safe-area-inset-top, 0px);
@@ -170,7 +169,7 @@
         }
         .ptr-indicator.visible { transform: translateX(-50%) translateY(8px); }
 
-        /* ===== UPDATE PROMPT (req 1.4) ===== */
+        /* ===== UPDATE PROMPT ===== */
         .update-prompt {
             position: fixed;
             top: 60px;
@@ -192,7 +191,7 @@
         .update-prompt span { font-size: 13px; font-weight: 600; color: var(--text-primary); }
         .update-now-btn { padding: 6px 14px; background: var(--btn-primary); color: white; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; }
 
-        /* ===== SETTINGS MODAL (req 7.3) ===== */
+        /* ===== SETTINGS MODAL ===== */
         .settings-row {
             display: flex;
             align-items: center;
@@ -203,7 +202,6 @@
         .settings-row:last-child { border-bottom: none; }
         .settings-label { font-size: 15px; color: var(--text-primary); }
         .settings-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
-        /* Toggle switch */
         .toggle { position: relative; width: 48px; height: 26px; }
         .toggle input { opacity: 0; width: 0; height: 0; }
         .toggle-slider {
@@ -225,7 +223,7 @@
         .toggle input:checked + .toggle-slider { background: var(--btn-primary); }
         .toggle input:checked + .toggle-slider::before { transform: translateX(22px); }
 
-        /* ===== SELECTIVE RESET MODAL (req 2.3) ===== */
+        /* ===== SELECTIVE RESET MODAL ===== */
         .reset-option {
             display: flex;
             align-items: center;
@@ -249,7 +247,6 @@
             flex-direction: column;
         }
 
-        /* Header */
         .header {
             text-align: center;
             margin-bottom: 8px;
@@ -274,7 +271,6 @@
             color: var(--btn-primary);
         }
 
-        /* Top Bar */
         .top-bar {
             display: flex;
             justify-content: space-between;
@@ -324,7 +320,6 @@
             cursor: not-allowed;
         }
 
-        /* Game Board */
         .game-board-container {
             flex: 0 0 auto;
             display: flex;
@@ -429,7 +424,6 @@
             75% { transform: translateX(4px); }
         }
 
-        /* Number Pad */
         .number-pad {
             display: flex;
             flex-direction: column;
@@ -496,7 +490,6 @@
             pointer-events: none;
         }
 
-        /* Hamburger Menu */
         .menu-overlay {
             position: fixed;
             top: 0;
@@ -566,7 +559,6 @@
             text-align: center;
         }
 
-        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -713,7 +705,7 @@
     <div class="container">
         <div class="header">
             <div class="app-title" id="appTitle">Sudoku Pro</div>
-            <div class="version" id="versionBtn">Version 9.8</div>
+            <div class="version" id="versionBtn">Version 9.9</div>
         </div>
 
         <div class="top-bar">
@@ -749,7 +741,6 @@
     </div>
 
     <div class="offline-banner" id="offlineBanner">⚠️ No internet connection</div>
-
     <div class="ptr-indicator" id="ptrIndicator">↻</div>
 
     <div class="update-prompt" id="updatePrompt">
@@ -975,361 +966,15 @@
         </div>
     </div>
 
+    <script src="sudoku-worker.js"></script>
+
     <script>
-        // ============= SUDOKU ENGINE =============
-        class SudokuEngine {
-            constructor() {
-                this.board = Array(81).fill(0);
-                this.solution = Array(81).fill(0);
-                this.fixed = Array(81).fill(false);
-                this.notes = Array(81).fill(null).map(() => new Set());
-            }
-
-            generateComplete() {
-                this.board = Array(81).fill(0);
-                this.fillDiagonalBlocks();
-                this.fillRemaining(0);
-                return [...this.board];
-            }
-
-            fillDiagonalBlocks() {
-                for (let block = 0; block < 3; block++) {
-                    const startRow = block * 3;
-                    const startCol = block * 3;
-                    const nums = this.shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-                    
-                    let idx = 0;
-                    for (let r = 0; r < 3; r++) {
-                        for (let c = 0; c < 3; c++) {
-                            const pos = (startRow + r) * 9 + (startCol + c);
-                            this.board[pos] = nums[idx++];
-                        }
-                    }
-                }
-            }
-
-            fillRemaining(pos) {
-                while (pos < 81 && this.board[pos] !== 0) {
-                    pos++;
-                }
-                
-                if (pos >= 81) return true;
-
-                const numbers = this.shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-                
-                for (let num of numbers) {
-                    if (this.isValid(pos, num)) {
-                        this.board[pos] = num;
-                        if (this.fillRemaining(pos + 1)) return true;
-                        this.board[pos] = 0;
-                    }
-                }
-                return false;
-            }
-
-            isValid(pos, num) {
-                const row = Math.floor(pos / 9);
-                const col = pos % 9;
-
-                for (let c = 0; c < 9; c++) {
-                    if (this.board[row * 9 + c] === num) return false;
-                }
-
-                for (let r = 0; r < 9; r++) {
-                    if (this.board[r * 9 + col] === num) return false;
-                }
-
-                const blockRow = Math.floor(row / 3) * 3;
-                const blockCol = Math.floor(col / 3) * 3;
-                for (let r = blockRow; r < blockRow + 3; r++) {
-                    for (let c = blockCol; c < blockCol + 3; c++) {
-                        if (this.board[r * 9 + c] === num) return false;
-                    }
-                }
-                return true;
-            }
-
-            shuffle(array) {
-                const arr = [...array];
-                for (let i = arr.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [arr[i], arr[j]] = [arr[j], arr[i]];
-                }
-                return arr;
-            }
-
-            generatePuzzle(difficulty = 'medium') {
-                const cellsToRemove = { 
-                    easy: 38,       
-                    medium: 48,     
-                    hard: 58,       
-                    expert: 64      
-                };
-                
-                console.log(`🎯 Generating ${difficulty.toUpperCase()} puzzle with V8.0 Pro Engine...`);
-                const startTime = performance.now();
-                
-                const complete = this.generateComplete();
-                this.solution = [...complete];
-                this.board = [...complete];
-                this.fixed = Array(81).fill(true);
-
-                const target = cellsToRemove[difficulty] || 48;
-                
-                const symmetricPairs = this.createSymmetricPairs();
-                this.shuffleArray(symmetricPairs);
-                
-                let removed = 0;
-                let attempts = 0;
-                const maxAttempts = 250; 
-                const MAX_TIME = 15000; 
-                
-                console.log(`📐 Phase 1: Symmetric pair removal (target: ${target} cells)`);
-                
-                for (let pair of symmetricPairs) {
-                    if (removed >= target) break;
-                    if (attempts >= maxAttempts) {
-                        console.warn(`⚠️ Max attempts reached at ${removed} cells`);
-                        break;
-                    }
-                    if (performance.now() - startTime > MAX_TIME) {
-                        console.warn(`⏱️ Timeout after 15s at ${removed}/${target} cells`);
-                        break;
-                    }
-                    
-                    attempts++;
-                    
-                    const backup1 = this.board[pair[0]];
-                    const backup2 = this.board[pair[1]];
-                    
-                    this.board[pair[0]] = 0;
-                    if (pair[0] !== pair[1]) { 
-                        this.board[pair[1]] = 0;
-                    }
-                    
-                    if (this.hasUniqueSolution()) {
-                        this.fixed[pair[0]] = false;
-                        if (pair[0] !== pair[1]) {
-                            this.fixed[pair[1]] = false;
-                            removed += 2;
-                        } else {
-                            removed += 1;
-                        }
-                        attempts = 0; 
-                        
-                        if (removed % 10 === 0) {
-                            console.log(`   Progress: ${removed}/${target} cells removed`);
-                        }
-                    } else {
-                        this.board[pair[0]] = backup1;
-                        if (pair[0] !== pair[1]) {
-                            this.board[pair[1]] = backup2;
-                        }
-                    }
-                }
-                
-                console.log(`   ✓ Symmetric phase complete: ${removed}/${target} cells`);
-                
-                if (removed < target) {
-                    console.log(`📝 Phase 2: Strategic single cell removal (${target - removed} remaining)`);
-                    
-                    const remainingCells = [];
-                    for (let i = 0; i < 81; i++) {
-                        if (this.board[i] !== 0) {
-                            remainingCells.push(i);
-                        }
-                    }
-                    
-                    this.shuffleArray(remainingCells);
-                    
-                    attempts = 0;
-                    for (let pos of remainingCells) {
-                        if (removed >= target) break;
-                        if (attempts >= maxAttempts * 2) {
-                            console.warn(`⚠️ Phase 2 max attempts reached`);
-                            break;
-                        }
-                        if (performance.now() - startTime > MAX_TIME) {
-                            console.warn(`⏱️ Phase 2 timeout at ${removed}/${target} cells`);
-                            break;
-                        }
-                        
-                        attempts++;
-                        const backup = this.board[pos];
-                        this.board[pos] = 0;
-                        
-                        if (this.hasUniqueSolution()) {
-                            this.fixed[pos] = false;
-                            removed++;
-                            attempts = 0;
-                            
-                            if ((removed - (target - (target - removed))) % 5 === 0) {
-                                console.log(`   Progress: ${removed}/${target} cells`);
-                            }
-                        } else {
-                            this.board[pos] = backup;
-                        }
-                    }
-                    
-                    console.log(`   ✓ Single cell phase complete: ${removed}/${target} cells`);
-                }
-
-                this.notes = Array(81).fill(null).map(() => new Set());
-                
-                const endTime = performance.now();
-                const duration = ((endTime - startTime) / 1000).toFixed(2);
-                const symmetryPercent = this.getSymmetryPercent();
-                
-                console.log(`\n✅ PUZZLE GENERATED SUCCESSFULLY!`);
-                console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-                console.log(`   🎲 Difficulty: ${difficulty.toUpperCase()}`);
-                console.log(`   📊 Cells removed: ${removed}/${target}`);
-                console.log(`   🎯 Clues given: ${81 - removed}`);
-                console.log(`   🔄 Symmetry: ${symmetryPercent >= 0.95 ? 'PERFECT ✓' : Math.round(symmetryPercent * 100) + '%'}`);
-                console.log(`   ⏱️ Generation time: ${duration}s`);
-                console.log(`   ✔️ Unique solution: VERIFIED`);
-                console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
-                
-                return {
-                    board: [...this.board],
-                    solution: [...this.solution],
-                    fixed: [...this.fixed],
-                    metadata: {
-                        difficulty,
-                        cellsRemoved: removed,
-                        cluesGiven: 81 - removed,
-                        symmetry: symmetryPercent,
-                        generationTime: duration
-                    }
-                };
-            }
-
-            createSymmetricPairs() {
-                const pairs = [];
-                const used = new Set();
-                
-                for (let i = 0; i < 81; i++) {
-                    if (used.has(i)) continue;
-                    
-                    const symmetric = 80 - i;
-                    
-                    if (i === symmetric) {
-                        pairs.push([i, i]);
-                        used.add(i);
-                    } else if (!used.has(symmetric)) {
-                        pairs.push([i, symmetric]);
-                        used.add(i);
-                        used.add(symmetric);
-                    }
-                }
-                
-                return pairs;
-            }
-
-            getSymmetryPercent() {
-                let symmetricPairs = 0;
-                let totalPairs = 0;
-                
-                for (let i = 0; i < 41; i++) { 
-                    const symmetric = 80 - i;
-                    totalPairs++;
-                    
-                    const isEmpty1 = this.board[i] === 0;
-                    const isEmpty2 = this.board[symmetric] === 0;
-                    
-                    if (isEmpty1 === isEmpty2) {
-                        symmetricPairs++;
-                    }
-                }
-                
-                return symmetricPairs / totalPairs;
-            }
-
-            shuffleArray(array) {
-                for (let i = array.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [array[i], array[j]] = [array[j], array[i]];
-                }
-            }
-
-            hasUniqueSolution() {
-                const solutions = [];
-                const board = [...this.board];
-                this.solveCount(board, solutions, 2);
-                return solutions.length === 1;
-            }
-
-            solveCount(board, solutions, limit) {
-                if (solutions.length >= limit) return;
-                const pos = board.indexOf(0);
-                if (pos === -1) {
-                    solutions.push([...board]);
-                    return;
-                }
-                for (let num = 1; num <= 9; num++) {
-                    const tempBoard = [...board];
-                    this.board = tempBoard;
-                    if (this.isValid(pos, num)) {
-                        tempBoard[pos] = num;
-                        this.solveCount(tempBoard, solutions, limit);
-                    }
-                }
-                this.board = board;
-            }
-
-            getConflicts(pos, num) {
-                const conflicts = new Set();
-                const row = Math.floor(pos / 9);
-                const col = pos % 9;
-
-                for (let c = 0; c < 9; c++) {
-                    const checkPos = row * 9 + c;
-                    if (checkPos !== pos && this.board[checkPos] === num) {
-                        conflicts.add(checkPos);
-                    }
-                }
-
-                for (let r = 0; r < 9; r++) {
-                    const checkPos = r * 9 + col;
-                    if (checkPos !== pos && this.board[checkPos] === num) {
-                        conflicts.add(checkPos);
-                    }
-                }
-
-                const blockRow = Math.floor(row / 3) * 3;
-                const blockCol = Math.floor(col / 3) * 3;
-                for (let r = blockRow; r < blockRow + 3; r++) {
-                    for (let c = blockCol; c < blockCol + 3; c++) {
-                        const checkPos = r * 9 + c;
-                        if (checkPos !== pos && this.board[checkPos] === num) {
-                            conflicts.add(checkPos);
-                        }
-                    }
-                }
-
-                return conflicts;
-            }
-
-            countNumber(num) {
-                let count = 0;
-                for (let i = 0; i < 81; i++) {
-                    if (this.board[i] === num) count++;
-                }
-                return count;
-            }
-        }
-
         // ============= WORKER MANAGER =============
         class WorkerManager {
             constructor() {
                 this.worker = null;
                 this.workerSupported = typeof Worker !== 'undefined';
-                this.cache = {
-                    easy: null,
-                    medium: null,
-                    hard: null,
-                    expert: null
-                };
+                this.cache = { easy: null, medium: null, hard: null, expert: null };
                 this.generating = false;
                 this.currentDifficulty = null;
                 
@@ -1347,20 +992,10 @@
                         
                         if (status === 'SUCCESS') {
                             console.log(`✅ Worker generated ${this.currentDifficulty} puzzle in ${timeSpent}ms`);
-                            
-                            this.cache[this.currentDifficulty] = {
-                                board,
-                                solution,
-                                fixed,
-                                metadata,
-                                timestamp: Date.now()
-                            };
-                            
+                            this.cache[this.currentDifficulty] = { board, solution, fixed, metadata, timestamp: Date.now() };
                             this.generating = false;
                             this.currentDifficulty = null;
-                            
                             this.preGenerateNext();
-                            
                         } else if (status === 'ERROR') {
                             console.error('❌ Worker error:', e.data.error);
                             this.generating = false;
@@ -1373,9 +1008,6 @@
                         this.generating = false;
                         this.workerSupported = false;
                     };
-                    
-                    console.log('✅ Worker initialized successfully');
-                    
                 } catch (error) {
                     console.error('❌ Failed to initialize worker:', error);
                     this.workerSupported = false;
@@ -1387,39 +1019,26 @@
                     console.log(`📦 Using cached ${difficulty} puzzle`);
                     const cached = this.cache[difficulty];
                     this.cache[difficulty] = null; 
-                    
                     this.preGenerate(difficulty);
-                    
                     return cached;
                 }
-                
                 console.log(`⏳ No cache for ${difficulty}, generating synchronously...`);
                 return await this.generateSync(difficulty);
             }
             
             preGenerate(difficulty) {
-                if (this.generating || this.cache[difficulty]) {
-                    return;
-                }
-                
-                if (!this.workerSupported || !this.worker) {
-                    return;
-                }
+                if (this.generating || this.cache[difficulty]) return;
+                if (!this.workerSupported || !this.worker) return;
                 
                 console.log(`🔄 Pre-generating ${difficulty} puzzle in background...`);
                 this.generating = true;
                 this.currentDifficulty = difficulty;
                 
-                this.worker.postMessage({
-                    action: 'GENERATE',
-                    difficulty: difficulty,
-                    seed: Date.now()
-                });
+                this.worker.postMessage({ action: 'GENERATE', difficulty: difficulty, seed: Date.now() });
             }
             
             preGenerateNext() {
                 const priorities = ['medium', 'easy', 'hard', 'expert'];
-                
                 for (let diff of priorities) {
                     if (!this.cache[diff] && !this.generating) {
                         this.preGenerate(diff);
@@ -1432,13 +1051,7 @@
                 console.log('🔧 Fallback: Generating in main thread');
                 const engine = new SudokuEngine();
                 const result = engine.generatePuzzle(difficulty);
-                
-                return {
-                    board: result.board,
-                    solution: result.solution,
-                    fixed: result.fixed,
-                    metadata: result.metadata
-                };
+                return { board: result.board, solution: result.solution, fixed: result.fixed, metadata: result.metadata };
             }
             
             cancelGeneration() {
@@ -1468,12 +1081,7 @@
 
             loadStats() {
                 const stored = localStorage.getItem('sudoku_stats');
-                return stored ? JSON.parse(stored) : {
-                    totalWins: 0,
-                    gamesPlayed: 0,
-                    bestTime: null,
-                    totalHints: 0
-                };
+                return stored ? JSON.parse(stored) : { totalWins: 0, gamesPlayed: 0, bestTime: null, totalHints: 0 };
             }
 
             saveStats() {
@@ -1482,7 +1090,6 @@
 
             async newGame(difficulty) {
                 this.difficulty = difficulty;
-                
                 const puzzle = await workerManager.getPuzzle(difficulty);
                 
                 this.engine.board = puzzle.board;
@@ -1495,6 +1102,7 @@
                 this.hints = 3;
                 this.history = [];
                 this.historyIndex = -1;
+                
                 this.saveSnapshot();
                 this.startTimer();
                 this.saveGame();
@@ -1599,9 +1207,7 @@
 
             checkWin() {
                 for (let i = 0; i < 81; i++) {
-                    if (this.engine.board[i] !== this.engine.solution[i]) {
-                        return false;
-                    }
+                    if (this.engine.board[i] !== this.engine.solution[i]) return false;
                 }
                 return true;
             }
@@ -1622,7 +1228,8 @@
                 this.stopTimer();
                 this.timerInterval = setInterval(() => {
                     this.timer++;
-                    this.saveGame();
+                    // Removed this.saveGame() to improve battery & performance.
+                    // Saving now happens on explicit actions and visibility change.
                 }, 1000);
             }
 
@@ -1688,7 +1295,7 @@
         class UIController {
             constructor(gameState) {
                 this.game = gameState;
-                this.initBackButtonHandler(); // Initialize back button logic first
+                this.initBackButtonHandler();
                 this.initElements();
                 this.initTheme();
                 this.bindEvents();
@@ -1696,39 +1303,30 @@
             }
 
             initBackButtonHandler() {
-                // Set initial state
                 history.replaceState({ page: 'root' }, '');
-
                 window.addEventListener('popstate', (e) => {
                     const menuOverlay = document.getElementById('menuOverlay');
                     const menuPanel = document.getElementById('menuPanel');
                     const difficultyModal = document.getElementById('difficultyModal');
                     const otherModals = Array.from(document.querySelectorAll('.modal.active')).filter(m => m.id !== 'difficultyModal');
 
-                    // 1. "אם בתפריט -> סוגר את התפריט" (If menu or side modals are open -> close them)
                     if (menuOverlay.classList.contains('active')) {
                         menuOverlay.classList.remove('active');
                         menuPanel.classList.remove('active');
-                        history.pushState({ page: 'game' }, ''); // Keep game state alive
+                        history.pushState({ page: 'game' }, '');
                         return;
                     }
 
                     if (otherModals.length > 0) {
                         otherModals.forEach(m => m.classList.remove('active'));
-                        history.pushState({ page: 'game' }, ''); // Keep game state alive
+                        history.pushState({ page: 'game' }, '');
                         return;
                     }
 
-                    // 2. "אם בלוח המשחק -> פותח תפריט בחירת רמת משחק" (If in game board -> open difficulty)
                     if (!difficultyModal.classList.contains('active')) {
                         this.showDifficultyModal();
-                        // State popped to root. Next back will exit.
                         return;
                     }
-
-                    // 3. "אם בחירת רמת משחק -> סוגר את האפליקציה"
-                    // If we reach here, the difficulty modal is active, and we are at the root state.
-                    // The browser's default behavior handles exiting the app flawlessly.
                 });
             }
 
@@ -1780,22 +1378,13 @@
                 this.noteBtn.addEventListener('click', () => this.toggleNoteMode());
                 this.menuOverlay.addEventListener('click', () => this.toggleMenu());
 
-                document.getElementById('versionBtn').addEventListener('click', () => {
-                    this.showReinstallModal();
-                });
-
-                document.getElementById('confirmReinstall').addEventListener('click', async () => {
-                    await this.performReinstall();
-                });
-
-                document.getElementById('cancelReinstall').addEventListener('click', () => {
-                    document.getElementById('reinstallModal').classList.remove('active');
-                });
+                document.getElementById('versionBtn').addEventListener('click', () => this.showReinstallModal());
+                document.getElementById('confirmReinstall').addEventListener('click', async () => await this.performReinstall());
+                document.getElementById('cancelReinstall').addEventListener('click', () => document.getElementById('reinstallModal').classList.remove('active'));
 
                 document.getElementById('newGameMenu').addEventListener('click', () => {
                     this.toggleMenu();
                     this.showDifficultyModal();
-                    // Reset history stack to root so next back closes app
                     history.replaceState({ page: 'root' }, '');
                 });
 
@@ -1836,7 +1425,7 @@
                 document.getElementById('resumeBtn')?.addEventListener('click', () => {
                     if (this.game.loadGame()) {
                         this.difficultyModal.classList.remove('active');
-                        history.pushState({ page: 'game' }, ''); // Add game state
+                        history.pushState({ page: 'game' }, '');
                         this.updateDifficultyTitle(this.game.difficulty);
                         this.updateUI();
                     }
@@ -1845,26 +1434,15 @@
                 document.getElementById('newGameAfterWin').addEventListener('click', () => {
                     this.victoryModal.classList.remove('active');
                     this.showDifficultyModal();
-                    // Reset history stack to root so next back closes app
                     history.replaceState({ page: 'root' }, '');
                 });
 
-                document.getElementById('closeVictory').addEventListener('click', () => {
-                    this.victoryModal.classList.remove('active');
-                });
-
-                document.getElementById('closeStats').addEventListener('click', () => {
-                    this.statsModal.classList.remove('active');
-                });
+                document.getElementById('closeVictory').addEventListener('click', () => this.victoryModal.classList.remove('active'));
+                document.getElementById('closeStats').addEventListener('click', () => this.statsModal.classList.remove('active'));
 
                 document.getElementById('resetStats').addEventListener('click', () => {
                     if (confirm('Are you sure you want to reset all statistics?')) {
-                        this.game.stats = {
-                            totalWins: 0,
-                            gamesPlayed: 0,
-                            bestTime: null,
-                            totalHints: 0
-                        };
+                        this.game.stats = { totalWins: 0, gamesPlayed: 0, bestTime: null, totalHints: 0 };
                         this.game.saveStats();
                         this.showStats();
                     }
@@ -1936,22 +1514,11 @@
 
             showConflicts(conflicts) {
                 const cells = this.gameBoard.querySelectorAll('.cell');
-                
-                if (this.game.selectedCell !== null) {
-                    cells[this.game.selectedCell].classList.add('conflict');
-                }
-                
-                conflicts.forEach(pos => {
-                    cells[pos].classList.add('conflict');
-                });
-
+                if (this.game.selectedCell !== null) cells[this.game.selectedCell].classList.add('conflict');
+                conflicts.forEach(pos => cells[pos].classList.add('conflict'));
                 setTimeout(() => {
-                    if (this.game.selectedCell !== null) {
-                        cells[this.game.selectedCell].classList.remove('conflict');
-                    }
-                    conflicts.forEach(pos => {
-                        cells[pos].classList.remove('conflict');
-                    });
+                    if (this.game.selectedCell !== null) cells[this.game.selectedCell].classList.remove('conflict');
+                    conflicts.forEach(pos => cells[pos].classList.remove('conflict'));
                 }, 600);
             }
 
@@ -1961,21 +1528,15 @@
             }
 
             giveHint() {
-                if (this.game.giveHint()) {
-                    this.updateUI();
-                }
+                if (this.game.giveHint()) this.updateUI();
             }
 
             undo() {
-                if (this.game.undo()) {
-                    this.updateUI();
-                }
+                if (this.game.undo()) this.updateUI();
             }
 
             redo() {
-                if (this.game.redo()) {
-                    this.updateUI();
-                }
+                if (this.game.redo()) this.updateUI();
             }
 
             showDifficultyModal() {
@@ -1990,8 +1551,7 @@
 
             async startNewGame(difficulty) {
                 this.difficultyModal.classList.remove('active');
-                history.pushState({ page: 'game' }, ''); // Add game state
-                
+                history.pushState({ page: 'game' }, '');
                 AppSystems.showToast('⏳ Generating puzzle...', 'info', 2000);
                 
                 await this.game.newGame(difficulty);
@@ -2000,27 +1560,16 @@
             }
 
             updateDifficultyTitle(difficulty) {
-                const difficultyNames = {
-                    easy: 'Easy',
-                    medium: 'Medium',
-                    hard: 'Hard',
-                    expert: 'Expert 🔥'
-                };
-                const titleElement = document.getElementById('appTitle');
-                titleElement.textContent = `Sudoku Pro - ${difficultyNames[difficulty] || 'Medium'}`;
+                const difficultyNames = { easy: 'Easy', medium: 'Medium', hard: 'Hard', expert: 'Expert 🔥' };
+                document.getElementById('appTitle').textContent = `Sudoku Pro - ${difficultyNames[difficulty] || 'Medium'}`;
             }
 
             showStats() {
                 const stats = this.game.stats;
                 document.getElementById('totalWins').textContent = stats.totalWins;
                 document.getElementById('gamesPlayed').textContent = stats.gamesPlayed;
-                document.getElementById('bestTime').textContent = stats.bestTime 
-                    ? this.game.formatTime(stats.bestTime) 
-                    : '--:--';
-                const avgHints = stats.totalWins > 0 
-                    ? (stats.totalHints / stats.totalWins).toFixed(1)
-                    : '0';
-                document.getElementById('avgHints').textContent = avgHints;
+                document.getElementById('bestTime').textContent = stats.bestTime ? this.game.formatTime(stats.bestTime) : '--:--';
+                document.getElementById('avgHints').textContent = stats.totalWins > 0 ? (stats.totalHints / stats.totalWins).toFixed(1) : '0';
                 this.statsModal.classList.add('active');
             }
 
@@ -2032,29 +1581,16 @@
 
             updateBoard() {
                 const cells = this.gameBoard.querySelectorAll('.cell');
-                
-                const selectedNum = (this.game.selectedCell !== null && 
-                                    this.game.engine.board[this.game.selectedCell] !== 0)
-                    ? this.game.engine.board[this.game.selectedCell] 
-                    : 0;
+                const selectedNum = (this.game.selectedCell !== null && this.game.engine.board[this.game.selectedCell] !== 0) ? this.game.engine.board[this.game.selectedCell] : 0;
                 
                 cells.forEach((cell, index) => {
                     cell.className = 'cell';
                     cell.innerHTML = '';
+                    if (this.game.engine.fixed[index]) cell.classList.add('fixed');
+                    else cell.classList.add('user');
 
-                    if (this.game.engine.fixed[index]) {
-                        cell.classList.add('fixed');
-                    } else {
-                        cell.classList.add('user');
-                    }
-
-                    if (index === this.game.selectedCell) {
-                        cell.classList.add('selected');
-                    }
-
-                    if (selectedNum !== 0 && this.game.engine.board[index] === selectedNum) {
-                        cell.classList.add('highlighted');
-                    }
+                    if (index === this.game.selectedCell) cell.classList.add('selected');
+                    if (selectedNum !== 0 && this.game.engine.board[index] === selectedNum) cell.classList.add('highlighted');
 
                     if (this.game.engine.board[index] !== 0) {
                         cell.textContent = this.game.engine.board[index];
@@ -2075,30 +1611,19 @@
                 for (let num = 1; num <= 9; num++) {
                     const count = this.game.engine.countNumber(num);
                     const btn = document.querySelector(`.num-btn[data-num="${num}"]`);
-                    if (btn) {
-                        if (count >= 9) {
-                            btn.disabled = true;
-                        } else {
-                            btn.disabled = false;
-                        }
-                    }
+                    if (btn) btn.disabled = (count >= 9);
                 }
             }
 
             updateControls() {
-                if (this.game.noteMode) {
-                    this.noteBtn.classList.add('active');
-                } else {
-                    this.noteBtn.classList.remove('active');
-                }
-
+                if (this.game.noteMode) this.noteBtn.classList.add('active');
+                else this.noteBtn.classList.remove('active');
                 this.undoBtn.disabled = this.game.historyIndex <= 0;
             }
 
             showVictory() {
                 const usedHints = 3 - this.game.hints;
-                document.getElementById('victoryTime').textContent = 
-                    `Time: ${this.game.formatTime(this.game.timer)} | Hints: ${usedHints}`;
+                document.getElementById('victoryTime').textContent = `Time: ${this.game.formatTime(this.game.timer)} | Hints: ${usedHints}`;
                 this.victoryModal.classList.add('active');
             }
 
@@ -2108,63 +1633,31 @@
 
             async performReinstall() {
                 document.getElementById('reinstallModal').classList.remove('active');
-                
                 try {
-                    console.log('🗑️ Starting complete app removal...');
-                    
-                    console.log('   Clearing localStorage...');
                     localStorage.clear();
-                    
-                    console.log('   Clearing sessionStorage...');
                     sessionStorage.clear();
-                    
                     if ('serviceWorker' in navigator) {
-                        console.log('   Unregistering service workers...');
                         const registrations = await navigator.serviceWorker.getRegistrations();
-                        for (let registration of registrations) {
-                            await registration.unregister();
-                            console.log('   ✓ Service worker unregistered');
-                        }
+                        for (let registration of registrations) await registration.unregister();
                     }
-                    
                     if ('caches' in window) {
-                        console.log('   Clearing all caches...');
                         const cacheNames = await caches.keys();
-                        for (let cacheName of cacheNames) {
-                            await caches.delete(cacheName);
-                            console.log(`   ✓ Cache deleted: ${cacheName}`);
-                        }
+                        for (let cacheName of cacheNames) await caches.delete(cacheName);
                     }
-                    
                     if ('indexedDB' in window) {
-                        console.log('   Clearing IndexedDB...');
                         const dbs = await indexedDB.databases();
-                        for (let db of dbs) {
-                            if (db.name) {
-                                indexedDB.deleteDatabase(db.name);
-                                console.log(`   ✓ Database deleted: ${db.name}`);
-                            }
-                        }
+                        for (let db of dbs) if (db.name) indexedDB.deleteDatabase(db.name);
                     }
-                    
-                    console.log('   Clearing cookies...');
-                    document.cookie.split(";").forEach(function(c) { 
-                        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
-                    });
-                    
-                    console.log('✅ Complete app removal finished!');
+                    document.cookie.split(";").forEach(function(c) { document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); });
                     alert('✅ App completely removed!\n\nAll data, cache, and storage cleared.\nPage will reload.');
-                    
                     window.location.href = window.location.href.split('?')[0] + '?t=' + new Date().getTime();
                 } catch (error) {
-                    console.error('❌ Removal error:', error);
-                    alert('⚠️ Removal error: ' + error.message + '\n\nSome data may still remain.');
+                    alert('⚠️ Removal error: ' + error.message);
                 }
             }
         }
 
-        // ============= INITIALIZE APP =============
-        const APP_VERSION = '9.8';
+        const APP_VERSION = '9.9';
         let gameState, uiController;
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -2179,25 +1672,22 @@
             };
 
             uiController.showDifficultyModal();
-
-            // Boot all systems
             AppSystems.init();
+            
+            // Fix Point 1: Save game to LocalStorage only when app loses visibility/backgrounded
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden' && gameState) {
+                    gameState.saveGame();
+                    console.log('💾 Game state saved on visibility change');
+                }
+            });
         });
 
-        // ============= APP SYSTEMS V9.8 =============
+        // ============= APP SYSTEMS V9.9 =============
         const AppSystems = {
-
-            settings: {
-                haptics: true,
-                animations: true,
-                network: true,
-                pullToRefresh: true,
-                screenAwake: false 
-            },
-
+            settings: { haptics: true, animations: true, network: true, pullToRefresh: true, screenAwake: false },
             wakeLock: null,
 
-            // ---- INIT ----
             init() {
                 this.loadSettings();
                 this.initVersionManager();
@@ -2212,124 +1702,65 @@
                 this.initWakeLock();
             },
 
-            // ---- TOAST SYSTEM (req 6.1) ----
             showToast(message, type = 'info', duration = 3000) {
                 const container = document.getElementById('toastContainer');
                 const toast = document.createElement('div');
                 toast.className = `toast ${type}`;
                 toast.textContent = message;
                 container.appendChild(toast);
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(() => toast.classList.add('show'));
-                });
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    setTimeout(() => toast.remove(), 300);
-                }, duration);
+                requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('show')));
+                setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, duration);
             },
 
-            // ---- HAPTIC FEEDBACK (req 5.4) ----
             haptic(type = 'light') {
                 if (!this.settings.haptics || !navigator.vibrate) return;
-                const patterns = {
-                    light:  [10],
-                    error:  [50, 30, 50],
-                    win:    [50, 30, 50, 30, 100],
-                    tap:    [8]
-                };
+                const patterns = { light: [10], error: [50, 30, 50], win: [50, 30, 50, 30, 100], tap: [8] };
                 navigator.vibrate(patterns[type] || [10]);
             },
 
-            // ---- WAKE LOCK (Keep Screen Awake) ----
             initWakeLock() {
                 if ('wakeLock' in navigator) {
                     document.addEventListener('visibilitychange', () => {
-                        if (document.visibilityState === 'visible' && this.settings.screenAwake) {
-                            this.applyWakeLock(true);
-                        }
+                        if (document.visibilityState === 'visible' && this.settings.screenAwake) this.applyWakeLock(true);
                     });
-                    if (this.settings.screenAwake) {
-                        this.applyWakeLock(true);
-                    }
+                    if (this.settings.screenAwake) this.applyWakeLock(true);
                 }
             },
 
             async applyWakeLock(enable) {
                 if (!('wakeLock' in navigator)) return;
-                
                 try {
                     if (enable) {
                         if (this.wakeLock !== null) return;
                         this.wakeLock = await navigator.wakeLock.request('screen');
-                        this.wakeLock.addEventListener('release', () => {
-                            this.wakeLock = null;
-                        });
-                        console.log('[WakeLock] Screen is kept awake');
+                        this.wakeLock.addEventListener('release', () => this.wakeLock = null);
                     } else {
                         if (this.wakeLock !== null) {
                             await this.wakeLock.release();
                             this.wakeLock = null;
-                            console.log('[WakeLock] Released');
                         }
                     }
-                } catch (err) {
-                    console.warn('[WakeLock] Error:', err);
-                }
+                } catch (err) {}
             },
 
-            // ---- VERSION MANAGER (req 1.1-1.4) ----
             initVersionManager() {
                 const storedVersion = localStorage.getItem('app_version');
                 if (storedVersion && storedVersion !== APP_VERSION) {
-                    console.log(`[Version] Upgrade ${storedVersion} → ${APP_VERSION}, clearing cache...`);
-                    this.clearCacheSilent().then(() => {
-                        localStorage.setItem('app_version', APP_VERSION);
-                    });
+                    this.clearCacheSilent().then(() => localStorage.setItem('app_version', APP_VERSION));
                 } else {
                     localStorage.setItem('app_version', APP_VERSION);
                 }
-
                 this.checkRemoteVersion();
-
-                document.getElementById('versionBtn').addEventListener('click', () => {
-                    document.getElementById('reinstallModal').classList.add('active');
-                });
             },
 
             async checkRemoteVersion() {
-                if (!navigator.onLine) {
-                    console.log('[Version] Offline - skipping remote version check');
-                    return;
-                }
-                
+                if (!navigator.onLine) return;
                 try {
-                    const res = await fetch('./version.json?t=' + Date.now(), { 
-                        cache: 'no-store',
-                        signal: AbortSignal.timeout(3000)
-                    });
-                    
-                    if (!res.ok) {
-                        console.log('[Version] Server returned status:', res.status);
-                        return;
-                    }
-                    
+                    const res = await fetch('./version.json?t=' + Date.now(), { cache: 'no-store', signal: AbortSignal.timeout(3000) });
+                    if (!res.ok) return;
                     const data = await res.json();
-                    
-                    if (data.version && data.version !== APP_VERSION) {
-                        console.log(`[Version] Server has ${data.version}, current ${APP_VERSION}`);
-                        this.showUpdatePrompt();
-                    } else {
-                        console.log('[Version] Up to date:', APP_VERSION);
-                    }
-                } catch (e) {
-                    if (e.name === 'AbortError') {
-                        console.log('[Version] Check timed out - continuing with current version');
-                    } else if (e instanceof TypeError) {
-                        console.log('[Version] Network error - continuing offline with current version');
-                    } else {
-                        console.log('[Version] Check failed:', e.message);
-                    }
-                }
+                    if (data.version && data.version !== APP_VERSION) this.showUpdatePrompt();
+                } catch (e) {}
             },
 
             showUpdatePrompt() {
@@ -2348,15 +1779,11 @@
                 }
             },
 
-            // ---- SW REGISTRATION + update polling ----
             async registerSW() {
                 if (!('serviceWorker' in navigator)) return;
                 try {
                     const reg = await navigator.serviceWorker.register('./sw.js');
-                    console.log('[SW] Registered');
-
                     setInterval(() => reg.update(), 300_000);
-
                     reg.addEventListener('updatefound', () => {
                         const newWorker = reg.installing;
                         newWorker.addEventListener('statechange', () => {
@@ -2369,15 +1796,11 @@
                             }
                         });
                     });
-                } catch (err) {
-                    console.warn('[SW] Registration failed:', err);
-                }
+                } catch (err) {}
             },
 
-            // ---- NETWORK MONITOR ----
             initNetworkMonitor() {
                 const banner = document.getElementById('offlineBanner');
-
                 const updateStatus = (online) => {
                     if (!this.settings.network) return;
                     if (!online) {
@@ -2388,37 +1811,21 @@
                         this.showToast('✅ Internet connection restored', 'success');
                     }
                 };
-
-                window.addEventListener('online',  () => updateStatus(true));
+                window.addEventListener('online', () => updateStatus(true));
                 window.addEventListener('offline', () => updateStatus(false));
                 if (!navigator.onLine) updateStatus(false);
-
-                if ('connection' in navigator) {
-                    const conn = navigator.connection;
-                    const check = () => {
-                        if (conn.saveData || conn.effectiveType === '2g') {
-                            this.showToast('🐌 Slow connection detected', 'warning', 5000);
-                        }
-                    };
-                    check();
-                    conn.addEventListener('change', check);
-                }
             },
 
-            // ---- PWA INSTALL PROMPT ----
             initInstallPrompt() {
-                const banner  = document.getElementById('installBanner');
+                const banner = document.getElementById('installBanner');
                 const already = localStorage.getItem('pwa_install_dismissed');
                 if (already) return;
-
                 let deferredPrompt = null;
-
                 window.addEventListener('beforeinstallprompt', (e) => {
                     e.preventDefault();
                     deferredPrompt = e;
                     setTimeout(() => banner.classList.add('visible'), 2000);
                 });
-
                 document.getElementById('installAcceptBtn').addEventListener('click', async () => {
                     banner.classList.remove('visible');
                     if (deferredPrompt) {
@@ -2428,37 +1835,21 @@
                         deferredPrompt = null;
                     }
                 });
-
                 document.getElementById('installDismissBtn').addEventListener('click', () => {
                     banner.classList.remove('visible');
                     localStorage.setItem('pwa_install_dismissed', '1');
                 });
-
-                window.addEventListener('appinstalled', () => {
-                    banner.classList.remove('visible');
-                    this.showToast('🎉 App installed successfully!', 'success', 4000);
-                });
             },
 
-            // ---- PULL TO REFRESH ----
             initPullToRefresh() {
                 const indicator = document.getElementById('ptrIndicator');
                 let startY = 0, pulling = false;
-
                 document.addEventListener('touchstart', (e) => {
                     if (!this.settings.pullToRefresh) return;
-                    
                     if (window.scrollY === 0) startY = e.touches[0].clientY;
                 }, { passive: true });
-
                 document.addEventListener('touchmove', (e) => {
-                    if (!startY) return;
-                    
-                    if (!this.settings.pullToRefresh) {
-                        startY = 0;
-                        return;
-                    }
-                    
+                    if (!startY || !this.settings.pullToRefresh) return;
                     const dy = e.touches[0].clientY - startY;
                     if (dy > 60) {
                         pulling = true;
@@ -2466,132 +1857,85 @@
                         indicator.style.fontSize = '22px';
                     }
                 }, { passive: true });
-
                 document.addEventListener('touchend', () => {
                     if (pulling && this.settings.pullToRefresh) {
                         indicator.style.fontSize = '28px';
-                        setTimeout(() => {
-                            indicator.classList.remove('visible');
-                            location.reload();
-                        }, 500);
+                        setTimeout(() => { indicator.classList.remove('visible'); location.reload(); }, 500);
                     }
                     startY = 0; pulling = false;
                 });
             },
 
-            // ---- SWIPE GESTURES ----
             initSwipeGestures() {
                 let startX = 0, startY = 0;
-
-                document.addEventListener('touchstart', (e) => {
-                    startX = e.touches[0].clientX;
-                    startY = e.touches[0].clientY;
-                }, { passive: true });
-
+                document.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; }, { passive: true });
                 document.addEventListener('touchend', (e) => {
-                    const dx = e.changedTouches[0].clientX - startX;
-                    const dy = e.changedTouches[0].clientY - startY;
-                    const absDx = Math.abs(dx), absDy = Math.abs(dy);
-
-                    if (Math.max(absDx, absDy) < 50) return;
-
-                    if (absDx > absDy) {
+                    const dx = e.changedTouches[0].clientX - startX, dy = e.changedTouches[0].clientY - startY;
+                    if (Math.max(Math.abs(dx), Math.abs(dy)) < 50) return;
+                    if (Math.abs(dx) > Math.abs(dy)) {
                         const panel = document.getElementById('menuPanel');
-                        if (dx < 0 && panel.classList.contains('active')) {
-                            uiController.toggleMenu();
-                        } else if (dx > 0 && !panel.classList.contains('active')) {
-                            uiController.toggleMenu();
-                        }
+                        if (dx < 0 && panel.classList.contains('active')) uiController.toggleMenu();
+                        else if (dx > 0 && !panel.classList.contains('active')) uiController.toggleMenu();
                     } else if (dy < -50) {
                         document.querySelectorAll('.modal.active').forEach(m => m.classList.remove('active'));
                     }
                 });
             },
 
-            // ---- SETTINGS UI ----
             loadSettings() {
                 const saved = localStorage.getItem('app_settings');
-                if (saved) {
-                    try { Object.assign(this.settings, JSON.parse(saved)); } catch(e) {}
-                }
+                if (saved) { try { Object.assign(this.settings, JSON.parse(saved)); } catch(e) {} }
             },
-
-            saveSettingsToStorage() {
-                localStorage.setItem('app_settings', JSON.stringify(this.settings));
-            },
+            saveSettingsToStorage() { localStorage.setItem('app_settings', JSON.stringify(this.settings)); },
 
             initSettingsUI() {
                 document.getElementById('settingsMenu').addEventListener('click', () => {
                     uiController.toggleMenu();
-                    document.getElementById('settingHaptics').checked       = this.settings.haptics;
-                    document.getElementById('settingAnimations').checked    = this.settings.animations;
-                    document.getElementById('settingNetwork').checked       = this.settings.network;
+                    document.getElementById('settingHaptics').checked = this.settings.haptics;
+                    document.getElementById('settingAnimations').checked = this.settings.animations;
+                    document.getElementById('settingNetwork').checked = this.settings.network;
                     document.getElementById('settingPullToRefresh').checked = this.settings.pullToRefresh;
-                    document.getElementById('settingScreenAwake').checked   = this.settings.screenAwake;
+                    document.getElementById('settingScreenAwake').checked = this.settings.screenAwake;
                     document.getElementById('settingsModal').classList.add('active');
                 });
-
                 document.getElementById('saveSettings').addEventListener('click', () => {
-                    this.settings.haptics       = document.getElementById('settingHaptics').checked;
-                    this.settings.animations    = document.getElementById('settingAnimations').checked;
-                    this.settings.network       = document.getElementById('settingNetwork').checked;
+                    this.settings.haptics = document.getElementById('settingHaptics').checked;
+                    this.settings.animations = document.getElementById('settingAnimations').checked;
+                    this.settings.network = document.getElementById('settingNetwork').checked;
                     this.settings.pullToRefresh = document.getElementById('settingPullToRefresh').checked;
-                    this.settings.screenAwake   = document.getElementById('settingScreenAwake').checked;
-                    
+                    this.settings.screenAwake = document.getElementById('settingScreenAwake').checked;
                     this.saveSettingsToStorage();
                     this.applyWakeLock(this.settings.screenAwake);
-                    
                     document.getElementById('settingsModal').classList.remove('active');
                     this.showToast('✅ Settings saved', 'success');
                     this.haptic('light');
                 });
-
-                document.getElementById('closeSettings').addEventListener('click', () => {
-                    document.getElementById('settingsModal').classList.remove('active');
-                });
+                document.getElementById('closeSettings').addEventListener('click', () => document.getElementById('settingsModal').classList.remove('active'));
             },
 
-            // ---- RESET / REMOVAL UI ----
             initResetUI() {
                 document.getElementById('openSelectiveReset').addEventListener('click', () => {
                     document.getElementById('reinstallModal').classList.remove('active');
                     document.getElementById('resetModal').classList.add('active');
                 });
-
-                document.getElementById('cancelReset').addEventListener('click', () => {
-                    document.getElementById('resetModal').classList.remove('active');
-                });
-
+                document.getElementById('cancelReset').addEventListener('click', () => document.getElementById('resetModal').classList.remove('active'));
                 document.getElementById('confirmSelectiveReset').addEventListener('click', async () => {
-                    const delGame     = document.getElementById('resetSavedGame').checked;
-                    const delStats    = document.getElementById('resetStats').checked;
-                    const delSettings = document.getElementById('resetSettings').checked;
-                    const delCache    = document.getElementById('resetCache').checked;
-
-                    if (delGame)     localStorage.removeItem('sudoku_current_game');
-                    if (delStats)    localStorage.removeItem('sudoku_stats');
-                    if (delSettings) { localStorage.removeItem('app_settings'); localStorage.removeItem('sudoku_theme'); }
-                    if (delCache)    await this.clearCacheSilent();
-
+                    if (document.getElementById('resetSavedGame').checked) localStorage.removeItem('sudoku_current_game');
+                    if (document.getElementById('resetStats').checked) localStorage.removeItem('sudoku_stats');
+                    if (document.getElementById('resetSettings').checked) { localStorage.removeItem('app_settings'); localStorage.removeItem('sudoku_theme'); }
+                    if (document.getElementById('resetCache').checked) await this.clearCacheSilent();
                     document.getElementById('resetModal').classList.remove('active');
                     this.showToast('✅ Selected data removed', 'success');
                     setTimeout(() => location.reload(), 1200);
                 });
-
-                document.getElementById('cancelReinstall').addEventListener('click', () => {
-                    document.getElementById('reinstallModal').classList.remove('active');
-                });
-
-                document.getElementById('confirmReinstall').addEventListener('click', () => {
-                    this.performFullRemoval();
-                });
+                document.getElementById('cancelReinstall').addEventListener('click', () => document.getElementById('reinstallModal').classList.remove('active'));
+                document.getElementById('confirmReinstall').addEventListener('click', () => this.performFullRemoval());
             },
 
             async performFullRemoval() {
                 document.getElementById('reinstallModal').classList.remove('active');
                 try {
-                    localStorage.clear();
-                    sessionStorage.clear();
+                    localStorage.clear(); sessionStorage.clear();
                     if ('serviceWorker' in navigator) {
                         const regs = await navigator.serviceWorker.getRegistrations();
                         await Promise.all(regs.map(r => r.unregister()));
@@ -2601,35 +1945,20 @@
                         const dbs = await indexedDB.databases();
                         dbs.forEach(db => db.name && indexedDB.deleteDatabase(db.name));
                     }
-                    document.cookie.split(';').forEach(c => {
-                        document.cookie = c.replace(/^ +/, '').replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/');
-                    });
+                    document.cookie.split(';').forEach(c => { document.cookie = c.replace(/^ +/, '').replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/'); });
                     this.showToast('✅ App completely removed', 'success');
                     setTimeout(() => { window.location.href = window.location.href.split('?')[0] + '?t=' + Date.now(); }, 1500);
-                } catch (err) {
-                    this.showToast('⚠️ Error: ' + err.message, 'error');
-                }
+                } catch (err) { this.showToast('⚠️ Error: ' + err.message, 'error'); }
             },
 
-            // ---- URL PARAM handling ----
             applyUrlParams() {
                 const params = new URLSearchParams(location.search);
                 const diff = params.get('difficulty');
                 const view = params.get('view');
-                if (diff && ['easy','medium','hard','expert'].includes(diff)) {
-                    setTimeout(() => uiController.startNewGame(diff), 200);
-                }
-                if (view === 'stats') {
-                    setTimeout(() => uiController.showStats(), 200);
-                }
+                if (diff && ['easy','medium','hard','expert'].includes(diff)) setTimeout(() => uiController.startNewGame(diff), 200);
+                if (view === 'stats') setTimeout(() => uiController.showStats(), 200);
             }
         };
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-            });
-        }
-
     </script>
 </body>
 </html>
