@@ -1,6 +1,6 @@
-// ============= SUDOKU WEB WORKER =============
-// Version 9.8
-// Handles puzzle generation in background thread to prevent UI blocking
+// ============= SUDOKU ENGINE & WEB WORKER =============
+// Version 9.9
+// Shared file: Loaded in main thread via <script> and in background via Worker()
 
 class SudokuEngine {
     constructor() {
@@ -310,56 +310,50 @@ class SudokuEngine {
 }
 
 // ============= WORKER MESSAGE HANDLER =============
+// Only execute if running inside a Web Worker
+if (typeof window === 'undefined') {
+    let currentEngine = null;
 
-let currentEngine = null;
-
-self.onmessage = function(e) {
-    const { action, difficulty, seed } = e.data;
-    
-    try {
-        if (action === 'GENERATE') {
-            const startTime = performance.now();
-            
-            // Set seed if provided
-            if (seed) {
-                Math.random = () => {
-                    const x = Math.sin(seed++) * 10000;
-                    return x - Math.floor(x);
-                };
+    self.onmessage = function(e) {
+        const { action, difficulty, seed } = e.data;
+        
+        try {
+            if (action === 'GENERATE') {
+                const startTime = performance.now();
+                
+                if (seed) {
+                    Math.random = () => {
+                        const x = Math.sin(seed++) * 10000;
+                        return x - Math.floor(x);
+                    };
+                }
+                
+                currentEngine = new SudokuEngine();
+                const result = currentEngine.generatePuzzle(difficulty);
+                const timeSpent = Math.round(performance.now() - startTime);
+                
+                self.postMessage({
+                    status: 'SUCCESS',
+                    board: result.board,
+                    solution: result.solution,
+                    fixed: result.fixed,
+                    metadata: result.metadata,
+                    timeSpent: timeSpent
+                });
+                
+            } else if (action === 'CANCEL') {
+                currentEngine = null;
+                self.postMessage({
+                    status: 'CANCELLED'
+                });
             }
             
-            // Create new engine instance
-            currentEngine = new SudokuEngine();
-            
-            // Generate puzzle
-            const result = currentEngine.generatePuzzle(difficulty);
-            
-            const timeSpent = Math.round(performance.now() - startTime);
-            
-            // Send success response
+        } catch (error) {
             self.postMessage({
-                status: 'SUCCESS',
-                board: result.board,
-                solution: result.solution,
-                fixed: result.fixed,
-                metadata: result.metadata,
-                timeSpent: timeSpent
-            });
-            
-        } else if (action === 'CANCEL') {
-            // Cancel current generation (if possible)
-            currentEngine = null;
-            self.postMessage({
-                status: 'CANCELLED'
+                status: 'ERROR',
+                error: error.message,
+                stack: error.stack
             });
         }
-        
-    } catch (error) {
-        // Send error response
-        self.postMessage({
-            status: 'ERROR',
-            error: error.message,
-            stack: error.stack
-        });
-    }
-};
+    };
+}
