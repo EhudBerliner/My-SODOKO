@@ -1,5 +1,5 @@
 {
-  "version": "9.9",
+  "version": "9.10",
   "releaseDate": "2026-04-13",
   "changelog": [
     "Architecture: Solved DRY violation. SudokuEngine shared dynamically via Isomorphic pattern without new files.",
