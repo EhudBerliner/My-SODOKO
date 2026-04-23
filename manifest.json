@@ -1,7 +1,7 @@
 {
   "name": "Sudoku Pro Ultimate",
   "short_name": "Sudoku Pro",
-  "description": "Professional Sudoku with 4 difficulty levels, offline play & smart engine - Version 9.9",
+  "description": "Professional Sudoku with 4 difficulty levels, offline play & smart engine - Version 9.10",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
