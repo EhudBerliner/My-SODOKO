@@ -815,7 +815,6 @@
             <p id="victoryTime" style="text-align: center; margin: 12px 0; font-size: 18px;"></p>
             <div class="modal-buttons">
                 <button class="modal-btn primary" id="newGameAfterWin">New Game</button>
-                <button class="modal-btn secondary" id="closeVictory">Close</button>
             </div>
         </div>
     </div>
@@ -1437,7 +1436,6 @@
                     history.replaceState({ page: 'root' }, '');
                 });
 
-                document.getElementById('closeVictory').addEventListener('click', () => this.victoryModal.classList.remove('active'));
                 document.getElementById('closeStats').addEventListener('click', () => this.statsModal.classList.remove('active'));
 
                 document.getElementById('resetStats').addEventListener('click', () => {
