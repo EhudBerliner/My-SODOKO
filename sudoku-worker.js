@@ -1,5 +1,5 @@
 // ============= SUDOKU ENGINE & WEB WORKER =============
-// Version 9.9
+// Version 9.10
 // Shared file: Loaded in main thread via <script> and in background via Worker()
 
 class SudokuEngine {
